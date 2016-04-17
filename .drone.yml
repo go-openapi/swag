@@ -11,8 +11,8 @@ build:
     pull: true
     commands:
       - go get -u github.com/stretchr/testify
-      - go test -race 
-      - go test -v -cover -coverprofile=profile.cov -covermode=count ./...
+      - go test -race
+      - go test -v -cover -coverprofile=coverage.out -covermode=count ./...
 
 notify:
   slack:
