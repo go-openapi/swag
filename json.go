@@ -32,15 +32,6 @@ var closers = map[byte]byte{
 	'[': ']',
 }
 
-// JSONDoc loads a json document from either a file or a remote url
-func JSONDoc(path string) (json.RawMessage, error) {
-	data, err := LoadFromFileOrHTTP(path)
-	if err != nil {
-		return nil, err
-	}
-	return json.RawMessage(data), nil
-}
-
 // DynamicJSONToStruct converts an untyped json structure into a struct
 func DynamicJSONToStruct(data interface{}, target interface{}) error {
 	// TODO: convert straight to a json typed map  (mergo + iterate?)

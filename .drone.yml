@@ -1,5 +1,5 @@
 clone:
-  path: github.com/go-openapi/jsonpointer
+  path: github.com/go-openapi/swag
 
 matrix:
   GO_VERSION:
@@ -10,10 +10,7 @@ build:
     image: golang:$$GO_VERSION
     pull: true
     commands:
-      - go get -u github.com/axw/gocov/gocov
-      - go get -u gopkg.in/matm/v1/gocov-html
-      - go get -u github.com/cee-dub/go-junit-report
-      - go get -u github.com/stretchr/testify/assert
+      - go get -u github.com/stretchr/testify
       - go test -v -race -coverprofile=profile.cov -covermode=count ./...
 
 notify:
