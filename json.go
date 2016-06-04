@@ -21,7 +21,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mailru/easyjson"
 	"github.com/mailru/easyjson/jlexer"
 	"github.com/mailru/easyjson/jwriter"
 )
@@ -36,10 +35,18 @@ var closers = map[byte]byte{
 	'[': ']',
 }
 
+type ejMarshaler interface {
+	MarshalEasyJSON(w *jwriter.Writer)
+}
+
+type ejUnmarshaler interface {
+	UnmarshalEasyJSON(w *jlexer.Lexer)
+}
+
 // WriteJSON writes json data, prefers finding an appropriate interface to short-circuit the marshaller
 // so it takes the fastest option available.
 func WriteJSON(data interface{}) ([]byte, error) {
-	if d, ok := data.(easyjson.Marshaler); ok {
+	if d, ok := data.(ejMarshaler); ok {
 		jw := new(jwriter.Writer)
 		d.MarshalEasyJSON(jw)
 		return jw.BuildBytes()
@@ -53,7 +60,7 @@ func WriteJSON(data interface{}) ([]byte, error) {
 // ReadJSON reads json data, prefers finding an appropriate interface to short-circuit the unmarshaller
 // so it takes the fastes option available
 func ReadJSON(data []byte, value interface{}) error {
-	if d, ok := value.(easyjson.Unmarshaler); ok {
+	if d, ok := value.(ejUnmarshaler); ok {
 		jl := &jlexer.Lexer{Data: data}
 		d.UnmarshalEasyJSON(jl)
 		return jl.Error()
