@@ -11,6 +11,7 @@ build:
     pull: true
     commands:
       - go get -u github.com/stretchr/testify
+      - go get -u github.com/mailru/easyjson
       - go test -race
       - go test -v -cover -coverprofile=coverage.out -covermode=count ./...
 
