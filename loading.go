@@ -46,8 +46,7 @@ func LoadStrategy(path string, local, remote func(string) ([]byte, error)) func(
 
 func loadHTTPBytes(timeout time.Duration) func(path string) ([]byte, error) {
 	return func(path string) ([]byte, error) {
-		client := new(http.Client)
-		client.Timeout = 30 * time.Second
+		client := &http.Client{Timeout: timeout}
 		req, err := http.NewRequest("GET", path, nil)
 		if err != nil {
 			return nil, err
