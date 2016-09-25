@@ -19,6 +19,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // LoadFromFileOrHTTP loads the bytes from a file or a remote http server based on the path passed in
@@ -35,7 +36,13 @@ func LoadStrategy(path string, local, remote func(string) ([]byte, error)) func(
 }
 
 func loadHTTPBytes(path string) ([]byte, error) {
-	resp, err := http.Get(path)
+	client := new(http.Client)
+	client.Timeout = 30 * time.Second
+	req, err := http.NewRequest("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
