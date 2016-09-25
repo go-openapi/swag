@@ -52,10 +52,14 @@ func loadHTTPBytes(timeout time.Duration) func(path string) ([]byte, error) {
 			return nil, err
 		}
 		resp, err := client.Do(req)
+		defer func() {
+			if resp != nil {
+				resp.Body.Close()
+			}
+		}()
 		if err != nil {
 			return nil, err
 		}
-		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
 			return nil, fmt.Errorf("could not access document at %q [%s] ", path, resp.Status)
