@@ -21,10 +21,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/easeway/mapstructure"
 	"github.com/fatih/structs"
 	"github.com/mailru/easyjson/jlexer"
 	"github.com/mailru/easyjson/jwriter"
+	"github.com/mitchellh/mapstructure"
 )
 
 // DefaultJSONNameProvider the default cache for types
