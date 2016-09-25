@@ -21,8 +21,10 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/fatih/structs"
 	"github.com/mailru/easyjson/jlexer"
 	"github.com/mailru/easyjson/jwriter"
+	"github.com/mitchellh/mapstructure"
 )
 
 // DefaultJSONNameProvider the default cache for types
@@ -73,15 +75,16 @@ func ReadJSON(data []byte, value interface{}) error {
 
 // DynamicJSONToStruct converts an untyped json structure into a struct
 func DynamicJSONToStruct(data interface{}, target interface{}) error {
-	// TODO: convert straight to a json typed map  (mergo + iterate?)
-	b, err := WriteJSON(data)
+	dec, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Result:           target,
+		WeaklyTypedInput: true,
+		TagName:          "json",
+	})
+
 	if err != nil {
 		return err
 	}
-	if err := ReadJSON(b, target); err != nil {
-		return err
-	}
-	return nil
+	return dec.Decode(data)
 }
 
 // ConcatJSON concatenates multiple json objects efficiently
@@ -138,17 +141,14 @@ func ConcatJSON(blobs ...[]byte) []byte {
 
 // ToDynamicJSON turns an object into a properly JSON typed structure
 func ToDynamicJSON(data interface{}) interface{} {
-	// TODO: convert straight to a json typed map (mergo + iterate?)
-	b, _ := json.Marshal(data)
-	var res interface{}
-	json.Unmarshal(b, &res)
-	return res
+	str := structs.New(data)
+	str.TagName = "json"
+	return str.Map()
 }
 
-// FromDynamicJSON turns an object into a properly JSON typed structure
+// FromDynamicJSON reads an object from a properly JSON typed structure
 func FromDynamicJSON(data, target interface{}) error {
-	b, _ := json.Marshal(data)
-	return json.Unmarshal(b, target)
+	return DynamicJSONToStruct(data, target)
 }
 
 // NameProvider represents an object capabale of translating from go property names
