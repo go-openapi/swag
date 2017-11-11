@@ -192,43 +192,44 @@ func lower(str string) string {
 
 // Camelize an uppercased word
 func Camelize(word string) (camelized string) {
-        for pos, ru := range word {
-          if pos > 0 {
-                camelized+=string(unicode.ToLower(ru))
-          } else {
-                camelized+=string(unicode.ToUpper(ru))
-          }
-        }
-        return
+	for pos, ru := range word {
+		if pos > 0 {
+			camelized += string(unicode.ToLower(ru))
+		} else {
+			camelized += string(unicode.ToUpper(ru))
+		}
+	}
+	return
 }
+
 // ToFileName lowercases and underscores a go type name
 func ToFileName(name string) string {
 	var out []string
-        cml := trim(name)
+	cml := trim(name)
 
-        // Camelize any capital word preceding a reserved keyword ("initialism")
-        // thus, upper-cased words preceding a common initialism will get separated
-        // e.g: ELBHTTPLoadBalancer becomes elb_http_load_balancer
-        rexPrevious  := regexp.MustCompile(`(?P<word>\p{Lu}{2,})(?:HTTP|OAI)`)
-        cml = rexPrevious.ReplaceAllStringFunc(cml, func  (match string) (replaceInMatch string) {
-          for _, m := range rexPrevious.FindAllStringSubmatch(match, -1) {  // [ match submatch ]
-            if m[1] != "" {
-              replaceInMatch=strings.Replace(m[0], m[1], Camelize(m[1]), -1)
-            }
-          }
-          return
-        })
+	// Camelize any capital word preceding a reserved keyword ("initialism")
+	// thus, upper-cased words preceding a common initialism will get separated
+	// e.g: ELBHTTPLoadBalancer becomes elb_http_load_balancer
+	rexPrevious := regexp.MustCompile(`(?P<word>\p{Lu}{2,})(?:HTTP|OAI)`)
+	cml = rexPrevious.ReplaceAllStringFunc(cml, func(match string) (replaceInMatch string) {
+		for _, m := range rexPrevious.FindAllStringSubmatch(match, -1) { // [ match submatch ]
+			if m[1] != "" {
+				replaceInMatch = strings.Replace(m[0], m[1], Camelize(m[1]), -1)
+			}
+		}
+		return
+	})
 
-        // Pre-camelize reserved keywords ("initialisms") to avoid unnecessary hyphenization
+	// Pre-camelize reserved keywords ("initialisms") to avoid unnecessary hyphenization
 	for _, k := range initialisms {
-	  cml = strings.Replace(cml,k, Camelize(k),-1)
+		cml = strings.Replace(cml, k, Camelize(k), -1)
 	}
 
-        // Camelize other capital words to avoid unnecessary hyphenization
-        rexCase  := regexp.MustCompile(`(\p{Lu}{2,})`)
-        cml = rexCase.ReplaceAllStringFunc(cml, Camelize )
+	// Camelize other capital words to avoid unnecessary hyphenization
+	rexCase := regexp.MustCompile(`(\p{Lu}{2,})`)
+	cml = rexCase.ReplaceAllStringFunc(cml, Camelize)
 
-        // Final split with hyphens
+	// Final split with hyphens
 	for _, w := range split(cml) {
 		out = append(out, lower(w))
 	}
