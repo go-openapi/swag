@@ -88,10 +88,7 @@ func DynamicJSONToStruct(data interface{}, target interface{}) error {
 	if err != nil {
 		return err
 	}
-	if err := ReadJSON(b, target); err != nil {
-		return err
-	}
-	return nil
+	return ReadJSON(b, target)
 }
 
 // ConcatJSON concatenates multiple json objects efficiently
