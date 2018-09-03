@@ -264,7 +264,7 @@ func (n *NameProvider) GetJSONNames(subject interface{}) []string {
 		names = n.makeNameIndex(tpe)
 	}
 
-	var res []string
+	res := make([]string, 0, len(names.jsonNames))
 	for k := range names.jsonNames {
 		res = append(res, k)
 	}
