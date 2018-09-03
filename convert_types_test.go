@@ -8,6 +8,34 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func assertSingleValue(t *testing.T, inElem, elem reflect.Value, expectPointer bool, idx int) {
+	if !assert.Truef(t,
+		(elem.Kind() == reflect.Ptr) == expectPointer,
+		"Unexpected expectPointer=%t value type", expectPointer) {
+		return
+	}
+	if inElem.Kind() == reflect.Ptr && !inElem.IsNil() {
+		inElem = reflect.Indirect(inElem)
+	}
+	if elem.Kind() == reflect.Ptr && !elem.IsNil() {
+		elem = reflect.Indirect(elem)
+	}
+
+	if !assert.Truef(t,
+		(elem.Kind() == reflect.Ptr && elem.IsNil()) || IsZero(elem.Interface()) ==
+			(inElem.Kind() == reflect.Ptr && inElem.IsNil()) || IsZero(inElem.Interface()),
+		"Unexpected nil pointer at idx %d", idx) {
+		return
+	}
+
+	if !((elem.Kind() == reflect.Ptr && elem.IsNil()) || IsZero(elem.Interface())) {
+		if !assert.IsTypef(t, inElem.Interface(), elem.Interface(), "Expected in/out to match types") {
+			return
+		}
+		assert.EqualValuesf(t, inElem.Interface(), elem.Interface(), "Unexpected value at idx %d: %v", idx, elem.Interface())
+	}
+}
+
 // assertValues checks equivalent representation pointer vs values for single var, slices and maps
 func assertValues(t *testing.T, in, out interface{}, expectPointer bool, idx int) {
 	vin := reflect.ValueOf(in)
@@ -28,67 +56,13 @@ func assertValues(t *testing.T, in, out interface{}, expectPointer bool, idx int
 				elem = vout.MapIndex(keys[i])
 				inElem = vout.MapIndex(keys[i])
 			}
-
-			if !assert.Truef(t,
-				(elem.Kind() == reflect.Ptr) == expectPointer,
-				"Unexpected expectPointer=%t value type", expectPointer) {
-				break
-			}
-			if inElem.Kind() == reflect.Ptr && !inElem.IsNil() {
-				inElem = reflect.Indirect(inElem)
-			}
-			if elem.Kind() == reflect.Ptr && !elem.IsNil() {
-				elem = reflect.Indirect(elem)
-			}
-
-			if !assert.Truef(t,
-				(elem.Kind() == reflect.Ptr && elem.IsNil()) || IsZero(elem.Interface()) ==
-					(inElem.Kind() == reflect.Ptr && inElem.IsNil()) || IsZero(inElem.Interface()),
-				"Unexpected nil pointer at idx %d", idx) {
-				break
-			}
-
-			if !((elem.Kind() == reflect.Ptr && elem.IsNil()) || IsZero(elem.Interface())) {
-				if !assert.IsTypef(t, inElem.Interface(), elem.Interface(), "Expected in/out to match types") {
-					break
-				}
-				assert.EqualValuesf(t, inElem.Interface(), elem.Interface(), "Unexpected value at idx %d: %v", idx, elem.Interface())
-			}
+			assertSingleValue(t, inElem, elem, expectPointer, idx)
 		}
-		// Yay!
-		return
 	default:
 		inElem := vin
 		elem := vout
-		if !assert.Truef(t,
-			(elem.Kind() == reflect.Ptr) == expectPointer,
-			"Unexpected expectPointer=%t value type", expectPointer) {
-			break
-		}
-		if inElem.Kind() == reflect.Ptr && !inElem.IsNil() {
-			inElem = reflect.Indirect(inElem)
-		}
-		if elem.Kind() == reflect.Ptr && !elem.IsNil() {
-			elem = reflect.Indirect(elem)
-		}
-
-		if !assert.Truef(t,
-			(elem.Kind() == reflect.Ptr && elem.IsNil()) || IsZero(elem.Interface()) ==
-				(inElem.Kind() == reflect.Ptr && inElem.IsNil()) || IsZero(inElem.Interface()),
-			"Unexpected nil pointer at idx %d", idx) {
-			break
-		}
-
-		if !((elem.Kind() == reflect.Ptr && elem.IsNil()) || IsZero(elem.Interface())) {
-			if !assert.IsTypef(t, inElem.Interface(), elem.Interface(), "Expected in/out to match types") {
-				break
-			}
-			assert.EqualValuesf(t, inElem.Interface(), elem.Interface(), "Unexpected value at idx %d: %v", idx, elem.Interface())
-		}
-		// Yay!
-		return
+		assertSingleValue(t, inElem, elem, expectPointer, idx)
 	}
-	t.Fail()
 }
 
 var testCasesStringSlice = [][]string{

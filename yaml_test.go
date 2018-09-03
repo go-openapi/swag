@@ -48,6 +48,7 @@ func TestLoadHTTPBytes(t *testing.T) {
 
 	ts2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		rw.WriteHeader(http.StatusOK)
+		// nolint:gas
 		_, _ = rw.Write([]byte("the content"))
 	}))
 	defer ts2.Close()
@@ -65,6 +66,7 @@ name: a string value
 'y': some value
 `
 	var data yaml.MapSlice
+	// nolint:gas
 	_ = yaml.Unmarshal([]byte(sd), &data)
 
 	d, err := YAMLToJSON(data)
@@ -142,6 +144,7 @@ func TestLoadStrategy(t *testing.T) {
 
 	ts2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		rw.WriteHeader(http.StatusNotFound)
+		// nolint:gas
 		_, _ = rw.Write([]byte("\n"))
 	}))
 	defer ts2.Close()
@@ -151,6 +154,7 @@ func TestLoadStrategy(t *testing.T) {
 
 var yamlPestoreServer = func(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusOK)
+	// nolint:gas
 	_, _ = rw.Write([]byte(yamlPetStore))
 }
 

@@ -307,3 +307,69 @@ func TestIsZero(t *testing.T) {
 		assert.Equal(t, it.Expected, IsZero(it.Data), fmt.Sprintf("%#v", it.Data))
 	}
 }
+
+func TestCamelize(t *testing.T) {
+	samples := []translationSample{
+		{"SampleText", "Sampletext"},
+		{"FindThingByID", "Findthingbyid"},
+		{"CAPWD.folwdBylc", "Capwd.folwdbylc"},
+		{"CAPWDfolwdBylc", "Capwdfolwdbylc"},
+		{"CAP_WD_folwdBylc", "Cap_wd_folwdbylc"},
+		{"TypeOAI_alias", "Typeoai_alias"},
+		{"Type_OAI_alias", "Type_oai_alias"},
+		{"Type_OAIAlias", "Type_oaialias"},
+		{"ELB.HTTPLoadBalancer", "Elb.httploadbalancer"},
+		{"elbHTTPLoadBalancer", "Elbhttploadbalancer"},
+		{"ELBHTTPLoadBalancer", "Elbhttploadbalancer"},
+	}
+
+	for _, sample := range samples {
+		res := Camelize(sample.str)
+		assert.Equalf(t, sample.out, res, "expected Camelize(%q)=%q, got %q", sample.str, sample.out, res)
+	}
+}
+
+func TestToHumanNameTitle(t *testing.T) {
+	samples := []translationSample{
+		{"SampleText", "Sample Text"},
+		{"FindThingByID", "Find Thing By ID"},
+		{"CAPWD.folwdBylc", "CAPWD Folwd Bylc"},
+		{"CAPWDfolwdBylc", "Capwdfolwd Bylc"},
+		{"CAP_WD_folwdBylc", "CAP WD Folwd Bylc"},
+		{"TypeOAI_alias", "Type OAI Alias"},
+		{"Type_OAI_alias", "Type OAI Alias"},
+		{"Type_OAIAlias", "Type OAI Alias"},
+		{"ELB.HTTPLoadBalancer", "ELB HTTP Load Balancer"},
+		{"elbHTTPLoadBalancer", "elb HTTP Load Balancer"},
+		{"ELBHTTPLoadBalancer", "ELB HTTP Load Balancer"},
+	}
+
+	for _, sample := range samples {
+		res := ToHumanNameTitle(sample.str)
+		assert.Equalf(t, sample.out, res, "expected ToHumanNameTitle(%q)=%q, got %q", sample.str, sample.out, res)
+	}
+}
+
+func TestToVarName(t *testing.T) {
+	samples := []translationSample{
+		{"SampleText", "sampleText"},
+		{"FindThingByID", "findThingByID"},
+		{"CAPWD.folwdBylc", "cAPWDFolwdBylc"},
+		{"CAPWDfolwdBylc", "capwdfolwdBylc"},
+		{"CAP_WD_folwdBylc", "cAPWDFolwdBylc"},
+		{"TypeOAI_alias", "typeOAIAlias"},
+		{"Type_OAI_alias", "typeOAIAlias"},
+		{"Type_OAIAlias", "typeOAIAlias"},
+		{"ELB.HTTPLoadBalancer", "eLBHTTPLoadBalancer"},
+		{"elbHTTPLoadBalancer", "eLBHTTPLoadBalancer"},
+		{"ELBHTTPLoadBalancer", "eLBHTTPLoadBalancer"},
+		{"Id", "id"},
+		{"HTTP", "http"},
+		{"A", "a"},
+	}
+
+	for _, sample := range samples {
+		res := ToVarName(sample.str)
+		assert.Equalf(t, sample.out, res, "expected ToVarName(%q)=%q, got %q", sample.str, sample.out, res)
+	}
+}
