@@ -76,22 +76,38 @@ func TestContainsStringsCI(t *testing.T) {
 	assert.False(t, ContainsStringsCI(list, "nuts"))
 }
 
+func TestContainsStrings(t *testing.T) {
+	list := []string{"hello", "world", "and", "such"}
+
+	assert.True(t, ContainsStrings(list, "hello"))
+	assert.False(t, ContainsStrings(list, "hELLo"))
+	assert.True(t, ContainsStrings(list, "world"))
+	assert.False(t, ContainsStrings(list, "World"))
+	assert.True(t, ContainsStrings(list, "and"))
+	assert.False(t, ContainsStrings(list, "AND"))
+	assert.False(t, ContainsStrings(list, "nuts"))
+}
+
+const (
+	collectionFormatComma = "csv"
+)
+
 func TestSplitByFormat(t *testing.T) {
 	expected := []string{"one", "two", "three"}
-	for _, fmt := range []string{"csv", "pipes", "tsv", "ssv", "multi"} {
+	for _, fmt := range []string{collectionFormatComma, collectionFormatPipe, collectionFormatTab, collectionFormatSpace, collectionFormatMulti} {
 
 		var actual []string
 		switch fmt {
-		case "multi":
+		case collectionFormatMulti:
 			assert.Nil(t, SplitByFormat("", fmt))
 			assert.Nil(t, SplitByFormat("blah", fmt))
-		case "ssv":
+		case collectionFormatSpace:
 			actual = SplitByFormat(strings.Join(expected, " "), fmt)
 			assert.EqualValues(t, expected, actual)
-		case "pipes":
+		case collectionFormatPipe:
 			actual = SplitByFormat(strings.Join(expected, "|"), fmt)
 			assert.EqualValues(t, expected, actual)
-		case "tsv":
+		case collectionFormatTab:
 			actual = SplitByFormat(strings.Join(expected, "\t"), fmt)
 			assert.EqualValues(t, expected, actual)
 		default:
@@ -102,18 +118,18 @@ func TestSplitByFormat(t *testing.T) {
 }
 
 func TestJoinByFormat(t *testing.T) {
-	for _, fmt := range []string{"csv", "pipes", "tsv", "ssv", "multi"} {
+	for _, fmt := range []string{collectionFormatComma, collectionFormatPipe, collectionFormatTab, collectionFormatSpace, collectionFormatMulti} {
 
 		lval := []string{"one", "two", "three"}
 		var expected []string
 		switch fmt {
-		case "multi":
+		case collectionFormatMulti:
 			expected = lval
-		case "ssv":
+		case collectionFormatSpace:
 			expected = []string{strings.Join(lval, " ")}
-		case "pipes":
+		case collectionFormatPipe:
 			expected = []string{strings.Join(lval, "|")}
-		case "tsv":
+		case collectionFormatTab:
 			expected = []string{strings.Join(lval, "\t")}
 		default:
 			expected = []string{strings.Join(lval, ",")}
