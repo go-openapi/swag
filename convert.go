@@ -18,6 +18,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"sync/atomic"
 )
 
 // same as ECMA Number.MAX_SAFE_INTEGER and Number.MIN_SAFE_INTEGER
@@ -50,21 +51,27 @@ func IsFloat64AJSONInteger(f float64) bool {
 	return diff/math.Min(fa+ga, math.MaxFloat64) < epsilon
 }
 
-var evaluatesAsTrue = map[string]struct{}{
-	"true":     {},
-	"1":        {},
-	"yes":      {},
-	"ok":       {},
-	"y":        {},
-	"on":       {},
-	"selected": {},
-	"checked":  {},
-	"t":        {},
-	"enabled":  {},
+var atomicEvaluatesAsTrue atomic.Value
+
+func init() {
+	atomicEvaluatesAsTrue.Store(
+		map[string]struct{}{
+			"true":     {},
+			"1":        {},
+			"yes":      {},
+			"ok":       {},
+			"y":        {},
+			"on":       {},
+			"selected": {},
+			"checked":  {},
+			"t":        {},
+			"enabled":  {},
+		})
 }
 
 // ConvertBool turn a string into a boolean
 func ConvertBool(str string) (bool, error) {
+	evaluatesAsTrue := atomicEvaluatesAsTrue.Load().(map[string]struct{})
 	_, ok := evaluatesAsTrue[strings.ToLower(str)]
 	return ok, nil
 }

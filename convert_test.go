@@ -25,6 +25,7 @@ import (
 // These are really dumb tests
 
 func TestConvertBool(t *testing.T) {
+	evaluatesAsTrue := atomicEvaluatesAsTrue.Load().(map[string]struct{})
 	for k := range evaluatesAsTrue {
 		r, err := ConvertBool(k)
 		if assert.NoError(t, err) {
