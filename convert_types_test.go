@@ -1,11 +1,95 @@
 package swag
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 )
+
+// assertValues checks equivalent representation pointer vs values for single var, slices and maps
+func assertValues(t *testing.T, in, out interface{}, expectPointer bool, idx int) {
+	vin := reflect.ValueOf(in)
+	vout := reflect.ValueOf(out)
+	switch vin.Kind() {
+	case reflect.Slice, reflect.Map:
+		if !assert.Equalf(t, vin.Kind(), vout.Kind(), "Unexpected output type at idx %d", idx) ||
+			!assert.Equalf(t, vin.Len(), vout.Len(), "Unexpected len at idx %d", idx) {
+			break
+		}
+		var elem, inElem reflect.Value
+		for i := 0; i < vin.Len(); i++ {
+			if vin.Kind() == reflect.Slice {
+				elem = vout.Index(i)
+				inElem = vin.Index(i)
+			} else if vin.Kind() == reflect.Map {
+				keys := vin.MapKeys()
+				elem = vout.MapIndex(keys[i])
+				inElem = vout.MapIndex(keys[i])
+			}
+
+			if !assert.Truef(t,
+				(elem.Kind() == reflect.Ptr) == expectPointer,
+				"Unexpected expectPointer=%t value type", expectPointer) {
+				break
+			}
+			if inElem.Kind() == reflect.Ptr && !inElem.IsNil() {
+				inElem = reflect.Indirect(inElem)
+			}
+			if elem.Kind() == reflect.Ptr && !elem.IsNil() {
+				elem = reflect.Indirect(elem)
+			}
+
+			if !assert.Truef(t,
+				(elem.Kind() == reflect.Ptr && elem.IsNil()) || IsZero(elem.Interface()) ==
+					(inElem.Kind() == reflect.Ptr && inElem.IsNil()) || IsZero(inElem.Interface()),
+				"Unexpected nil pointer at idx %d", idx) {
+				break
+			}
+
+			if !((elem.Kind() == reflect.Ptr && elem.IsNil()) || IsZero(elem.Interface())) {
+				if !assert.IsTypef(t, inElem.Interface(), elem.Interface(), "Expected in/out to match types") {
+					break
+				}
+				assert.EqualValuesf(t, inElem.Interface(), elem.Interface(), "Unexpected value at idx %d: %v", idx, elem.Interface())
+			}
+		}
+		// Yay!
+		return
+	default:
+		inElem := vin
+		elem := vout
+		if !assert.Truef(t,
+			(elem.Kind() == reflect.Ptr) == expectPointer,
+			"Unexpected expectPointer=%t value type", expectPointer) {
+			break
+		}
+		if inElem.Kind() == reflect.Ptr && !inElem.IsNil() {
+			inElem = reflect.Indirect(inElem)
+		}
+		if elem.Kind() == reflect.Ptr && !elem.IsNil() {
+			elem = reflect.Indirect(elem)
+		}
+
+		if !assert.Truef(t,
+			(elem.Kind() == reflect.Ptr && elem.IsNil()) || IsZero(elem.Interface()) ==
+				(inElem.Kind() == reflect.Ptr && inElem.IsNil()) || IsZero(inElem.Interface()),
+			"Unexpected nil pointer at idx %d", idx) {
+			break
+		}
+
+		if !((elem.Kind() == reflect.Ptr && elem.IsNil()) || IsZero(elem.Interface())) {
+			if !assert.IsTypef(t, inElem.Interface(), elem.Interface(), "Expected in/out to match types") {
+				break
+			}
+			assert.EqualValuesf(t, inElem.Interface(), elem.Interface(), "Unexpected value at idx %d: %v", idx, elem.Interface())
+		}
+		// Yay!
+		return
+	}
+	t.Fail()
+}
 
 var testCasesStringSlice = [][]string{
 	{"a", "b", "c", "d", "e"},
@@ -18,14 +102,10 @@ func TestStringSlice(t *testing.T) {
 			continue
 		}
 		out := StringSlice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := StringValueSlice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -39,24 +119,10 @@ func TestStringValueSlice(t *testing.T) {
 			continue
 		}
 		out := StringValueSlice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			if in[i] == nil {
-				assert.Empty(t, out[i], "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, *(in[i]), out[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out, false, idx)
 
 		out2 := StringSlice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		for i := range out2 {
-			if in[i] == nil {
-				assert.Empty(t, *(out2[i]), "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, in[i], out2[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out2, true, idx)
 	}
 }
 
@@ -70,14 +136,10 @@ func TestStringMap(t *testing.T) {
 			continue
 		}
 		out := StringMap(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := StringValueMap(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -91,18 +153,16 @@ func TestBoolSlice(t *testing.T) {
 			continue
 		}
 		out := BoolSlice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := BoolValueSlice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
-var testCasesBoolValueSlice = [][]*bool{}
+var testCasesBoolValueSlice = [][]*bool{
+	{Bool(true), Bool(true), Bool(false), Bool(false)},
+}
 
 func TestBoolValueSlice(t *testing.T) {
 	for idx, in := range testCasesBoolValueSlice {
@@ -110,24 +170,10 @@ func TestBoolValueSlice(t *testing.T) {
 			continue
 		}
 		out := BoolValueSlice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			if in[i] == nil {
-				assert.Empty(t, out[i], "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, *(in[i]), out[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out, false, idx)
 
 		out2 := BoolSlice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		for i := range out2 {
-			if in[i] == nil {
-				assert.Empty(t, *(out2[i]), "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, in[i], out2[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out2, true, idx)
 	}
 }
 
@@ -141,14 +187,10 @@ func TestBoolMap(t *testing.T) {
 			continue
 		}
 		out := BoolMap(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := BoolValueMap(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -162,18 +204,16 @@ func TestIntSlice(t *testing.T) {
 			continue
 		}
 		out := IntSlice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := IntValueSlice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
-var testCasesIntValueSlice = [][]*int{}
+var testCasesIntValueSlice = [][]*int{
+	{Int(1), Int(2), Int(3), Int(4)},
+}
 
 func TestIntValueSlice(t *testing.T) {
 	for idx, in := range testCasesIntValueSlice {
@@ -181,24 +221,10 @@ func TestIntValueSlice(t *testing.T) {
 			continue
 		}
 		out := IntValueSlice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			if in[i] == nil {
-				assert.Empty(t, out[i], "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, *(in[i]), out[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out, false, idx)
 
 		out2 := IntSlice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		for i := range out2 {
-			if in[i] == nil {
-				assert.Empty(t, *(out2[i]), "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, in[i], out2[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out2, true, idx)
 	}
 }
 
@@ -212,14 +238,10 @@ func TestIntMap(t *testing.T) {
 			continue
 		}
 		out := IntMap(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := IntValueMap(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -233,18 +255,16 @@ func TestInt64Slice(t *testing.T) {
 			continue
 		}
 		out := Int64Slice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := Int64ValueSlice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
-var testCasesInt64ValueSlice = [][]*int64{}
+var testCasesInt64ValueSlice = [][]*int64{
+	{Int64(1), Int64(2), Int64(3), Int64(4)},
+}
 
 func TestInt64ValueSlice(t *testing.T) {
 	for idx, in := range testCasesInt64ValueSlice {
@@ -252,24 +272,10 @@ func TestInt64ValueSlice(t *testing.T) {
 			continue
 		}
 		out := Int64ValueSlice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			if in[i] == nil {
-				assert.Empty(t, out[i], "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, *(in[i]), out[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out, false, idx)
 
 		out2 := Int64Slice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		for i := range out2 {
-			if in[i] == nil {
-				assert.Empty(t, *(out2[i]), "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, in[i], out2[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out2, true, idx)
 	}
 }
 
@@ -283,14 +289,10 @@ func TestInt64Map(t *testing.T) {
 			continue
 		}
 		out := Int64Map(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := Int64ValueMap(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -304,14 +306,10 @@ func TestFloat64Slice(t *testing.T) {
 			continue
 		}
 		out := Float64Slice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := Float64ValueSlice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -325,14 +323,10 @@ func TestUintSlice(t *testing.T) {
 			continue
 		}
 		out := UintSlice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := UintValueSlice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -344,24 +338,10 @@ func TestUintValueSlice(t *testing.T) {
 			continue
 		}
 		out := UintValueSlice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			if in[i] == nil {
-				assert.Empty(t, out[i], "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, *(in[i]), out[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := UintSlice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		for i := range out2 {
-			if in[i] == nil {
-				assert.Empty(t, *(out2[i]), "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, in[i], out2[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -375,14 +355,10 @@ func TestUintMap(t *testing.T) {
 			continue
 		}
 		out := UintMap(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := UintValueMap(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -396,14 +372,10 @@ func TestUint64Slice(t *testing.T) {
 			continue
 		}
 		out := Uint64Slice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := Uint64ValueSlice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -415,24 +387,10 @@ func TestUint64ValueSlice(t *testing.T) {
 			continue
 		}
 		out := Uint64ValueSlice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			if in[i] == nil {
-				assert.Empty(t, out[i], "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, *(in[i]), out[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := Uint64Slice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		for i := range out2 {
-			if in[i] == nil {
-				assert.Empty(t, *(out2[i]), "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, in[i], out2[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -446,14 +404,10 @@ func TestUint64Map(t *testing.T) {
 			continue
 		}
 		out := Uint64Map(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := Uint64ValueMap(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -465,24 +419,10 @@ func TestFloat64ValueSlice(t *testing.T) {
 			continue
 		}
 		out := Float64ValueSlice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			if in[i] == nil {
-				assert.Empty(t, out[i], "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, *(in[i]), out[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := Float64Slice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		for i := range out2 {
-			if in[i] == nil {
-				assert.Empty(t, *(out2[i]), "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, in[i], out2[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -496,14 +436,10 @@ func TestFloat64Map(t *testing.T) {
 			continue
 		}
 		out := Float64Map(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := Float64ValueMap(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
@@ -517,18 +453,16 @@ func TestTimeSlice(t *testing.T) {
 			continue
 		}
 		out := TimeSlice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := TimeValueSlice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
 }
 
-var testCasesTimeValueSlice = [][]*time.Time{}
+var testCasesTimeValueSlice = [][]*time.Time{
+	{Time(time.Now()), Time(time.Now().AddDate(100, 0, 0))},
+}
 
 func TestTimeValueSlice(t *testing.T) {
 	for idx, in := range testCasesTimeValueSlice {
@@ -536,24 +470,10 @@ func TestTimeValueSlice(t *testing.T) {
 			continue
 		}
 		out := TimeValueSlice(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			if in[i] == nil {
-				assert.Empty(t, out[i], "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, *(in[i]), out[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out, false, idx)
 
 		out2 := TimeSlice(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		for i := range out2 {
-			if in[i] == nil {
-				assert.Empty(t, *(out2[i]), "Unexpected value at idx %d", idx)
-			} else {
-				assert.Equal(t, in[i], out2[i], "Unexpected value at idx %d", idx)
-			}
-		}
+		assertValues(t, in, out2, true, idx)
 	}
 }
 
@@ -567,13 +487,243 @@ func TestTimeMap(t *testing.T) {
 			continue
 		}
 		out := TimeMap(in)
-		assert.Len(t, out, len(in), "Unexpected len at idx %d", idx)
-		for i := range out {
-			assert.Equal(t, in[i], *(out[i]), "Unexpected value at idx %d", idx)
-		}
+		assertValues(t, in, out, true, idx)
 
 		out2 := TimeValueMap(out)
-		assert.Len(t, out2, len(in), "Unexpected len at idx %d", idx)
-		assert.Equal(t, in, out2, "Unexpected value at idx %d", idx)
+		assertValues(t, in, out2, false, idx)
 	}
+}
+
+var testCasesInt32Slice = [][]int32{
+	{1, 2, 3, 4},
+}
+
+func TestInt32Slice(t *testing.T) {
+	for idx, in := range testCasesInt32Slice {
+		if in == nil {
+			continue
+		}
+		out := Int32Slice(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := Int32ValueSlice(out)
+		assertValues(t, in, out2, false, idx)
+	}
+}
+
+var testCasesInt32ValueSlice = [][]*int32{
+	{Int32(1), Int32(2), Int32(3), Int32(4)},
+}
+
+func TestInt32ValueSlice(t *testing.T) {
+	for idx, in := range testCasesInt32ValueSlice {
+		if in == nil {
+			continue
+		}
+		out := Int32ValueSlice(in)
+		assertValues(t, in, out, false, idx)
+
+		out2 := Int32Slice(out)
+		assertValues(t, in, out2, true, idx)
+	}
+}
+
+var testCasesInt32Map = []map[string]int32{
+	{"a": 3, "b": 2, "c": 1},
+}
+
+func TestInt32Map(t *testing.T) {
+	for idx, in := range testCasesInt32Map {
+		if in == nil {
+			continue
+		}
+		out := Int32Map(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := Int32ValueMap(out)
+		assertValues(t, in, out2, false, idx)
+	}
+}
+
+var testCasesUint32Slice = [][]uint32{
+	{1, 2, 3, 4},
+}
+
+func TestUint32Slice(t *testing.T) {
+	for idx, in := range testCasesUint32Slice {
+		if in == nil {
+			continue
+		}
+		out := Uint32Slice(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := Uint32ValueSlice(out)
+		assertValues(t, in, out2, false, idx)
+	}
+}
+
+var testCasesUint32ValueSlice = [][]*uint32{
+	{Uint32(1), Uint32(2), Uint32(3), Uint32(4)},
+}
+
+func TestUint32ValueSlice(t *testing.T) {
+	for idx, in := range testCasesUint32ValueSlice {
+		if in == nil {
+			continue
+		}
+		out := Uint32ValueSlice(in)
+		assertValues(t, in, out, false, idx)
+
+		out2 := Uint32Slice(out)
+		assertValues(t, in, out2, true, idx)
+	}
+}
+
+var testCasesUint32Map = []map[string]uint32{
+	{"a": 3, "b": 2, "c": 1},
+}
+
+func TestUint32Map(t *testing.T) {
+	for idx, in := range testCasesUint32Map {
+		if in == nil {
+			continue
+		}
+		out := Uint32Map(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := Uint32ValueMap(out)
+		assertValues(t, in, out2, false, idx)
+	}
+}
+
+var testCasesString = []string{"a", "b", "c", "d", "e", ""}
+
+func TestStringValue(t *testing.T) {
+	for idx, in := range testCasesString {
+		out := String(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := StringValue(out)
+		assertValues(t, in, out2, false, idx)
+	}
+	assert.Zerof(t, StringValue(nil), "expected conversion from nil to return zero value")
+}
+
+var testCasesBool = []bool{true, false}
+
+func TestBoolValue(t *testing.T) {
+	for idx, in := range testCasesBool {
+		out := Bool(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := BoolValue(out)
+		assertValues(t, in, out2, false, idx)
+	}
+	assert.Zerof(t, BoolValue(nil), "expected conversion from nil to return zero value")
+}
+
+var testCasesInt = []int{1, 2, 3, 0}
+
+func TestIntValue(t *testing.T) {
+	for idx, in := range testCasesInt {
+		out := Int(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := IntValue(out)
+		assertValues(t, in, out2, false, idx)
+	}
+	assert.Zerof(t, IntValue(nil), "expected conversion from nil to return zero value")
+}
+
+var testCasesInt32 = []int32{1, 2, 3, 0}
+
+func TestInt32Value(t *testing.T) {
+	for idx, in := range testCasesInt32 {
+		out := Int32(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := Int32Value(out)
+		assertValues(t, in, out2, false, idx)
+	}
+	assert.Zerof(t, Int32Value(nil), "expected conversion from nil to return zero value")
+}
+
+var testCasesInt64 = []int64{1, 2, 3, 0}
+
+func TestInt64Value(t *testing.T) {
+	for idx, in := range testCasesInt64 {
+		out := Int64(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := Int64Value(out)
+		assertValues(t, in, out2, false, idx)
+	}
+	assert.Zerof(t, Int64Value(nil), "expected conversion from nil to return zero value")
+}
+
+var testCasesUint = []uint{1, 2, 3, 0}
+
+func TestUintValue(t *testing.T) {
+	for idx, in := range testCasesUint {
+		out := Uint(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := UintValue(out)
+		assertValues(t, in, out2, false, idx)
+	}
+	assert.Zerof(t, UintValue(nil), "expected conversion from nil to return zero value")
+}
+
+var testCasesUint32 = []uint32{1, 2, 3, 0}
+
+func TestUint32Value(t *testing.T) {
+	for idx, in := range testCasesUint32 {
+		out := Uint32(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := Uint32Value(out)
+		assertValues(t, in, out2, false, idx)
+	}
+	assert.Zerof(t, Uint32Value(nil), "expected conversion from nil to return zero value")
+}
+
+var testCasesUint64 = []uint64{1, 2, 3, 0}
+
+func TestUint64Value(t *testing.T) {
+	for idx, in := range testCasesUint64 {
+		out := Uint64(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := Uint64Value(out)
+		assertValues(t, in, out2, false, idx)
+	}
+	assert.Zerof(t, Uint64Value(nil), "expected conversion from nil to return zero value")
+}
+
+var testCasesFloat64 = []float64{1, 2, 3, 0}
+
+func TestFloat64Value(t *testing.T) {
+	for idx, in := range testCasesFloat64 {
+		out := Float64(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := Float64Value(out)
+		assertValues(t, in, out2, false, idx)
+	}
+	assert.Zerof(t, Float64Value(nil), "expected conversion from nil to return zero value")
+}
+
+var testCasesTime = []time.Time{
+	time.Now().AddDate(-100, 0, 0), time.Now(),
+}
+
+func TestTimeValue(t *testing.T) {
+	for idx, in := range testCasesTime {
+		out := Time(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := TimeValue(out)
+		assertValues(t, in, out2, false, idx)
+	}
+	assert.Zerof(t, TimeValue(nil), "expected conversion from nil to return zero value")
 }
