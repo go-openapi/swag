@@ -37,7 +37,6 @@ func TestLoadFromHTTP(t *testing.T) {
 
 	ts2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		rw.WriteHeader(http.StatusOK)
-		// nolint:gas
 		_, _ = rw.Write([]byte("the content"))
 	}))
 	defer ts2.Close()
