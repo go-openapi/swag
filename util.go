@@ -165,37 +165,44 @@ func (s byLength) Less(i, j int) bool {
 	return len(s[i]) < len(s[j])
 }
 
+var (
+	splitRex1     *regexp.Regexp
+	splitRex2     *regexp.Regexp
+	splitReplacer *strings.Replacer
+)
+
 // Prepares strings by splitting by caps, spaces, dashes, and underscore
 func split(str string) []string {
-	repl := strings.NewReplacer(
-		"@", "At ",
-		"&", "And ",
-		"|", "Pipe ",
-		"$", "Dollar ",
-		"!", "Bang ",
-		"-", " ",
-		"_", " ",
-	)
-
-	rex1 := regexp.MustCompile(`(\p{Lu})`)
-	rex2 := regexp.MustCompile(`(\pL|\pM|\pN|\p{Pc})+`)
+	// check if consecutive single char things make up an initialism
+	once.Do(func() {
+		splitRex1 = regexp.MustCompile(`(\p{Lu})`)
+		splitRex2 = regexp.MustCompile(`(\pL|\pM|\pN|\p{Pc})+`)
+		splitReplacer = strings.NewReplacer(
+			"@", "At ",
+			"&", "And ",
+			"|", "Pipe ",
+			"$", "Dollar ",
+			"!", "Bang ",
+			"-", " ",
+			"_", " ",
+		)
+		ensureSorted()
+	})
 
 	str = trim(str)
 
 	// Convert dash and underscore to spaces
-	str = repl.Replace(str)
+	str = splitReplacer.Replace(str)
 
 	// Split when uppercase is found (needed for Snake)
-	str = rex1.ReplaceAllString(str, " $1")
+	str = splitRex1.ReplaceAllString(str, " $1")
 
-	// check if consecutive single char things make up an initialism
-	once.Do(ensureSorted)
 	for _, k := range initialisms {
-		str = strings.Replace(str, rex1.ReplaceAllString(k, " $1"), " "+k, -1)
+		str = strings.Replace(str, splitRex1.ReplaceAllString(k, " $1"), " "+k, -1)
 	}
 	// Get the final list of words
 	//words = rex2.FindAllString(str, -1)
-	return rex2.FindAllString(str, -1)
+	return splitRex2.FindAllString(str, -1)
 }
 
 // Removes leading whitespaces
