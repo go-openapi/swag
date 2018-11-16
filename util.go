@@ -33,6 +33,12 @@ var once sync.Once
 
 var isInitialism func(string) bool
 
+var (
+	splitRex1     *regexp.Regexp
+	splitRex2     *regexp.Regexp
+	splitReplacer *strings.Replacer
+)
+
 func init() {
 	// Taken from https://github.com/golang/lint/blob/3390df4df2787994aea98de825b964ac7944b817/lint.go#L732-L769
 	var configuredInitialisms = map[string]bool{
@@ -164,12 +170,6 @@ func (s byLength) Swap(i, j int) {
 func (s byLength) Less(i, j int) bool {
 	return len(s[i]) < len(s[j])
 }
-
-var (
-	splitRex1     *regexp.Regexp
-	splitRex2     *regexp.Regexp
-	splitReplacer *strings.Replacer
-)
 
 // Prepares strings by splitting by caps, spaces, dashes, and underscore
 func split(str string) []string {
