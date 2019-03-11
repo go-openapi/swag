@@ -329,9 +329,7 @@ func ToGoName(name string) string {
 
 	result := strings.Join(out, "")
 	if len(result) > 0 {
-		if unicode.IsUpper([]rune(result)[0]) {
-			result = result
-		} else {
+		if !unicode.IsUpper([]rune(result)[0]) {
 			result = "X" + result
 		}
 	}
