@@ -1,10 +1,10 @@
 after_success:
 - bash <(curl -s https://codecov.io/bash)
 go:
-- '1.9'
-- 1.10.x
 - 1.11.x
+- 1.12.x
 install:
+- go get -u github.com/mailru/easyjson
 - go get -u github.com/stretchr/testify
 - go get -u gopkg.in/yaml.v2
 language: go
