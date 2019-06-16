@@ -14,6 +14,8 @@
 
 package swag
 
+import "unicode"
+
 type (
 	nameLexem interface {
 		GetUnsafeGoName() string
@@ -49,8 +51,20 @@ func (l *initialismNameLexem) GetUnsafeGoName() string {
 }
 
 func (l *casualNameLexem) GetUnsafeGoName() string {
+	var first rune
+	var rest string
+	for i, orig := range l.original {
+		if i == 0 {
+			first = orig
+			continue
+		}
+		if i > 0 {
+			rest = l.original[i:]
+			break
+		}
+	}
 	if len(l.original) > 1 {
-		return upper(l.original[:1]) + lower(l.original[1:])
+		return string(unicode.ToUpper(first)) + lower(rest)
 	}
 
 	return l.original

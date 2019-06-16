@@ -221,8 +221,8 @@ func (s *splitter) breakCasualString(str []rune) []nameLexem {
 		addCasualNameLexem(original)
 	}
 
-	for _, rune := range string(str) {
-		if replace, found := nameReplaceTable[rune]; found {
+	for _, rn := range string(str) {
+		if replace, found := nameReplaceTable[rn]; found {
 			if currentSegment != "" {
 				addNameLexem(currentSegment)
 				currentSegment = ""
@@ -235,7 +235,7 @@ func (s *splitter) breakCasualString(str []rune) []nameLexem {
 			continue
 		}
 
-		if !unicode.In(rune, unicode.L, unicode.M, unicode.N, unicode.Pc) {
+		if !unicode.In(rn, unicode.L, unicode.M, unicode.N, unicode.Pc) {
 			if currentSegment != "" {
 				addNameLexem(currentSegment)
 				currentSegment = ""
@@ -244,14 +244,14 @@ func (s *splitter) breakCasualString(str []rune) []nameLexem {
 			continue
 		}
 
-		if unicode.IsUpper(rune) {
+		if unicode.IsUpper(rn) {
 			if currentSegment != "" {
 				addNameLexem(currentSegment)
 			}
 			currentSegment = ""
 		}
 
-		currentSegment += string(rune)
+		currentSegment += string(rn)
 	}
 
 	if currentSegment != "" {
