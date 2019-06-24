@@ -16,6 +16,7 @@ package swag
 
 import (
 	"reflect"
+	"regexp"
 	"strings"
 	"unicode"
 )
@@ -27,6 +28,20 @@ var commonInitialisms *indexOfInitialisms
 var initialisms []string
 
 var isInitialism func(string) bool
+
+var (
+	splitRex1     *regexp.Regexp
+	splitRex2     *regexp.Regexp
+	splitReplacer *strings.Replacer
+)
+
+// GoNamePrefixFunc sets an optional rule to prefix go names
+// which do not start with a letter.
+//
+// e.g. to help converting "123" into "{prefix}123"
+//
+// The default is to prefix with "X"
+var GoNamePrefixFunc func(string) string
 
 func init() {
 	// Taken from https://github.com/golang/lint/blob/3390df4df2787994aea98de825b964ac7944b817/lint.go#L732-L769
@@ -291,7 +306,10 @@ func ToGoName(name string) string {
 		// Only prefix with X when the first character isn't an ascii letter
 		first := []rune(result)[0]
 		if !unicode.IsLetter(first) || (first > unicode.MaxASCII && !unicode.IsUpper(first)) {
-			result = "X" + result
+			if GoNamePrefixFunc == nil {
+				return "X" + result
+			}
+			result = GoNamePrefixFunc(name) + result
 		}
 		first = []rune(result)[0]
 		if unicode.IsLetter(first) && !unicode.IsUpper(first) {

@@ -16,12 +16,13 @@ package swag
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"log"
 	"strings"
 	"testing"
 	"time"
 	"unicode"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -403,6 +404,7 @@ func TestCamelize(t *testing.T) {
 		{"ELB.HTTPLoadBalancer", "Elb.httploadbalancer"},
 		{"elbHTTPLoadBalancer", "Elbhttploadbalancer"},
 		{"ELBHTTPLoadBalancer", "Elbhttploadbalancer"},
+		{"12ab", "12ab"},
 	}
 
 	for _, sample := range samples {
@@ -453,5 +455,38 @@ func TestToVarName(t *testing.T) {
 	for _, sample := range samples {
 		res := ToVarName(sample.str)
 		assert.Equalf(t, sample.out, res, "expected ToVarName(%q)=%q, got %q", sample.str, sample.out, res)
+	}
+}
+
+func TestToGoNameUnicode(t *testing.T) {
+	defer func() { GoNamePrefixFunc = nil }()
+	GoNamePrefixFunc = func(name string) string {
+		// this is the pascalize func from go-swagger codegen
+		arg := []rune(name)
+		if len(arg) == 0 || arg[0] > '9' {
+			return ""
+		}
+		if arg[0] == '+' {
+			return "Plus"
+		}
+		if arg[0] == '-' {
+			return "Minus"
+		}
+
+		return "Nr"
+	}
+
+	samples := []translationSample{
+		{"123_a", "Nr123a"},
+		{"!123_a", "Bang123a"},
+		{"+123_a", "Plus123a"},
+		{"abc", "Abc"},
+		{"éabc", "Éabc"},
+		{":éabc", "Éabc"},
+		// TODO: non unicode char
+	}
+
+	for _, sample := range samples {
+		assert.Equal(t, sample.out, ToGoName(sample.str))
 	}
 }
