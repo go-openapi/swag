@@ -288,8 +288,14 @@ func ToGoName(name string) string {
 	}
 
 	if len(result) > 0 {
-		if !unicode.IsUpper([]rune(result)[0]) {
+		// Only prefix with X when the first character isn't an ascii letter
+		first := []rune(result)[0]
+		if !unicode.IsLetter(first) || (first > unicode.MaxASCII && !unicode.IsUpper(first)) {
 			result = "X" + result
+		}
+		first = []rune(result)[0]
+		if unicode.IsLetter(first) && !unicode.IsUpper(first) {
+			result = string(append([]rune{unicode.ToUpper(first)}, []rune(result)[1:]...))
 		}
 	}
 

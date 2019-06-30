@@ -16,9 +16,12 @@ package swag
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/require"
+	"log"
 	"strings"
 	"testing"
 	"time"
+	"unicode"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -71,6 +74,14 @@ func TestIndexOfInitialismsSorted(t *testing.T) {
 	}
 }
 
+func TestHighUnicode(t *testing.T) {
+	ss := "日本語sample 2 Text"
+	rss := []rune(ss)
+
+	log.Println("title:", unicode.IsTitle(rss[0]))
+	require.False(t, rss[0] < unicode.MaxASCII && unicode.IsLetter(rss[0]))
+}
+
 func TestToGoName(t *testing.T) {
 	samples := []translationSample{
 		{"@Type", "AtType"},
@@ -88,6 +99,7 @@ func TestToGoName(t *testing.T) {
 		{"日本語sample 2 Text", "X日本語sample2Text"},
 		{"日本語findThingById", "X日本語findThingByID"},
 		{"findTHINGSbyID", "FindTHINGSbyID"},
+		{"x-isAnOptionalHeader0", "XIsAnOptionalHeader0"},
 	}
 
 	for _, k := range commonInitialisms.sorted() {
