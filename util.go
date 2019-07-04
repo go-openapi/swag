@@ -16,7 +16,6 @@ package swag
 
 import (
 	"reflect"
-	"regexp"
 	"strings"
 	"unicode"
 )
@@ -28,12 +27,6 @@ var commonInitialisms *indexOfInitialisms
 var initialisms []string
 
 var isInitialism func(string) bool
-
-var (
-	splitRex1     *regexp.Regexp
-	splitRex2     *regexp.Regexp
-	splitReplacer *strings.Replacer
-)
 
 // GoNamePrefixFunc sets an optional rule to prefix go names
 // which do not start with a letter.
