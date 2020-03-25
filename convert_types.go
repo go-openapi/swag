@@ -487,6 +487,7 @@ func Float32Value(v *float32) float32 {
 	if v != nil {
 		return *v
 	}
+
 	return 0
 }
 
@@ -494,9 +495,11 @@ func Float32Value(v *float32) float32 {
 // float32 pointers
 func Float32Slice(src []float32) []*float32 {
 	dst := make([]*float32, len(src))
+
 	for i := 0; i < len(src); i++ {
 		dst[i] = &(src[i])
 	}
+
 	return dst
 }
 
@@ -504,11 +507,13 @@ func Float32Slice(src []float32) []*float32 {
 // float32 values
 func Float32ValueSlice(src []*float32) []float32 {
 	dst := make([]float32, len(src))
+
 	for i := 0; i < len(src); i++ {
 		if src[i] != nil {
 			dst[i] = *(src[i])
 		}
 	}
+
 	return dst
 }
 
@@ -516,10 +521,12 @@ func Float32ValueSlice(src []*float32) []float32 {
 // map of float32 pointers
 func Float32Map(src map[string]float32) map[string]*float32 {
 	dst := make(map[string]*float32)
+
 	for k, val := range src {
 		v := val
 		dst[k] = &v
 	}
+
 	return dst
 }
 
@@ -527,11 +534,13 @@ func Float32Map(src map[string]float32) map[string]*float32 {
 // map of float32 values
 func Float32ValueMap(src map[string]*float32) map[string]float32 {
 	dst := make(map[string]float32)
+
 	for k, val := range src {
 		if val != nil {
 			dst[k] = *val
 		}
 	}
+
 	return dst
 }
 

@@ -293,6 +293,7 @@ func TestFloat32Slice(t *testing.T) {
 		if in == nil {
 			continue
 		}
+
 		out := Float32Slice(in)
 		assertValues(t, in, out, true, idx)
 
@@ -423,6 +424,7 @@ func TestFloat32ValueSlice(t *testing.T) {
 		if in == nil {
 			continue
 		}
+
 		out := Float32ValueSlice(in)
 		assertValues(t, in, out, true, idx)
 
@@ -440,6 +442,7 @@ func TestFloat32Map(t *testing.T) {
 		if in == nil {
 			continue
 		}
+
 		out := Float32Map(in)
 		assertValues(t, in, out, true, idx)
 
@@ -747,6 +750,7 @@ func TestFloat32Value(t *testing.T) {
 		out2 := Float32Value(out)
 		assertValues(t, in, out2, false, idx)
 	}
+
 	assert.Zerof(t, Float32Value(nil), "expected conversion from nil to return zero value")
 }
 
