@@ -299,6 +299,73 @@ func Int64ValueMap(src map[string]*int64) map[string]int64 {
 	return dst
 }
 
+// Uint16 returns a pointer to of the uint16 value passed in.
+func Uint16(v uint16) *uint16 {
+	return &v
+}
+
+// Uint16Value returns the value of the uint16 pointer passed in or
+// 0 if the pointer is nil.
+func Uint16Value(v *uint16) uint16 {
+	if v != nil {
+		return *v
+	}
+
+	return 0
+}
+
+// Uint16Slice converts a slice of uint16 values into a slice of
+// uint16 pointers
+func Uint16Slice(src []uint16) []*uint16 {
+	dst := make([]*uint16, len(src))
+	for i := 0; i < len(src); i++ {
+		dst[i] = &(src[i])
+	}
+
+	return dst
+}
+
+// Uint16ValueSlice converts a slice of uint16 pointers into a slice of
+// uint16 values
+func Uint16ValueSlice(src []*uint16) []uint16 {
+	dst := make([]uint16, len(src))
+
+	for i := 0; i < len(src); i++ {
+		if src[i] != nil {
+			dst[i] = *(src[i])
+		}
+	}
+
+	return dst
+}
+
+// Uint16Map converts a string map of uint16 values into a string
+// map of uint16 pointers
+func Uint16Map(src map[string]uint16) map[string]*uint16 {
+	dst := make(map[string]*uint16)
+
+	for k, val := range src {
+		v := val
+		dst[k] = &v
+	}
+
+	return dst
+}
+
+// Uint16ValueMap converts a string map of uint16 pointers into a string
+// map of uint16 values
+func Uint16ValueMap(src map[string]*uint16) map[string]uint16 {
+	dst := make(map[string]uint16)
+
+	for k, val := range src {
+		if val != nil {
+			dst[k] = *val
+		}
+	}
+
+	return dst
+}
+
 // Uint returns a pointer to of the uint value passed in.
 func Uint(v uint) *uint {
 	return &v
