@@ -368,6 +368,58 @@ func TestUintMap(t *testing.T) {
 	}
 }
 
+var testCasesUint16Slice = [][]uint16{
+	{1, 2, 3, 4},
+}
+
+func TestUint16Slice(t *testing.T) {
+	for idx, in := range testCasesUint16Slice {
+		if in == nil {
+			continue
+		}
+
+		out := Uint16Slice(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := Uint16ValueSlice(out)
+		assertValues(t, in, out2, false, idx)
+	}
+}
+
+var testCasesUint16ValueSlice = [][]*uint16{}
+
+func TestUint16ValueSlice(t *testing.T) {
+	for idx, in := range testCasesUint16ValueSlice {
+		if in == nil {
+			continue
+		}
+
+		out := Uint16ValueSlice(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := Uint16Slice(out)
+		assertValues(t, in, out2, false, idx)
+	}
+}
+
+var testCasesUint16Map = []map[string]uint16{
+	{"a": 3, "b": 2, "c": 1},
+}
+
+func TestUint16Map(t *testing.T) {
+	for idx, in := range testCasesUint16Map {
+		if in == nil {
+			continue
+		}
+
+		out := Uint16Map(in)
+		assertValues(t, in, out, true, idx)
+
+		out2 := Uint16ValueMap(out)
+		assertValues(t, in, out2, false, idx)
+	}
+}
+
 var testCasesUint64Slice = [][]uint64{
 	{1, 2, 3, 4},
 }
