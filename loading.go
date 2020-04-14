@@ -53,7 +53,7 @@ func LoadStrategy(path string, local, remote func(string) ([]byte, error)) func(
 		return remote
 	}
 	return func(pth string) ([]byte, error) {
-		upth, err := pathUnescape(pth)
+		upth, err := pathUnescape(strings.TrimPrefix(pth, `file://`))
 		if err != nil {
 			return nil, err
 		}
