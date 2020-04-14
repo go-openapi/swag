@@ -22,6 +22,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	validUsername     = "fake-user"
+	validPassword     = "correct-password"
+	invalidPassword   = "incorrect-password"
+	sharedHeaderKey   = "X-Myapp"
+	sharedHeaderValue = "MySecretKey"
+)
+
 func TestLoadFromHTTP(t *testing.T) {
 
 	_, err := LoadFromFileOrHTTP("httx://12394:abd")
@@ -44,4 +52,62 @@ func TestLoadFromHTTP(t *testing.T) {
 	d, err := LoadFromFileOrHTTP(ts2.URL)
 	assert.NoError(t, err)
 	assert.Equal(t, []byte("the content"), d)
+
+	ts3 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		u, p, ok := r.BasicAuth()
+		if ok && u == validUsername && p == validPassword {
+			rw.WriteHeader(http.StatusOK)
+		} else {
+			rw.WriteHeader(http.StatusForbidden)
+		}
+	}))
+	defer ts3.Close()
+
+	// no auth
+	_, err = LoadFromFileOrHTTP(ts3.URL)
+	assert.Error(t, err)
+
+	// basic auth, invalide credentials
+	LoadHTTPBasicAuthUsername = validUsername
+	LoadHTTPBasicAuthPassword = invalidPassword
+
+	_, err = LoadFromFileOrHTTP(ts3.URL)
+	assert.Error(t, err)
+
+	// basic auth, valid credentials
+	LoadHTTPBasicAuthUsername = validUsername
+	LoadHTTPBasicAuthPassword = validPassword
+
+	_, err = LoadFromFileOrHTTP(ts3.URL)
+	assert.NoError(t, err)
+
+	ts4 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		myHeaders := r.Header[sharedHeaderKey]
+		ok := false
+		for _, v := range myHeaders {
+			if v == sharedHeaderValue {
+				ok = true
+				break
+			}
+		}
+		if ok {
+			rw.WriteHeader(http.StatusOK)
+		} else {
+			rw.WriteHeader(http.StatusForbidden)
+		}
+	}))
+	defer ts4.Close()
+
+	_, err = LoadFromFileOrHTTP(ts4.URL)
+	assert.Error(t, err)
+
+	LoadHTTPCustomHeaders[sharedHeaderKey] = sharedHeaderValue
+
+	_, err = LoadFromFileOrHTTP(ts4.URL)
+	assert.NoError(t, err)
+
+	// clean up for future tests
+	LoadHTTPBasicAuthUsername = ""
+	LoadHTTPBasicAuthPassword = ""
+	LoadHTTPCustomHeaders = map[string]string{}
 }
