@@ -111,3 +111,90 @@ func TestLoadFromHTTP(t *testing.T) {
 	LoadHTTPBasicAuthPassword = ""
 	LoadHTTPCustomHeaders = map[string]string{}
 }
+
+func TestLoadHTTPBytes(t *testing.T) {
+	_, err := LoadFromFileOrHTTP("httx://12394:abd")
+	assert.Error(t, err)
+
+	serv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.WriteHeader(http.StatusNotFound)
+	}))
+	defer serv.Close()
+
+	_, err = LoadFromFileOrHTTP(serv.URL)
+	assert.Error(t, err)
+
+	ts2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.WriteHeader(http.StatusOK)
+		_, _ = rw.Write([]byte("the content"))
+	}))
+	defer ts2.Close()
+
+	d, err := LoadFromFileOrHTTP(ts2.URL)
+	assert.NoError(t, err)
+	assert.Equal(t, []byte("the content"), d)
+}
+
+func TestLoadStrategy(t *testing.T) {
+
+	loader := func(p string) ([]byte, error) {
+		return []byte(yamlPetStore), nil
+	}
+	remLoader := func(p string) ([]byte, error) {
+		return []byte("not it"), nil
+	}
+
+	ld := LoadStrategy("blah", loader, remLoader)
+	b, _ := ld("")
+	assert.Equal(t, []byte(yamlPetStore), b)
+
+	serv := httptest.NewServer(http.HandlerFunc(yamlPestoreServer))
+	defer serv.Close()
+
+	s, err := YAMLDoc(serv.URL)
+	assert.NoError(t, err)
+	assert.NotNil(t, s)
+
+	ts2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.WriteHeader(http.StatusNotFound)
+		_, _ = rw.Write([]byte("\n"))
+	}))
+	defer ts2.Close()
+	_, err = YAMLDoc(ts2.URL)
+	assert.Error(t, err)
+}
+
+func TestLoadStrategyFile(t *testing.T) {
+	const (
+		thisIsIt = "thisIsIt"
+	)
+
+	called, pth := false, ""
+	loader := func(p string) ([]byte, error) {
+		called = true
+		pth = p
+		return []byte(thisIsIt), nil
+	}
+	remLoader := func(p string) ([]byte, error) {
+		return []byte("not it"), nil
+	}
+
+	ld := LoadStrategy("blah", loader, remLoader)
+
+	b, _ := ld("file:///a/c/myfile.yaml")
+	assert.True(t, called)
+	assert.Equal(t, "/a/c/myfile.yaml", pth)
+	assert.Equal(t, []byte(thisIsIt), b)
+
+	called, pth = false, ""
+	b, _ = ld(`file://C:\a\c\myfile.yaml`)
+	assert.True(t, called)
+	assert.Equal(t, `C:\a\c\myfile.yaml`, pth)
+	assert.Equal(t, []byte(thisIsIt), b)
+
+	called, pth = false, ""
+	b, _ = ld(`file://C%3A%5Ca%5Cc%5Cmyfile.yaml`)
+	assert.True(t, called)
+	assert.Equal(t, `C:\a\c\myfile.yaml`, pth)
+	assert.Equal(t, []byte(thisIsIt), b)
+}
