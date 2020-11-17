@@ -97,6 +97,7 @@ func TestFindPackage(t *testing.T) {
 	assert.Empty(t, pkg)
 }
 
+// nolint: unparam
 func assertPath(t testing.TB, expected, actual string) bool {
 	fp, err := filepath.EvalSymlinks(expected)
 	if assert.NoError(t, err) {
