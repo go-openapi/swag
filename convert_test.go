@@ -73,7 +73,7 @@ func TestConvertFloat64(t *testing.T) {
 
 func TestConvertInt8(t *testing.T) {
 	validInts := []int8{0, 1, -1, math.MaxInt8, math.MinInt8}
-	invalidInts := []string{"1.233", "a", "false", strconv.Itoa(int(math.MaxInt64))}
+	invalidInts := []string{"1.233", "a", "false", strconv.FormatInt(int64(math.MaxInt64), 10)}
 
 	for _, f := range validInts {
 		c, err := ConvertInt8(FormatInt8(f))
@@ -89,7 +89,7 @@ func TestConvertInt8(t *testing.T) {
 
 func TestConvertInt16(t *testing.T) {
 	validInts := []int16{0, 1, -1, math.MaxInt8, math.MinInt8, math.MaxInt16, math.MinInt16}
-	invalidInts := []string{"1.233", "a", "false", strconv.Itoa(int(math.MaxInt64))}
+	invalidInts := []string{"1.233", "a", "false", strconv.FormatInt(int64(math.MaxInt64), 10)}
 
 	for _, f := range validInts {
 		c, err := ConvertInt16(FormatInt16(f))
@@ -105,7 +105,7 @@ func TestConvertInt16(t *testing.T) {
 
 func TestConvertInt32(t *testing.T) {
 	validInts := []int32{0, 1, -1, math.MaxInt8, math.MinInt8, math.MaxInt16, math.MinInt16, math.MinInt32, math.MaxInt32}
-	invalidInts := []string{"1.233", "a", "false", strconv.Itoa(int(math.MaxInt64))}
+	invalidInts := []string{"1.233", "a", "false", strconv.FormatInt(int64(math.MaxInt64), 10)}
 
 	for _, f := range validInts {
 		c, err := ConvertInt32(FormatInt32(f))
