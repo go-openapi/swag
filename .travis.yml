@@ -14,6 +14,12 @@ jobs:
     script:
     - go test -v
 
+  #- go: 1.x
+  #  arch: arm
+  #  install: ~
+  #  script:
+  #  - go test -v
+
   # include linting job, but only for latest go version and amd64 arch
   - go: 1.x
     arch: amd64
