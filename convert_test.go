@@ -209,7 +209,7 @@ func TestIsFloat64AJSONInteger(t *testing.T) {
 	assert.True(t, IsFloat64AJSONInteger(minJSONFloat))
 	assert.True(t, IsFloat64AJSONInteger(1/0.01*67.15000001))
 	assert.False(t, IsFloat64AJSONInteger(math.SmallestNonzeroFloat64))
-	assert.False(t, IsFloat64AJSONInteger(math.SmallestNonzeroFloat64/2))
+	assert.True(t, IsFloat64AJSONInteger(math.SmallestNonzeroFloat64/2))
 	assert.True(t, IsFloat64AJSONInteger(math.SmallestNonzeroFloat64/3))
 	assert.True(t, IsFloat64AJSONInteger(math.SmallestNonzeroFloat64/4))
 }
