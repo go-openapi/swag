@@ -20,17 +20,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v3"
 )
-
-/* currently unused:
-type failJSONMarshal struct {
-}
-
-func (f failJSONMarshal) MarshalJSON() ([]byte, error) {
-	return nil, errors.New("expected")
-}
-*/
 
 func TestYAMLToJSON(t *testing.T) {
 
@@ -39,7 +30,7 @@ func TestYAMLToJSON(t *testing.T) {
 name: a string value
 'y': some value
 `
-	var data yaml.MapSlice
+	var data yaml.Node
 	_ = yaml.Unmarshal([]byte(sd), &data)
 
 	d, err := YAMLToJSON(data)
@@ -47,22 +38,65 @@ name: a string value
 		assert.Equal(t, `{"1":"the int key value","name":"a string value","y":"some value"}`, string(d))
 	}
 
-	data = append(data, yaml.MapItem{Key: true, Value: "the bool value"})
+	ns := []*yaml.Node{
+		{
+			Kind:  yaml.ScalarNode,
+			Value: "true",
+			Tag:   "!!bool",
+		},
+		{
+			Kind:  yaml.ScalarNode,
+			Value: "the bool value",
+			Tag:   "!!str",
+		},
+	}
+	data.Content[0].Content = append(data.Content[0].Content, ns...)
 	d, err = YAMLToJSON(data)
 	assert.Error(t, err)
 	assert.Nil(t, d)
 
-	data = data[:len(data)-1]
+	data.Content[0].Content = data.Content[0].Content[:len(data.Content[0].Content)-2]
 
-	tag := yaml.MapSlice{{Key: "name", Value: "tag name"}}
-	data = append(data, yaml.MapItem{Key: "tag", Value: tag})
+	tag := []*yaml.Node{
+		{
+			Kind:  yaml.ScalarNode,
+			Value: "tag",
+			Tag:   "!!str",
+		},
+		{
+			Kind: yaml.MappingNode,
+			Content: []*yaml.Node{
+				{
+					Kind:  yaml.ScalarNode,
+					Value: "name",
+					Tag:   "!!str",
+				},
+				{
+					Kind:  yaml.ScalarNode,
+					Value: "tag name",
+					Tag:   "!!str",
+				},
+			},
+		},
+	}
+	data.Content[0].Content = append(data.Content[0].Content, tag...)
 
 	d, err = YAMLToJSON(data)
 	assert.NoError(t, err)
 	assert.Equal(t, `{"1":"the int key value","name":"a string value","y":"some value","tag":{"name":"tag name"}}`, string(d))
 
-	tag = yaml.MapSlice{{Key: true, Value: "bool tag name"}}
-	data = append(data[:len(data)-1], yaml.MapItem{Key: "tag", Value: tag})
+	tag[1].Content = []*yaml.Node{
+		{
+			Kind:  yaml.ScalarNode,
+			Value: "true",
+			Tag:   "!!bool",
+		},
+		{
+			Kind:  yaml.ScalarNode,
+			Value: "the bool tag name",
+			Tag:   "!!str",
+		},
+	}
 
 	d, err = YAMLToJSON(data)
 	assert.Error(t, err)
@@ -104,7 +138,7 @@ func TestWithYKey(t *testing.T) {
 	doc, err := BytesToYAMLDoc([]byte(withYKey))
 	if assert.NoError(t, err) {
 		_, err := YAMLToJSON(doc)
-		if assert.Error(t, err) {
+		if assert.NoError(t, err) {
 			doc, err := BytesToYAMLDoc([]byte(withQuotedYKey))
 			if assert.NoError(t, err) {
 				jsond, err := YAMLToJSON(doc)
@@ -131,21 +165,6 @@ func TestWithYKey(t *testing.T) {
 }
 
 func TestMapKeyTypes(t *testing.T) {
-	d := yaml.MapSlice{
-		yaml.MapItem{Key: 12345, Value: "int"},
-		yaml.MapItem{Key: int8(1), Value: "int8"},
-		yaml.MapItem{Key: int16(12345), Value: "int16"},
-		yaml.MapItem{Key: int32(12345678), Value: "int32"},
-		yaml.MapItem{Key: int64(12345678910), Value: "int64"},
-		yaml.MapItem{Key: uint(12345), Value: "uint"},
-		yaml.MapItem{Key: uint8(1), Value: "uint8"},
-		yaml.MapItem{Key: uint16(12345), Value: "uint16"},
-		yaml.MapItem{Key: uint32(12345678), Value: "uint32"},
-		yaml.MapItem{Key: uint64(12345678910), Value: "uint64"},
-	}
-	_, err := YAMLToJSON(d)
-	assert.NoError(t, err)
-
 	dm := map[interface{}]interface{}{
 		12345:               "int",
 		int8(1):             "int8",
@@ -158,7 +177,7 @@ func TestMapKeyTypes(t *testing.T) {
 		uint32(12345678):    "uint32",
 		uint64(12345678910): "uint64",
 	}
-	_, err = YAMLToJSON(dm)
+	_, err := YAMLToJSON(dm)
 	assert.NoError(t, err)
 }
 

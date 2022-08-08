@@ -15,7 +15,6 @@
 package swag
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -29,11 +28,11 @@ func makeDirStructure(tgt string) (string, string, error) {
 	if tgt == "" {
 		tgt = "pkgpaths"
 	}
-	td, err := ioutil.TempDir("", tgt)
+	td, err := os.MkdirTemp("", tgt)
 	if err != nil {
 		return "", "", err
 	}
-	td2, err := ioutil.TempDir("", tgt+"-2")
+	td2, err := os.MkdirTemp("", tgt+"-2")
 	if err != nil {
 		return "", "", err
 	}
@@ -97,7 +96,7 @@ func TestFindPackage(t *testing.T) {
 	assert.Empty(t, pkg)
 }
 
-// nolint: unparam
+//nolint:unparam
 func assertPath(t testing.TB, expected, actual string) bool {
 	fp, err := filepath.EvalSymlinks(expected)
 	if assert.NoError(t, err) {
