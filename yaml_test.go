@@ -49,6 +49,15 @@ tag:
 	ny, err := ndata.MarshalYAML()
 	require.NoError(t, err)
 	assert.Equal(t, nestpected, string(ny.([]byte)))
+
+	ydoc, err := BytesToYAMLDoc([]byte(fixtures2224))
+	require.NoError(t, err)
+	b, err := YAMLToJSON(ydoc)
+	require.NoError(t, err)
+
+	var bdata JSONMapSlice
+	require.NoError(t, json.Unmarshal(b, &bdata))
+
 }
 
 func TestYAMLToJSON(t *testing.T) {
@@ -208,6 +217,184 @@ func TestMapKeyTypes(t *testing.T) {
 	_, err := YAMLToJSON(dm)
 	assert.NoError(t, err)
 }
+
+const fixtures2224 = `definitions:
+  Time:
+    type: string
+    format: date-time
+    x-go-type:
+      import:
+        package: time
+      embedded: true
+      type: Time
+    x-nullable: true
+
+  TimeAsObject:  # <- time.Time is actually a struct
+    type: string
+    format: date-time
+    x-go-type:
+      import:
+        package: time
+        hints:
+          kind: object
+      embedded: true
+      type: Time
+    x-nullable: true
+
+  Raw:
+    x-go-type:
+      import:
+        package: encoding/json
+      hints:
+        kind: primitive
+      embedded: true
+      type: RawMessage
+
+  Request:
+    x-go-type:
+      import:
+        package: net/http
+      hints:
+        kind: object
+      embedded: true
+      type: Request
+
+  RequestPointer:
+    x-go-type:
+      import:
+        package: net/http
+      hints:
+        kind: object
+        nullable: true
+      embedded: true
+      type: Request
+
+  OldStyleImport:
+    type: object
+    x-go-type:
+      import:
+        package: net/http
+      type: Request
+      hints:
+        noValidation: true
+
+  OldStyleRenamed:
+    type: object
+    x-go-type:
+      import:
+        package: net/http
+      type: Request
+      hints:
+        noValidation: true
+    x-go-name: OldRenamed
+
+  ObjectWithEmbedded:
+    type: object
+    properties:
+      a:
+        $ref: '#/definitions/Time'
+      b:
+        $ref: '#/definitions/Request'
+      c:
+        $ref: '#/definitions/TimeAsObject'
+      d:
+        $ref: '#/definitions/Raw'
+      e:
+        $ref: '#/definitions/JSONObject'
+      f:
+        $ref: '#/definitions/JSONMessage'
+      g:
+        $ref: '#/definitions/JSONObjectWithAlias'
+
+  ObjectWithExternals:
+    type: object
+    properties:
+      a:
+        $ref: '#/definitions/OldStyleImport'
+      b:
+        $ref: '#/definitions/OldStyleRenamed'
+
+  Base:
+    properties: &base
+      id:
+        type: integer
+        format: uint64
+        x-go-custom-tag: 'gorm:"primary_key"'
+      FBID:
+        type: integer
+        format: uint64
+        x-go-custom-tag: 'gorm:"index"'
+      created_at:
+        $ref: "#/definitions/Time"
+      updated_at:
+        $ref: "#/definitions/Time"
+      version:
+        type: integer
+        format: uint64
+
+  HotspotType:
+    type: string
+    enum:
+      - A
+      - B
+      - C
+
+  Hotspot:
+    type: object
+    allOf:
+      - properties: *base
+      - properties:
+          access_points:
+            type: array
+            items:
+              $ref: '#/definitions/AccessPoint'
+          type:
+            $ref: '#/definitions/HotspotType'
+        required:
+          - type
+
+  AccessPoint:
+    type: object
+    allOf:
+      - properties: *base
+      - properties:
+          mac_address:
+            type: string
+            x-go-custom-tag: 'gorm:"index;not null;unique"'
+          hotspot_id:
+            type: integer
+            format: uint64
+          hotspot:
+            $ref: '#/definitions/Hotspot'
+
+  JSONObject:
+    type: object
+    additionalProperties:
+      type: array
+      items:
+        $ref: '#/definitions/Raw'
+
+  JSONObjectWithAlias:
+    type: object
+    additionalProperties:
+      type: object
+      properties:
+        message:
+          $ref: '#/definitions/JSONMessage'
+
+  JSONMessage:
+    $ref: '#/definitions/Raw'
+
+  Incorrect:
+    x-go-type:
+      import:
+        package: net
+        hints:
+          kind: array
+      embedded: true
+      type: Buffers
+    x-nullable: true
+`
 
 const withQuotedYKey = `consumes:
 - application/json

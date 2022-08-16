@@ -64,7 +64,7 @@ func yamlNode(root *yaml.Node) (interface{}, error) {
 	case yaml.ScalarNode:
 		return yamlScalar(root)
 	case yaml.AliasNode:
-		return nil, fmt.Errorf("no translation to JSON for AliasNode")
+		return yamlNode(root.Alias)
 	default:
 		return nil, fmt.Errorf("unsupported YAML node type: %v", root.Kind)
 	}
