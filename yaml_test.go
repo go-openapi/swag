@@ -20,8 +20,36 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	yaml "gopkg.in/yaml.v3"
 )
+
+func TestJSONToYAML(t *testing.T) {
+	sd := `{"1":"the int key value","name":"a string value","y":"some value"}`
+	var data JSONMapSlice
+	require.NoError(t, json.Unmarshal([]byte(sd), &data))
+
+	y, err := data.MarshalYAML()
+	require.NoError(t, err)
+	const expected = `"1": the int key value
+name: a string value
+y: some value
+`
+	assert.Equal(t, expected, string(y.([]byte)))
+
+	nstd := `{"1":"the int key value","name":"a string value","y":"some value","tag":{"name":"tag name"}}`
+	const nestpected = `"1": the int key value
+name: a string value
+y: some value
+tag:
+    name: tag name
+`
+	var ndata JSONMapSlice
+	require.NoError(t, json.Unmarshal([]byte(nstd), &ndata))
+	ny, err := ndata.MarshalYAML()
+	require.NoError(t, err)
+	assert.Equal(t, nestpected, string(ny.([]byte)))
+}
 
 func TestYAMLToJSON(t *testing.T) {
 
