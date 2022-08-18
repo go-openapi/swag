@@ -142,6 +142,8 @@ func yamlScalar(node *yaml.Node) (interface{}, error) {
 			return nil, fmt.Errorf("unable to process scalar node. Got %q. Expecting float content: %w", node.Value, err)
 		}
 		return f, nil
+	case "yaml.org,2002:timestamp":
+		return node.Value, nil
 	case "tag:yaml.org,2002:null":
 		return nil, nil
 	default:
