@@ -118,6 +118,8 @@ const ( // See https://yaml.org/type/
 	yamlIntScalar    = "tag:yaml.org,2002:int"
 	yamlBoolScalar   = "tag:yaml.org,2002:bool"
 	yamlFloatScalar  = "tag:yaml.org,2002:float"
+	yamlTimestamp    = "tag:yaml.org,2002:timestamp"
+	yamlNull         = "tag:yaml.org,2002:null"
 )
 
 func yamlScalar(node *yaml.Node) (interface{}, error) {
@@ -142,9 +144,9 @@ func yamlScalar(node *yaml.Node) (interface{}, error) {
 			return nil, fmt.Errorf("unable to process scalar node. Got %q. Expecting float content: %w", node.Value, err)
 		}
 		return f, nil
-	case "yaml.org,2002:timestamp":
+	case yamlTimestamp:
 		return node.Value, nil
-	case "tag:yaml.org,2002:null":
+	case yamlNull:
 		return nil, nil
 	default:
 		return nil, fmt.Errorf("YAML tag %q is not supported", node.LongTag())
