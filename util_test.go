@@ -490,3 +490,21 @@ func TestToGoNameUnicode(t *testing.T) {
 		assert.Equal(t, sample.out, ToGoName(sample.str))
 	}
 }
+
+type dummyZeroable struct {
+	zero bool
+}
+
+func (d dummyZeroable) IsZero() bool {
+	return d.zero
+}
+func TestZeroableNilIsZero(t *testing.T) {
+	var d *dummyZeroable
+
+	assert.True(t, IsZero(d))
+}
+
+func TestZeroableInterfaceIsRespected(t *testing.T) {
+	assert.False(t, IsZero(dummyZeroable{false}))
+	assert.True(t, IsZero(dummyZeroable{true}))
+}
