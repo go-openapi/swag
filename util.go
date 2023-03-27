@@ -344,7 +344,7 @@ func IsZero(data interface{}) bool {
 	v := reflect.ValueOf(data)
 	// check for nil data
 	switch v.Kind() {
-	case reflect.Interface, reflect.Ptr:
+	case reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice:
 		if v.IsNil() {
 			return true
 		}
@@ -367,14 +367,13 @@ func IsZero(data interface{}) bool {
 		return v.Uint() == 0
 	case reflect.Float32, reflect.Float64:
 		return v.Float() == 0
-	case reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice:
-		return v.IsNil()
 	case reflect.Struct, reflect.Array:
 		return reflect.DeepEqual(data, reflect.Zero(v.Type()).Interface())
 	case reflect.Invalid:
 		return true
+	default:
+		return false
 	}
-	return false
 }
 
 // AddInitialisms add additional initialisms
