@@ -309,6 +309,14 @@ type ZeroesWithTime struct {
 	Time time.Time
 }
 
+type dummyZeroable struct {
+	zero bool
+}
+
+func (d dummyZeroable) IsZero() bool {
+	return d.zero
+}
+
 func TestIsZero(t *testing.T) {
 	var strs [5]string
 	var strss []string
@@ -384,6 +392,9 @@ func TestIsZero(t *testing.T) {
 		{[...]string{"hello"}, false},
 		{[]string(nil), true},
 		{[]string{"a"}, false},
+		{&dummyZeroable{true}, true},
+		{&dummyZeroable{false}, false},
+		{(*dummyZeroable)(nil), true},
 	}
 
 	for _, it := range data {
@@ -489,22 +500,4 @@ func TestToGoNameUnicode(t *testing.T) {
 	for _, sample := range samples {
 		assert.Equal(t, sample.out, ToGoName(sample.str))
 	}
-}
-
-type dummyZeroable struct {
-	zero bool
-}
-
-func (d dummyZeroable) IsZero() bool {
-	return d.zero
-}
-func TestZeroableNilIsZero(t *testing.T) {
-	var d *dummyZeroable
-
-	assert.True(t, IsZero(d))
-}
-
-func TestZeroableInterfaceIsRespected(t *testing.T) {
-	assert.False(t, IsZero(dummyZeroable{false}))
-	assert.True(t, IsZero(dummyZeroable{true}))
 }
