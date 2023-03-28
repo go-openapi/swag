@@ -309,6 +309,14 @@ type ZeroesWithTime struct {
 	Time time.Time
 }
 
+type dummyZeroable struct {
+	zero bool
+}
+
+func (d dummyZeroable) IsZero() bool {
+	return d.zero
+}
+
 func TestIsZero(t *testing.T) {
 	var strs [5]string
 	var strss []string
@@ -384,6 +392,9 @@ func TestIsZero(t *testing.T) {
 		{[...]string{"hello"}, false},
 		{[]string(nil), true},
 		{[]string{"a"}, false},
+		{&dummyZeroable{true}, true},
+		{&dummyZeroable{false}, false},
+		{(*dummyZeroable)(nil), true},
 	}
 
 	for _, it := range data {
