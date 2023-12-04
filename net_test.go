@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSplitHostPort(t *testing.T) {
@@ -36,9 +37,13 @@ func TestSplitHostPort(t *testing.T) {
 
 	for _, e := range data {
 		h, p, err := SplitHostPort(e.Input)
-		if (!e.Err && assert.NoError(t, err)) || (e.Err && assert.Error(t, err)) {
-			assert.Equal(t, e.Host, h)
-			assert.Equal(t, e.Port, p)
+		if !e.Err {
+			require.NoError(t, err)
+		} else {
+			require.Error(t, err)
 		}
+
+		assert.Equal(t, e.Host, h)
+		assert.Equal(t, e.Port, p)
 	}
 }

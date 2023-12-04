@@ -16,15 +16,13 @@ package swag
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"testing"
 	"time"
 	"unicode"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type translationSample struct {
@@ -79,9 +77,21 @@ func TestHighUnicode(t *testing.T) {
 	ss := "日本語sample 2 Text"
 	rss := []rune(ss)
 
-	log.Println("title:", unicode.IsTitle(rss[0]))
 	require.False(t, rss[0] < unicode.MaxASCII && unicode.IsLetter(rss[0]))
 }
+
+const (
+	textTitle  = "Text"
+	blankText  = " text"
+	dashText   = "-text"
+	uscoreText = "_text"
+
+	sampleTitle  = "Sample"
+	sampleString = "sample"
+	sampleBlank  = "sample "
+	sampleDash   = "sample-"
+	sampleUscore = "sample_"
+)
 
 func TestToGoName(t *testing.T) {
 	samples := []translationSample{
@@ -107,17 +117,17 @@ func TestToGoName(t *testing.T) {
 		k = upper(k)
 
 		samples = append(samples,
-			translationSample{"sample " + lower(k) + " text", "Sample" + k + "Text"},
-			translationSample{"sample-" + lower(k) + "-text", "Sample" + k + "Text"},
-			translationSample{"sample_" + lower(k) + "_text", "Sample" + k + "Text"},
-			translationSample{"sample" + titleize(k) + "Text", "Sample" + k + "Text"},
-			translationSample{"sample " + lower(k), "Sample" + k},
-			translationSample{"sample-" + lower(k), "Sample" + k},
-			translationSample{"sample_" + lower(k), "Sample" + k},
-			translationSample{"sample" + titleize(k), "Sample" + k},
-			translationSample{"sample " + titleize(k) + " text", "Sample" + k + "Text"},
-			translationSample{"sample-" + titleize(k) + "-text", "Sample" + k + "Text"},
-			translationSample{"sample_" + titleize(k) + "_text", "Sample" + k + "Text"},
+			translationSample{sampleBlank + lower(k) + blankText, sampleTitle + k + textTitle},
+			translationSample{sampleDash + lower(k) + dashText, sampleTitle + k + textTitle},
+			translationSample{sampleUscore + lower(k) + uscoreText, sampleTitle + k + textTitle},
+			translationSample{sampleString + titleize(k) + textTitle, sampleTitle + k + textTitle},
+			translationSample{sampleBlank + lower(k), sampleTitle + k},
+			translationSample{sampleDash + lower(k), sampleTitle + k},
+			translationSample{sampleUscore + lower(k), sampleTitle + k},
+			translationSample{sampleString + titleize(k), sampleTitle + k},
+			translationSample{sampleBlank + titleize(k) + blankText, sampleTitle + k + textTitle},
+			translationSample{sampleDash + titleize(k) + dashText, sampleTitle + k + textTitle},
+			translationSample{sampleUscore + titleize(k) + uscoreText, sampleTitle + k + textTitle},
 		)
 	}
 
@@ -235,7 +245,7 @@ func TestToFileName(t *testing.T) {
 	}
 	for _, k := range commonInitialisms.sorted() {
 		samples = append(samples,
-			translationSample{"Sample" + k + "Text", "sample_" + lower(k) + "_text"},
+			translationSample{sampleTitle + k + textTitle, sampleUscore + lower(k) + uscoreText},
 		)
 	}
 
@@ -255,7 +265,7 @@ func TestToCommandName(t *testing.T) {
 
 	for _, k := range commonInitialisms.sorted() {
 		samples = append(samples,
-			translationSample{"Sample" + k + "Text", "sample-" + lower(k) + "-text"},
+			translationSample{sampleTitle + k + textTitle, sampleDash + lower(k) + dashText},
 		)
 	}
 
@@ -274,7 +284,7 @@ func TestToHumanName(t *testing.T) {
 
 	for _, k := range commonInitialisms.sorted() {
 		samples = append(samples,
-			translationSample{"Sample" + k + "Text", "sample " + k + " text"},
+			translationSample{sampleTitle + k + textTitle, sampleBlank + k + blankText},
 		)
 	}
 
@@ -292,7 +302,7 @@ func TestToJSONName(t *testing.T) {
 
 	for _, k := range commonInitialisms.sorted() {
 		samples = append(samples,
-			translationSample{"Sample" + k + "Text", "sample" + titleize(k) + "Text"},
+			translationSample{sampleTitle + k + textTitle, sampleString + titleize(k) + textTitle},
 		)
 	}
 

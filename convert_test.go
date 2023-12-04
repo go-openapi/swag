@@ -20,22 +20,30 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func errMsg(f string) string {
+	const (
+		expectedQuote = "expected '"
+		errSuffix     = "' to generate an error"
+	)
+
+	return expectedQuote + f + errSuffix
+}
 
 // These are really dumb tests
 
 func TestConvertBool(t *testing.T) {
 	for k := range evaluatesAsTrue {
 		r, err := ConvertBool(k)
-		if assert.NoError(t, err) {
-			assert.True(t, r)
-		}
+		require.NoError(t, err)
+		assert.True(t, r)
 	}
 	for _, k := range []string{"a", "", "0", "false", "unchecked"} {
 		r, err := ConvertBool(k)
-		if assert.NoError(t, err) {
-			assert.False(t, r)
-		}
+		require.NoError(t, err)
+		assert.False(t, r)
 	}
 }
 
@@ -45,13 +53,12 @@ func TestConvertFloat32(t *testing.T) {
 
 	for _, f := range validFloats {
 		c, err := ConvertFloat32(FormatFloat32(f))
-		if assert.NoError(t, err) {
-			assert.EqualValues(t, f, c)
-		}
+		require.NoError(t, err)
+		assert.EqualValues(t, f, c)
 	}
 	for _, f := range invalidFloats {
 		_, err := ConvertFloat32(f)
-		assert.Error(t, err, "expected '"+f+"' to generate an error")
+		require.Error(t, err, errMsg(f))
 	}
 }
 
@@ -61,13 +68,12 @@ func TestConvertFloat64(t *testing.T) {
 
 	for _, f := range validFloats {
 		c, err := ConvertFloat64(FormatFloat64(f))
-		if assert.NoError(t, err) {
-			assert.EqualValues(t, f, c)
-		}
+		require.NoError(t, err)
+		assert.EqualValues(t, f, c)
 	}
 	for _, f := range invalidFloats {
 		_, err := ConvertFloat64(f)
-		assert.Error(t, err, "expected '"+f+"' to generate an error")
+		require.Error(t, err, errMsg(f))
 	}
 }
 
@@ -77,13 +83,12 @@ func TestConvertInt8(t *testing.T) {
 
 	for _, f := range validInts {
 		c, err := ConvertInt8(FormatInt8(f))
-		if assert.NoError(t, err) {
-			assert.EqualValues(t, f, c)
-		}
+		require.NoError(t, err)
+		assert.EqualValues(t, f, c)
 	}
 	for _, f := range invalidInts {
 		_, err := ConvertInt8(f)
-		assert.Error(t, err, "expected '"+f+"' to generate an error")
+		require.Error(t, err, errMsg(f))
 	}
 }
 
@@ -93,13 +98,12 @@ func TestConvertInt16(t *testing.T) {
 
 	for _, f := range validInts {
 		c, err := ConvertInt16(FormatInt16(f))
-		if assert.NoError(t, err) {
-			assert.EqualValues(t, f, c)
-		}
+		require.NoError(t, err)
+		assert.EqualValues(t, f, c)
 	}
 	for _, f := range invalidInts {
 		_, err := ConvertInt16(f)
-		assert.Error(t, err, "expected '"+f+"' to generate an error")
+		require.Error(t, err, errMsg(f))
 	}
 }
 
@@ -109,13 +113,12 @@ func TestConvertInt32(t *testing.T) {
 
 	for _, f := range validInts {
 		c, err := ConvertInt32(FormatInt32(f))
-		if assert.NoError(t, err) {
-			assert.EqualValues(t, f, c)
-		}
+		require.NoError(t, err)
+		assert.EqualValues(t, f, c)
 	}
 	for _, f := range invalidInts {
 		_, err := ConvertInt32(f)
-		assert.Error(t, err, "expected '"+f+"' to generate an error")
+		require.Error(t, err, errMsg(f))
 	}
 }
 
@@ -125,13 +128,12 @@ func TestConvertInt64(t *testing.T) {
 
 	for _, f := range validInts {
 		c, err := ConvertInt64(FormatInt64(f))
-		if assert.NoError(t, err) {
-			assert.EqualValues(t, f, c)
-		}
+		require.NoError(t, err)
+		assert.EqualValues(t, f, c)
 	}
 	for _, f := range invalidInts {
 		_, err := ConvertInt64(f)
-		assert.Error(t, err, "expected '"+f+"' to generate an error")
+		require.Error(t, err, errMsg(f))
 	}
 }
 
@@ -141,13 +143,12 @@ func TestConvertUint8(t *testing.T) {
 
 	for _, f := range validInts {
 		c, err := ConvertUint8(FormatUint8(f))
-		if assert.NoError(t, err) {
-			assert.EqualValues(t, f, c)
-		}
+		require.NoError(t, err)
+		assert.EqualValues(t, f, c)
 	}
 	for _, f := range invalidInts {
 		_, err := ConvertUint8(f)
-		assert.Error(t, err, "expected '"+f+"' to generate an error")
+		require.Error(t, err, errMsg(f))
 	}
 }
 
@@ -157,13 +158,12 @@ func TestConvertUint16(t *testing.T) {
 
 	for _, f := range validUints {
 		c, err := ConvertUint16(FormatUint16(f))
-		if assert.NoError(t, err) {
-			assert.EqualValues(t, f, c)
-		}
+		require.NoError(t, err)
+		assert.EqualValues(t, f, c)
 	}
 	for _, f := range invalidUints {
 		_, err := ConvertUint16(f)
-		assert.Error(t, err, "expected '"+f+"' to generate an error")
+		require.Error(t, err, errMsg(f))
 	}
 }
 
@@ -173,13 +173,12 @@ func TestConvertUint32(t *testing.T) {
 
 	for _, f := range validUints {
 		c, err := ConvertUint32(FormatUint32(f))
-		if assert.NoError(t, err) {
-			assert.EqualValues(t, f, c)
-		}
+		require.NoError(t, err)
+		assert.EqualValues(t, f, c)
 	}
 	for _, f := range invalidUints {
 		_, err := ConvertUint32(f)
-		assert.Error(t, err, "expected '"+f+"' to generate an error")
+		require.Error(t, err, errMsg(f))
 	}
 }
 
@@ -189,13 +188,12 @@ func TestConvertUint64(t *testing.T) {
 
 	for _, f := range validUints {
 		c, err := ConvertUint64(FormatUint64(f))
-		if assert.NoError(t, err) {
-			assert.EqualValues(t, f, c)
-		}
+		require.NoError(t, err)
+		assert.EqualValues(t, f, c)
 	}
 	for _, f := range invalidUints {
 		_, err := ConvertUint64(f)
-		assert.Error(t, err, "expected '"+f+"' to generate an error")
+		require.Error(t, err, errMsg(f))
 	}
 }
 

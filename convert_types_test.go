@@ -20,71 +20,15 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func assertSingleValue(t *testing.T, inElem, elem reflect.Value, expectPointer bool, idx int) {
-	if !assert.Truef(t,
-		(elem.Kind() == reflect.Ptr) == expectPointer,
-		"Unexpected expectPointer=%t value type", expectPointer) {
-		return
-	}
-	if inElem.Kind() == reflect.Ptr && !inElem.IsNil() {
-		inElem = reflect.Indirect(inElem)
-	}
-	if elem.Kind() == reflect.Ptr && !elem.IsNil() {
-		elem = reflect.Indirect(elem)
-	}
-
-	if !assert.Truef(t,
-		(elem.Kind() == reflect.Ptr && elem.IsNil()) || IsZero(elem.Interface()) ==
-			(inElem.Kind() == reflect.Ptr && inElem.IsNil()) || IsZero(inElem.Interface()),
-		"Unexpected nil pointer at idx %d", idx) {
-		return
-	}
-
-	if !((elem.Kind() == reflect.Ptr && elem.IsNil()) || IsZero(elem.Interface())) {
-		if !assert.IsTypef(t, inElem.Interface(), elem.Interface(), "Expected in/out to match types") {
-			return
-		}
-		assert.EqualValuesf(t, inElem.Interface(), elem.Interface(), "Unexpected value at idx %d: %v", idx, elem.Interface())
-	}
-}
-
-// assertValues checks equivalent representation pointer vs values for single var, slices and maps
-func assertValues(t *testing.T, in, out interface{}, expectPointer bool, idx int) {
-	vin := reflect.ValueOf(in)
-	vout := reflect.ValueOf(out)
-	switch vin.Kind() {
-	case reflect.Slice, reflect.Map:
-		if !assert.Equalf(t, vin.Kind(), vout.Kind(), "Unexpected output type at idx %d", idx) ||
-			!assert.Equalf(t, vin.Len(), vout.Len(), "Unexpected len at idx %d", idx) {
-			break
-		}
-		var elem, inElem reflect.Value
-		for i := 0; i < vin.Len(); i++ {
-			if vin.Kind() == reflect.Slice {
-				elem = vout.Index(i)
-				inElem = vin.Index(i)
-			} else if vin.Kind() == reflect.Map {
-				keys := vin.MapKeys()
-				elem = vout.MapIndex(keys[i])
-				inElem = vout.MapIndex(keys[i])
-			}
-			assertSingleValue(t, inElem, elem, expectPointer, idx)
-		}
-	default:
-		inElem := vin
-		elem := vout
-		assertSingleValue(t, inElem, elem, expectPointer, idx)
-	}
-}
-
-var testCasesStringSlice = [][]string{
-	{"a", "b", "c", "d", "e"},
-	{"a", "b", "", "", "e"},
-}
-
 func TestStringSlice(t *testing.T) {
+	testCasesStringSlice := [][]string{
+		{"a", "b", "c", "d", "e"},
+		{"a", "b", "", "", "e"},
+	}
+
 	for idx, in := range testCasesStringSlice {
 		if in == nil {
 			continue
@@ -97,11 +41,11 @@ func TestStringSlice(t *testing.T) {
 	}
 }
 
-var testCasesStringValueSlice = [][]*string{
-	{String("a"), String("b"), nil, String("c")},
-}
-
 func TestStringValueSlice(t *testing.T) {
+	testCasesStringValueSlice := [][]*string{
+		{String("a"), String("b"), nil, String("c")},
+	}
+
 	for idx, in := range testCasesStringValueSlice {
 		if in == nil {
 			continue
@@ -114,11 +58,11 @@ func TestStringValueSlice(t *testing.T) {
 	}
 }
 
-var testCasesStringMap = []map[string]string{
-	{"a": "1", "b": "2", "c": "3"},
-}
-
 func TestStringMap(t *testing.T) {
+	testCasesStringMap := []map[string]string{
+		{"a": "1", "b": "2", "c": "3"},
+	}
+
 	for idx, in := range testCasesStringMap {
 		if in == nil {
 			continue
@@ -131,11 +75,11 @@ func TestStringMap(t *testing.T) {
 	}
 }
 
-var testCasesBoolSlice = [][]bool{
-	{true, true, false, false},
-}
-
 func TestBoolSlice(t *testing.T) {
+	testCasesBoolSlice := [][]bool{
+		{true, true, false, false},
+	}
+
 	for idx, in := range testCasesBoolSlice {
 		if in == nil {
 			continue
@@ -148,11 +92,11 @@ func TestBoolSlice(t *testing.T) {
 	}
 }
 
-var testCasesBoolValueSlice = [][]*bool{
-	{Bool(true), Bool(true), Bool(false), Bool(false)},
-}
-
 func TestBoolValueSlice(t *testing.T) {
+	testCasesBoolValueSlice := [][]*bool{
+		{Bool(true), Bool(true), Bool(false), Bool(false)},
+	}
+
 	for idx, in := range testCasesBoolValueSlice {
 		if in == nil {
 			continue
@@ -165,11 +109,11 @@ func TestBoolValueSlice(t *testing.T) {
 	}
 }
 
-var testCasesBoolMap = []map[string]bool{
-	{"a": true, "b": false, "c": true},
-}
-
 func TestBoolMap(t *testing.T) {
+	testCasesBoolMap := []map[string]bool{
+		{"a": true, "b": false, "c": true},
+	}
+
 	for idx, in := range testCasesBoolMap {
 		if in == nil {
 			continue
@@ -182,11 +126,11 @@ func TestBoolMap(t *testing.T) {
 	}
 }
 
-var testCasesIntSlice = [][]int{
-	{1, 2, 3, 4},
-}
-
 func TestIntSlice(t *testing.T) {
+	testCasesIntSlice := [][]int{
+		{1, 2, 3, 4},
+	}
+
 	for idx, in := range testCasesIntSlice {
 		if in == nil {
 			continue
@@ -199,11 +143,11 @@ func TestIntSlice(t *testing.T) {
 	}
 }
 
-var testCasesIntValueSlice = [][]*int{
-	{Int(1), Int(2), Int(3), Int(4)},
-}
-
 func TestIntValueSlice(t *testing.T) {
+	testCasesIntValueSlice := [][]*int{
+		{Int(1), Int(2), Int(3), Int(4)},
+	}
+
 	for idx, in := range testCasesIntValueSlice {
 		if in == nil {
 			continue
@@ -216,11 +160,11 @@ func TestIntValueSlice(t *testing.T) {
 	}
 }
 
-var testCasesIntMap = []map[string]int{
-	{"a": 3, "b": 2, "c": 1},
-}
-
 func TestIntMap(t *testing.T) {
+	testCasesIntMap := []map[string]int{
+		{"a": 3, "b": 2, "c": 1},
+	}
+
 	for idx, in := range testCasesIntMap {
 		if in == nil {
 			continue
@@ -233,11 +177,11 @@ func TestIntMap(t *testing.T) {
 	}
 }
 
-var testCasesInt64Slice = [][]int64{
-	{1, 2, 3, 4},
-}
-
 func TestInt64Slice(t *testing.T) {
+	testCasesInt64Slice := [][]int64{
+		{1, 2, 3, 4},
+	}
+
 	for idx, in := range testCasesInt64Slice {
 		if in == nil {
 			continue
@@ -250,11 +194,11 @@ func TestInt64Slice(t *testing.T) {
 	}
 }
 
-var testCasesInt64ValueSlice = [][]*int64{
-	{Int64(1), Int64(2), Int64(3), Int64(4)},
-}
-
 func TestInt64ValueSlice(t *testing.T) {
+	testCasesInt64ValueSlice := [][]*int64{
+		{Int64(1), Int64(2), Int64(3), Int64(4)},
+	}
+
 	for idx, in := range testCasesInt64ValueSlice {
 		if in == nil {
 			continue
@@ -267,11 +211,11 @@ func TestInt64ValueSlice(t *testing.T) {
 	}
 }
 
-var testCasesInt64Map = []map[string]int64{
-	{"a": 3, "b": 2, "c": 1},
-}
-
 func TestInt64Map(t *testing.T) {
+	testCasesInt64Map := []map[string]int64{
+		{"a": 3, "b": 2, "c": 1},
+	}
+
 	for idx, in := range testCasesInt64Map {
 		if in == nil {
 			continue
@@ -284,11 +228,11 @@ func TestInt64Map(t *testing.T) {
 	}
 }
 
-var testCasesFloat32Slice = [][]float32{
-	{1, 2, 3, 4},
-}
-
 func TestFloat32Slice(t *testing.T) {
+	testCasesFloat32Slice := [][]float32{
+		{1, 2, 3, 4},
+	}
+
 	for idx, in := range testCasesFloat32Slice {
 		if in == nil {
 			continue
@@ -302,11 +246,11 @@ func TestFloat32Slice(t *testing.T) {
 	}
 }
 
-var testCasesFloat64Slice = [][]float64{
-	{1, 2, 3, 4},
-}
-
 func TestFloat64Slice(t *testing.T) {
+	testCasesFloat64Slice := [][]float64{
+		{1, 2, 3, 4},
+	}
+
 	for idx, in := range testCasesFloat64Slice {
 		if in == nil {
 			continue
@@ -319,11 +263,11 @@ func TestFloat64Slice(t *testing.T) {
 	}
 }
 
-var testCasesUintSlice = [][]uint{
-	{1, 2, 3, 4},
-}
-
 func TestUintSlice(t *testing.T) {
+	testCasesUintSlice := [][]uint{
+		{1, 2, 3, 4},
+	}
+
 	for idx, in := range testCasesUintSlice {
 		if in == nil {
 			continue
@@ -336,9 +280,9 @@ func TestUintSlice(t *testing.T) {
 	}
 }
 
-var testCasesUintValueSlice = [][]*uint{}
-
 func TestUintValueSlice(t *testing.T) {
+	testCasesUintValueSlice := [][]*uint{}
+
 	for idx, in := range testCasesUintValueSlice {
 		if in == nil {
 			continue
@@ -351,11 +295,11 @@ func TestUintValueSlice(t *testing.T) {
 	}
 }
 
-var testCasesUintMap = []map[string]uint{
-	{"a": 3, "b": 2, "c": 1},
-}
-
 func TestUintMap(t *testing.T) {
+	testCasesUintMap := []map[string]uint{
+		{"a": 3, "b": 2, "c": 1},
+	}
+
 	for idx, in := range testCasesUintMap {
 		if in == nil {
 			continue
@@ -368,11 +312,11 @@ func TestUintMap(t *testing.T) {
 	}
 }
 
-var testCasesUint16Slice = [][]uint16{
-	{1, 2, 3, 4},
-}
-
 func TestUint16Slice(t *testing.T) {
+	testCasesUint16Slice := [][]uint16{
+		{1, 2, 3, 4},
+	}
+
 	for idx, in := range testCasesUint16Slice {
 		if in == nil {
 			continue
@@ -386,9 +330,9 @@ func TestUint16Slice(t *testing.T) {
 	}
 }
 
-var testCasesUint16ValueSlice = [][]*uint16{}
-
 func TestUint16ValueSlice(t *testing.T) {
+	testCasesUint16ValueSlice := [][]*uint16{}
+
 	for idx, in := range testCasesUint16ValueSlice {
 		if in == nil {
 			continue
@@ -402,11 +346,11 @@ func TestUint16ValueSlice(t *testing.T) {
 	}
 }
 
-var testCasesUint16Map = []map[string]uint16{
-	{"a": 3, "b": 2, "c": 1},
-}
-
 func TestUint16Map(t *testing.T) {
+	testCasesUint16Map := []map[string]uint16{
+		{"a": 3, "b": 2, "c": 1},
+	}
+
 	for idx, in := range testCasesUint16Map {
 		if in == nil {
 			continue
@@ -420,11 +364,11 @@ func TestUint16Map(t *testing.T) {
 	}
 }
 
-var testCasesUint64Slice = [][]uint64{
-	{1, 2, 3, 4},
-}
-
 func TestUint64Slice(t *testing.T) {
+	testCasesUint64Slice := [][]uint64{
+		{1, 2, 3, 4},
+	}
+
 	for idx, in := range testCasesUint64Slice {
 		if in == nil {
 			continue
@@ -437,9 +381,9 @@ func TestUint64Slice(t *testing.T) {
 	}
 }
 
-var testCasesUint64ValueSlice = [][]*uint64{}
-
 func TestUint64ValueSlice(t *testing.T) {
+	testCasesUint64ValueSlice := [][]*uint64{}
+
 	for idx, in := range testCasesUint64ValueSlice {
 		if in == nil {
 			continue
@@ -452,11 +396,11 @@ func TestUint64ValueSlice(t *testing.T) {
 	}
 }
 
-var testCasesUint64Map = []map[string]uint64{
-	{"a": 3, "b": 2, "c": 1},
-}
-
 func TestUint64Map(t *testing.T) {
+	testCasesUint64Map := []map[string]uint64{
+		{"a": 3, "b": 2, "c": 1},
+	}
+
 	for idx, in := range testCasesUint64Map {
 		if in == nil {
 			continue
@@ -469,9 +413,9 @@ func TestUint64Map(t *testing.T) {
 	}
 }
 
-var testCasesFloat32ValueSlice = [][]*float32{}
-
 func TestFloat32ValueSlice(t *testing.T) {
+	testCasesFloat32ValueSlice := [][]*float32{}
+
 	for idx, in := range testCasesFloat32ValueSlice {
 		if in == nil {
 			continue
@@ -485,11 +429,11 @@ func TestFloat32ValueSlice(t *testing.T) {
 	}
 }
 
-var testCasesFloat32Map = []map[string]float32{
-	{"a": 3, "b": 2, "c": 1},
-}
-
 func TestFloat32Map(t *testing.T) {
+	testCasesFloat32Map := []map[string]float32{
+		{"a": 3, "b": 2, "c": 1},
+	}
+
 	for idx, in := range testCasesFloat32Map {
 		if in == nil {
 			continue
@@ -503,9 +447,9 @@ func TestFloat32Map(t *testing.T) {
 	}
 }
 
-var testCasesFloat64ValueSlice = [][]*float64{}
-
 func TestFloat64ValueSlice(t *testing.T) {
+	testCasesFloat64ValueSlice := [][]*float64{}
+
 	for idx, in := range testCasesFloat64ValueSlice {
 		if in == nil {
 			continue
@@ -518,11 +462,11 @@ func TestFloat64ValueSlice(t *testing.T) {
 	}
 }
 
-var testCasesFloat64Map = []map[string]float64{
-	{"a": 3, "b": 2, "c": 1},
-}
-
 func TestFloat64Map(t *testing.T) {
+	testCasesFloat64Map := []map[string]float64{
+		{"a": 3, "b": 2, "c": 1},
+	}
+
 	for idx, in := range testCasesFloat64Map {
 		if in == nil {
 			continue
@@ -535,11 +479,11 @@ func TestFloat64Map(t *testing.T) {
 	}
 }
 
-var testCasesTimeSlice = [][]time.Time{
-	{time.Now(), time.Now().AddDate(100, 0, 0)},
-}
-
 func TestTimeSlice(t *testing.T) {
+	testCasesTimeSlice := [][]time.Time{
+		{time.Now(), time.Now().AddDate(100, 0, 0)},
+	}
+
 	for idx, in := range testCasesTimeSlice {
 		if in == nil {
 			continue
@@ -552,11 +496,11 @@ func TestTimeSlice(t *testing.T) {
 	}
 }
 
-var testCasesTimeValueSlice = [][]*time.Time{
-	{Time(time.Now()), Time(time.Now().AddDate(100, 0, 0))},
-}
-
 func TestTimeValueSlice(t *testing.T) {
+	testCasesTimeValueSlice := [][]*time.Time{
+		{Time(time.Now()), Time(time.Now().AddDate(100, 0, 0))},
+	}
+
 	for idx, in := range testCasesTimeValueSlice {
 		if in == nil {
 			continue
@@ -569,11 +513,11 @@ func TestTimeValueSlice(t *testing.T) {
 	}
 }
 
-var testCasesTimeMap = []map[string]time.Time{
-	{"a": time.Now().AddDate(-100, 0, 0), "b": time.Now()},
-}
-
 func TestTimeMap(t *testing.T) {
+	testCasesTimeMap := []map[string]time.Time{
+		{"a": time.Now().AddDate(-100, 0, 0), "b": time.Now()},
+	}
+
 	for idx, in := range testCasesTimeMap {
 		if in == nil {
 			continue
@@ -586,11 +530,11 @@ func TestTimeMap(t *testing.T) {
 	}
 }
 
-var testCasesInt32Slice = [][]int32{
-	{1, 2, 3, 4},
-}
-
 func TestInt32Slice(t *testing.T) {
+	testCasesInt32Slice := [][]int32{
+		{1, 2, 3, 4},
+	}
+
 	for idx, in := range testCasesInt32Slice {
 		if in == nil {
 			continue
@@ -603,11 +547,11 @@ func TestInt32Slice(t *testing.T) {
 	}
 }
 
-var testCasesInt32ValueSlice = [][]*int32{
-	{Int32(1), Int32(2), Int32(3), Int32(4)},
-}
-
 func TestInt32ValueSlice(t *testing.T) {
+	testCasesInt32ValueSlice := [][]*int32{
+		{Int32(1), Int32(2), Int32(3), Int32(4)},
+	}
+
 	for idx, in := range testCasesInt32ValueSlice {
 		if in == nil {
 			continue
@@ -620,11 +564,11 @@ func TestInt32ValueSlice(t *testing.T) {
 	}
 }
 
-var testCasesInt32Map = []map[string]int32{
-	{"a": 3, "b": 2, "c": 1},
-}
-
 func TestInt32Map(t *testing.T) {
+	testCasesInt32Map := []map[string]int32{
+		{"a": 3, "b": 2, "c": 1},
+	}
+
 	for idx, in := range testCasesInt32Map {
 		if in == nil {
 			continue
@@ -637,11 +581,11 @@ func TestInt32Map(t *testing.T) {
 	}
 }
 
-var testCasesUint32Slice = [][]uint32{
-	{1, 2, 3, 4},
-}
-
 func TestUint32Slice(t *testing.T) {
+	testCasesUint32Slice := [][]uint32{
+		{1, 2, 3, 4},
+	}
+
 	for idx, in := range testCasesUint32Slice {
 		if in == nil {
 			continue
@@ -654,11 +598,11 @@ func TestUint32Slice(t *testing.T) {
 	}
 }
 
-var testCasesUint32ValueSlice = [][]*uint32{
-	{Uint32(1), Uint32(2), Uint32(3), Uint32(4)},
-}
-
 func TestUint32ValueSlice(t *testing.T) {
+	testCasesUint32ValueSlice := [][]*uint32{
+		{Uint32(1), Uint32(2), Uint32(3), Uint32(4)},
+	}
+
 	for idx, in := range testCasesUint32ValueSlice {
 		if in == nil {
 			continue
@@ -671,11 +615,11 @@ func TestUint32ValueSlice(t *testing.T) {
 	}
 }
 
-var testCasesUint32Map = []map[string]uint32{
-	{"a": 3, "b": 2, "c": 1},
-}
-
 func TestUint32Map(t *testing.T) {
+	testCasesUint32Map := []map[string]uint32{
+		{"a": 3, "b": 2, "c": 1},
+	}
+
 	for idx, in := range testCasesUint32Map {
 		if in == nil {
 			continue
@@ -688,9 +632,9 @@ func TestUint32Map(t *testing.T) {
 	}
 }
 
-var testCasesString = []string{"a", "b", "c", "d", "e", ""}
-
 func TestStringValue(t *testing.T) {
+	testCasesString := []string{"a", "b", "c", "d", "e", ""}
+
 	for idx, in := range testCasesString {
 		out := String(in)
 		assertValues(t, in, out, true, idx)
@@ -701,9 +645,9 @@ func TestStringValue(t *testing.T) {
 	assert.Zerof(t, StringValue(nil), "expected conversion from nil to return zero value")
 }
 
-var testCasesBool = []bool{true, false}
-
 func TestBoolValue(t *testing.T) {
+	testCasesBool := []bool{true, false}
+
 	for idx, in := range testCasesBool {
 		out := Bool(in)
 		assertValues(t, in, out, true, idx)
@@ -714,9 +658,9 @@ func TestBoolValue(t *testing.T) {
 	assert.Zerof(t, BoolValue(nil), "expected conversion from nil to return zero value")
 }
 
-var testCasesInt = []int{1, 2, 3, 0}
-
 func TestIntValue(t *testing.T) {
+	testCasesInt := []int{1, 2, 3, 0}
+
 	for idx, in := range testCasesInt {
 		out := Int(in)
 		assertValues(t, in, out, true, idx)
@@ -727,9 +671,9 @@ func TestIntValue(t *testing.T) {
 	assert.Zerof(t, IntValue(nil), "expected conversion from nil to return zero value")
 }
 
-var testCasesInt32 = []int32{1, 2, 3, 0}
-
 func TestInt32Value(t *testing.T) {
+	testCasesInt32 := []int32{1, 2, 3, 0}
+
 	for idx, in := range testCasesInt32 {
 		out := Int32(in)
 		assertValues(t, in, out, true, idx)
@@ -740,9 +684,9 @@ func TestInt32Value(t *testing.T) {
 	assert.Zerof(t, Int32Value(nil), "expected conversion from nil to return zero value")
 }
 
-var testCasesInt64 = []int64{1, 2, 3, 0}
-
 func TestInt64Value(t *testing.T) {
+	testCasesInt64 := []int64{1, 2, 3, 0}
+
 	for idx, in := range testCasesInt64 {
 		out := Int64(in)
 		assertValues(t, in, out, true, idx)
@@ -753,9 +697,9 @@ func TestInt64Value(t *testing.T) {
 	assert.Zerof(t, Int64Value(nil), "expected conversion from nil to return zero value")
 }
 
-var testCasesUint = []uint{1, 2, 3, 0}
-
 func TestUintValue(t *testing.T) {
+	testCasesUint := []uint{1, 2, 3, 0}
+
 	for idx, in := range testCasesUint {
 		out := Uint(in)
 		assertValues(t, in, out, true, idx)
@@ -766,9 +710,9 @@ func TestUintValue(t *testing.T) {
 	assert.Zerof(t, UintValue(nil), "expected conversion from nil to return zero value")
 }
 
-var testCasesUint32 = []uint32{1, 2, 3, 0}
-
 func TestUint32Value(t *testing.T) {
+	testCasesUint32 := []uint32{1, 2, 3, 0}
+
 	for idx, in := range testCasesUint32 {
 		out := Uint32(in)
 		assertValues(t, in, out, true, idx)
@@ -779,9 +723,9 @@ func TestUint32Value(t *testing.T) {
 	assert.Zerof(t, Uint32Value(nil), "expected conversion from nil to return zero value")
 }
 
-var testCasesUint64 = []uint64{1, 2, 3, 0}
-
 func TestUint64Value(t *testing.T) {
+	testCasesUint64 := []uint64{1, 2, 3, 0}
+
 	for idx, in := range testCasesUint64 {
 		out := Uint64(in)
 		assertValues(t, in, out, true, idx)
@@ -792,9 +736,9 @@ func TestUint64Value(t *testing.T) {
 	assert.Zerof(t, Uint64Value(nil), "expected conversion from nil to return zero value")
 }
 
-var testCasesFloat32 = []float32{1, 2, 3, 0}
-
 func TestFloat32Value(t *testing.T) {
+	testCasesFloat32 := []float32{1, 2, 3, 0}
+
 	for idx, in := range testCasesFloat32 {
 		out := Float32(in)
 		assertValues(t, in, out, true, idx)
@@ -806,9 +750,9 @@ func TestFloat32Value(t *testing.T) {
 	assert.Zerof(t, Float32Value(nil), "expected conversion from nil to return zero value")
 }
 
-var testCasesFloat64 = []float64{1, 2, 3, 0}
-
 func TestFloat64Value(t *testing.T) {
+	testCasesFloat64 := []float64{1, 2, 3, 0}
+
 	for idx, in := range testCasesFloat64 {
 		out := Float64(in)
 		assertValues(t, in, out, true, idx)
@@ -819,11 +763,11 @@ func TestFloat64Value(t *testing.T) {
 	assert.Zerof(t, Float64Value(nil), "expected conversion from nil to return zero value")
 }
 
-var testCasesTime = []time.Time{
-	time.Now().AddDate(-100, 0, 0), time.Now(),
-}
-
 func TestTimeValue(t *testing.T) {
+	testCasesTime := []time.Time{
+		time.Now().AddDate(-100, 0, 0), time.Now(),
+	}
+
 	for idx, in := range testCasesTime {
 		out := Time(in)
 		assertValues(t, in, out, true, idx)
@@ -832,4 +776,65 @@ func TestTimeValue(t *testing.T) {
 		assertValues(t, in, out2, false, idx)
 	}
 	assert.Zerof(t, TimeValue(nil), "expected conversion from nil to return zero value")
+}
+
+func assertSingleValue(t *testing.T, inElem, elem reflect.Value, expectPointer bool, idx int) {
+	require.Equalf(t,
+		expectPointer, (elem.Kind() == reflect.Ptr),
+		"unexpected expectPointer=%t value type", expectPointer,
+	)
+
+	if inElem.Kind() == reflect.Ptr && !inElem.IsNil() {
+		inElem = reflect.Indirect(inElem)
+	}
+
+	if elem.Kind() == reflect.Ptr && !elem.IsNil() {
+		elem = reflect.Indirect(elem)
+	}
+
+	require.Truef(t,
+		(elem.Kind() == reflect.Ptr && elem.IsNil()) ||
+			IsZero(elem.Interface()) == (inElem.Kind() == reflect.Ptr && inElem.IsNil()) ||
+			IsZero(inElem.Interface()),
+		"unexpected nil pointer at idx %d", idx,
+	)
+
+	if !((elem.Kind() == reflect.Ptr && elem.IsNil()) || IsZero(elem.Interface())) {
+		require.IsTypef(t, inElem.Interface(), elem.Interface(), "Expected in/out to match types")
+		assert.EqualValuesf(t, inElem.Interface(), elem.Interface(), "Unexpected value at idx %d: %v", idx, elem.Interface())
+	}
+}
+
+// assertValues checks equivalent representation pointer vs values for single var, slices and maps
+func assertValues(t *testing.T, in, out interface{}, expectPointer bool, idx int) {
+	vin := reflect.ValueOf(in)
+	vout := reflect.ValueOf(out)
+
+	switch vin.Kind() { //nolint:exhaustive
+	case reflect.Slice, reflect.Map:
+		require.Equalf(t, vin.Kind(), vout.Kind(), "Unexpected output type at idx %d", idx)
+		require.Equalf(t, vin.Len(), vout.Len(), "Unexpected len at idx %d", idx)
+
+		var elem, inElem reflect.Value
+		for i := 0; i < vin.Len(); i++ {
+			switch vin.Kind() { //nolint:exhaustive
+			case reflect.Slice:
+				elem = vout.Index(i)
+				inElem = vin.Index(i)
+			case reflect.Map:
+				keys := vin.MapKeys()
+				elem = vout.MapIndex(keys[i])
+				inElem = vout.MapIndex(keys[i])
+			default:
+			}
+
+			assertSingleValue(t, inElem, elem, expectPointer, idx)
+		}
+
+	default:
+		inElem := vin
+		elem := vout
+
+		assertSingleValue(t, inElem, elem, expectPointer, idx)
+	}
 }

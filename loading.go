@@ -87,7 +87,7 @@ func LoadStrategy(pth string, local, remote func(string) ([]byte, error)) func(s
 	}
 
 	return func(p string) ([]byte, error) {
-		upth, err := pathUnescape(p)
+		upth, err := url.PathUnescape(p)
 		if err != nil {
 			return nil, err
 		}
