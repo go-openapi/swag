@@ -2,7 +2,7 @@
 
 [![Slack Status](https://slackin.goswagger.io/badge.svg)](https://slackin.goswagger.io)
 [![license](http://img.shields.io/badge/license-Apache%20v2-orange.svg)](https://raw.githubusercontent.com/go-openapi/swag/master/LICENSE)
-[![GoDoc](https://pkg.go.dev/github.com/go-openapi/swag?status.svg)](http://pkg.go.dev.org/github.com/go-openapi/swag)
+[![GoDoc](https://pkg.go.dev/github.com/go-openapi/swag?status.svg)](http://pkg.go.dev/github.com/go-openapi/swag)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-openapi/swag)](https://goreportcard.com/report/github.com/go-openapi/swag)
 
 Contains a bunch of helper functions for go-openapi and go-swagger projects.
@@ -19,4 +19,5 @@ You may also use it standalone for your projects.
 
 This repo has only few dependencies outside of the standard library:
 
-* YAML utilities depend on gopkg.in/yaml.v3
+* YAML utilities depend on `gopkg.in/yaml.v3`
+* `github.com/mailru/easyjson v0.7.7`
