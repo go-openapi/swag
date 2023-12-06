@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func makeDirStructure(tgt string) (string, string, error) {
@@ -99,19 +100,15 @@ func TestFindPackage(t *testing.T) {
 //nolint:unparam
 func assertPath(t testing.TB, expected, actual string) bool {
 	fp, err := filepath.EvalSymlinks(expected)
-	if assert.NoError(t, err) {
-		return assert.Equal(t, fp, actual)
-	}
-	return true
+	require.NoError(t, err)
+
+	return assert.Equal(t, fp, actual)
 }
 
 func TestFullGOPATH(t *testing.T) {
 	os.Unsetenv(GOPATHKey)
 	ngp := "/some/where:/other/place"
-	os.Setenv(GOPATHKey, ngp)
-
-	ogp := os.Getenv(GOPATHKey)
-	defer os.Setenv(GOPATHKey, ogp)
+	t.Setenv(GOPATHKey, ngp)
 
 	expected := ngp + ":" + runtime.GOROOT()
 	assert.Equal(t, expected, FullGoSearchPath())

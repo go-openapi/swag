@@ -170,13 +170,13 @@ func TestJSONConcatenation(t *testing.T) {
 }
 
 type SharedCounters struct {
-	Counter1 int64 `json:"Counter1,omitempty"`
-	Counter2 int64 `json:"Counter2:,omitempty"`
+	Counter1 int64 `json:"counter1,omitempty"`
+	Counter2 int64 `json:"counter2:,omitempty"`
 }
 
 type AggregationObject struct {
 	SharedCounters
-	Count int64 `json:"Count,omitempty"`
+	Count int64 `json:"count,omitempty"`
 }
 
 func (m *AggregationObject) UnmarshalJSON(raw []byte) error {
@@ -189,7 +189,7 @@ func (m *AggregationObject) UnmarshalJSON(raw []byte) error {
 
 	// now for regular properties
 	var propsAggregationObject struct {
-		Count int64 `json:"Count,omitempty"`
+		Count int64 `json:"count,omitempty"`
 	}
 	if err := ReadJSON(raw, &propsAggregationObject); err != nil {
 		return err
@@ -211,7 +211,7 @@ func (m AggregationObject) MarshalJSON() ([]byte, error) {
 
 	// now for regular properties
 	var propsAggregationObject struct {
-		Count int64 `json:"Count,omitempty"`
+		Count int64 `json:"count,omitempty"`
 	}
 	propsAggregationObject.Count = m.Count
 
@@ -241,7 +241,7 @@ func TestIssue2350(t *testing.T) {
 	require.NoError(t, obj11.UnmarshalJSON(rtjson))
 	require.Equal(t, obj, obj11)
 
-	jsons := `{"Counter1":123,"Counter2:":456,"Count":999}`
+	jsons := `{"counter1":123,"counter2:":456,"count":999}`
 	var obj2 AggregationObject
 	require.NoError(t, ReadJSON([]byte(jsons), &obj2))
 	require.Equal(t, AggregationObject{SharedCounters: SharedCounters{Counter1: 123, Counter2: 456}, Count: 999}, obj2)

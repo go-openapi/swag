@@ -71,9 +71,9 @@ name: a string value
 	_ = yaml.Unmarshal([]byte(sd), &data)
 
 	d, err := YAMLToJSON(data)
-	if assert.NoError(t, err) {
-		assert.Equal(t, `{"1":"the int key value","name":"a string value","y":"some value"}`, string(d))
-	}
+	require.NoError(t, err)
+	require.NotNil(t, d)
+	assert.Equal(t, `{"1":"the int key value","name":"a string value","y":"some value"}`, string(d))
 
 	ns := []*yaml.Node{
 		{
@@ -89,8 +89,8 @@ name: a string value
 	}
 	data.Content[0].Content = append(data.Content[0].Content, ns...)
 	d, err = YAMLToJSON(data)
-	assert.Error(t, err)
-	assert.Nil(t, d)
+	require.Error(t, err)
+	require.Nil(t, d)
 
 	data.Content[0].Content = data.Content[0].Content[:len(data.Content[0].Content)-2]
 
@@ -119,7 +119,7 @@ name: a string value
 	data.Content[0].Content = append(data.Content[0].Content, tag...)
 
 	d, err = YAMLToJSON(data)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `{"1":"the int key value","name":"a string value","y":"some value","tag":{"name":"tag name"}}`, string(d))
 
 	tag[1].Content = []*yaml.Node{
@@ -136,33 +136,31 @@ name: a string value
 	}
 
 	d, err = YAMLToJSON(data)
-	assert.Error(t, err)
-	assert.Nil(t, d)
+	require.Error(t, err)
+	require.Nil(t, d)
 
 	var lst []interface{}
 	lst = append(lst, "hello")
 
 	d, err = YAMLToJSON(lst)
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, d)
 	assert.Equal(t, []byte(`["hello"]`), []byte(d))
 
 	lst = append(lst, data)
 
 	d, err = YAMLToJSON(lst)
-	assert.Error(t, err)
-	assert.Nil(t, d)
-
-	// _, err := yamlToJSON(failJSONMarhal{})
-	// assert.Error(t, err)
+	require.Error(t, err)
+	require.Nil(t, d)
 
 	_, err = BytesToYAMLDoc([]byte("- name: hello\n"))
-	assert.Error(t, err)
+	require.Error(t, err)
 
 	dd, err := BytesToYAMLDoc([]byte("description: 'object created'\n"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	d, err = YAMLToJSON(dd)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, json.RawMessage(`{"description":"object created"}`), d)
 }
 
@@ -173,32 +171,29 @@ var yamlPestoreServer = func(rw http.ResponseWriter, r *http.Request) {
 
 func TestWithYKey(t *testing.T) {
 	doc, err := BytesToYAMLDoc([]byte(withYKey))
-	if assert.NoError(t, err) {
-		_, err := YAMLToJSON(doc)
-		if assert.NoError(t, err) {
-			doc, err := BytesToYAMLDoc([]byte(withQuotedYKey))
-			if assert.NoError(t, err) {
-				jsond, err := YAMLToJSON(doc)
-				if assert.NoError(t, err) {
-					var yt struct {
-						Definitions struct {
-							Viewbox struct {
-								Properties struct {
-									Y struct {
-										Type string `json:"type"`
-									} `json:"y"`
-								} `json:"properties"`
-							} `json:"viewbox"`
-						} `json:"definitions"`
-					}
-					if assert.NoError(t, json.Unmarshal(jsond, &yt)) {
-						assert.Equal(t, "integer", yt.Definitions.Viewbox.Properties.Y.Type)
-					}
-				}
-			}
-		}
+	require.NoError(t, err)
 
+	_, err = YAMLToJSON(doc)
+	require.NoError(t, err)
+
+	doc, err = BytesToYAMLDoc([]byte(withQuotedYKey))
+	require.NoError(t, err)
+	jsond, err := YAMLToJSON(doc)
+	require.NoError(t, err)
+
+	var yt struct {
+		Definitions struct {
+			Viewbox struct {
+				Properties struct {
+					Y struct {
+						Type string `json:"type"`
+					} `json:"y"`
+				} `json:"properties"`
+			} `json:"viewbox"`
+		} `json:"definitions"`
 	}
+	require.NoError(t, json.Unmarshal(jsond, &yt))
+	assert.Equal(t, "integer", yt.Definitions.Viewbox.Properties.Y.Type)
 }
 
 func TestMapKeyTypes(t *testing.T) {
@@ -215,7 +210,7 @@ func TestMapKeyTypes(t *testing.T) {
 		uint64(12345678910): "uint64",
 	}
 	_, err := YAMLToJSON(dm)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 const fixtures2224 = `definitions:
