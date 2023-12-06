@@ -2,7 +2,7 @@
 
 [![Slack Status](https://slackin.goswagger.io/badge.svg)](https://slackin.goswagger.io)
 [![license](http://img.shields.io/badge/license-Apache%20v2-orange.svg)](https://raw.githubusercontent.com/go-openapi/swag/master/LICENSE)
-[![GoDoc](https://pkg.go.dev/github.com/go-openapi/swag?status.svg)](http://pkg.go.dev/github.com/go-openapi/swag)
+[![Go Reference](https://pkg.go.dev/badge/github.com/go-openapi/swag.svg)](https://pkg.go.dev/github.com/go-openapi/swag)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-openapi/swag)](https://goreportcard.com/report/github.com/go-openapi/swag)
 
 Contains a bunch of helper functions for go-openapi and go-swagger projects.
