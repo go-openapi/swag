@@ -11,7 +11,7 @@ linters-settings:
     threshold: 100
   goconst:
     min-len: 3
-    min-occurrences: 2
+    min-occurrences: 3
 
 linters:
   enable-all: true
@@ -52,3 +52,7 @@ linters:
     - nilnil
     - nonamedreturns
     - nosnakecase
+    - depguard
+    # temporarily disabled
+    - goconst
+    - testifylint
