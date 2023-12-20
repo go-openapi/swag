@@ -60,6 +60,21 @@ tag:
 
 }
 
+func TestJSONToYAMLWithNull(t *testing.T) {
+	const (
+		jazon    = `{"1":"the int key value","name":null,"y":"some value"}`
+		expected = `"1": the int key value
+name: null
+y: some value
+`
+	)
+	var data JSONMapSlice
+	require.NoError(t, json.Unmarshal([]byte(jazon), &data))
+	ny, err := data.MarshalYAML()
+	require.NoError(t, err)
+	assert.Equal(t, expected, string(ny.([]byte)))
+}
+
 func TestYAMLToJSON(t *testing.T) {
 
 	sd := `---
