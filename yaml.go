@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"strconv"
 
 	"github.com/mailru/easyjson/jlexer"
@@ -245,7 +246,27 @@ func (s JSONMapSlice) MarshalYAML() (interface{}, error) {
 	return yaml.Marshal(&n)
 }
 
+func isNil(input interface{}) bool {
+	if input == nil {
+		return true
+	}
+	kind := reflect.TypeOf(input).Kind()
+	switch kind { //nolint:exhaustive
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Chan:
+		return reflect.ValueOf(input).IsNil()
+	default:
+		return false
+	}
+}
+
 func json2yaml(item interface{}) (*yaml.Node, error) {
+	if isNil(item) {
+		return &yaml.Node{
+			Kind:  yaml.ScalarNode,
+			Value: "null",
+		}, nil
+	}
+
 	switch val := item.(type) {
 	case JSONMapSlice:
 		var n yaml.Node
@@ -318,9 +339,9 @@ func json2yaml(item interface{}) (*yaml.Node, error) {
 			Tag:   yamlBoolScalar,
 			Value: strconv.FormatBool(val),
 		}, nil
+	default:
+		return nil, fmt.Errorf("unhandled type: %T", val)
 	}
-
-	return nil, nil //nolint:nilnil
 }
 
 // JSONMapItem represents the value of a key in a JSON object held by JSONMapSlice
