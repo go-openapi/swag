@@ -75,8 +75,30 @@ y: some value
 	assert.Equal(t, expected, string(ny.([]byte)))
 }
 
-func TestYAMLToJSON(t *testing.T) {
+func TestMarshalYAML(t *testing.T) {
+	t.Run("marshalYAML should be deterministic", func(t *testing.T) {
+		const (
+			jazon    = `{"1":"x","2":null,"3":{"a":1,"b":2,"c":3}}`
+			expected = `"1": x
+"2": null
+"3":
+    a: !!float 1
+    b: !!float 2
+    c: !!float 3
+`
+		)
+		const iterations = 10
+		for n := 0; n < iterations; n++ {
+			var data JSONMapSlice
+			require.NoError(t, json.Unmarshal([]byte(jazon), &data))
+			ny, err := data.MarshalYAML()
+			require.NoError(t, err)
+			assert.Equal(t, expected, string(ny.([]byte)))
+		}
+	})
+}
 
+func TestYAMLToJSON(t *testing.T) {
 	sd := `---
 1: the int key value
 name: a string value
