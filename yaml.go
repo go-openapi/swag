@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strconv"
 
 	"github.com/mailru/easyjson/jlexer"
@@ -286,7 +287,14 @@ func json2yaml(item interface{}) (*yaml.Node, error) {
 	case map[string]interface{}:
 		var n yaml.Node
 		n.Kind = yaml.MappingNode
-		for k, v := range val {
+		keys := make([]string, 0, len(val))
+		for k := range val {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		for _, k := range keys {
+			v := val[k]
 			childNode, err := json2yaml(v)
 			if err != nil {
 				return nil, err
