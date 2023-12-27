@@ -111,6 +111,7 @@ func TestToGoName(t *testing.T) {
 		{"日本語findThingById", "X日本語findThingByID"},
 		{"findTHINGSbyID", "FindTHINGSbyID"},
 		{"x-isAnOptionalHeader0", "XIsAnOptionalHeader0"},
+		{"get$ref", "GetDollarRef"},
 	}
 
 	for _, k := range commonInitialisms.sorted() {
@@ -242,6 +243,7 @@ func TestToFileName(t *testing.T) {
 		{"ELB.HTTPLoadBalancer", "elb_http_load_balancer"},
 		{"elbHTTPLoadBalancer", "elb_http_load_balancer"},
 		{"ELBHTTPLoadBalancer", "elb_http_load_balancer"},
+		{"get$Ref", "get_dollar_ref"},
 	}
 	for _, k := range commonInitialisms.sorted() {
 		samples = append(samples,
@@ -261,6 +263,8 @@ func TestToCommandName(t *testing.T) {
 		{"SampleText", "sample-text"},
 		{"FindThingByID", "find-thing-by-id"},
 		{"elbHTTPLoadBalancer", "elb-http-load-balancer"},
+		{"get$ref", "get-dollar-ref"},
+		{"get!ref", "get-bang-ref"},
 	}
 
 	for _, k := range commonInitialisms.sorted() {
@@ -298,6 +302,8 @@ func TestToJSONName(t *testing.T) {
 		{"SampleText", "sampleText"},
 		{"FindThingByID", "findThingById"},
 		{"elbHTTPLoadBalancer", "elbHttpLoadBalancer"},
+		{"get$ref", "getDollarRef"},
+		{"get!ref", "getBangRef"},
 	}
 
 	for _, k := range commonInitialisms.sorted() {
@@ -426,6 +432,8 @@ func TestCamelize(t *testing.T) {
 		{"elbHTTPLoadBalancer", "Elbhttploadbalancer"},
 		{"ELBHTTPLoadBalancer", "Elbhttploadbalancer"},
 		{"12ab", "12ab"},
+		{"get$Ref", "Get$ref"},
+		{"get!Ref", "Get!ref"},
 	}
 
 	for _, sample := range samples {
@@ -447,6 +455,8 @@ func TestToHumanNameTitle(t *testing.T) {
 		{"ELB.HTTPLoadBalancer", "ELB HTTP Load Balancer"},
 		{"elbHTTPLoadBalancer", "elb HTTP Load Balancer"},
 		{"ELBHTTPLoadBalancer", "ELB HTTP Load Balancer"},
+		{"get$ref", "Get Dollar Ref"},
+		{"get!ref", "Get Bang Ref"},
 	}
 
 	for _, sample := range samples {
@@ -471,6 +481,8 @@ func TestToVarName(t *testing.T) {
 		{"Id", "id"},
 		{"HTTP", "http"},
 		{"A", "a"},
+		{"get$ref", "getDollarRef"},
+		{"get!ref", "getBangRef"},
 	}
 
 	for _, sample := range samples {
@@ -504,6 +516,8 @@ func TestToGoNameUnicode(t *testing.T) {
 		{"abc", "Abc"},
 		{"éabc", "Éabc"},
 		{":éabc", "Éabc"},
+		{"get$ref", "GetDollarRef"},
+		{"get!ref", "GetBangRef"},
 		// TODO: non unicode char
 	}
 
