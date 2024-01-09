@@ -112,6 +112,12 @@ func TestToGoName(t *testing.T) {
 		{"findTHINGSbyID", "FindTHINGSbyID"},
 		{"x-isAnOptionalHeader0", "XIsAnOptionalHeader0"},
 		{"get$ref", "GetDollarRef"},
+		{"éget$ref", "ÉgetDollarRef"},
+		{"日get$ref", "X日getDollarRef"},
+		{"", ""},
+		{"?", ""},
+		{"!", "Bang"},
+		{"", ""},
 	}
 
 	for _, k := range commonInitialisms.sorted() {
@@ -135,26 +141,7 @@ func TestToGoName(t *testing.T) {
 	for _, sample := range samples {
 		result := ToGoName(sample.str)
 		assert.Equal(t, sample.out, result,
-			"ToGoName(%q) == %q but %q", sample.str, sample.out, result)
-	}
-}
-
-func BenchmarkToGoName(b *testing.B) {
-	samples := []string{
-		"sample text",
-		"sample-text",
-		"sample_text",
-		"sampleText",
-		"sample 2 Text",
-		"findThingById",
-		"日本語sample 2 Text",
-		"日本語findThingById",
-		"findTHINGSbyID",
-	}
-	for i := 0; i < b.N; i++ {
-		for _, s := range samples {
-			ToGoName(s)
-		}
+			"ToGoName(%q) == %q but got %q", sample.str, sample.out, result)
 	}
 }
 
@@ -518,6 +505,8 @@ func TestToGoNameUnicode(t *testing.T) {
 		{":éabc", "Éabc"},
 		{"get$ref", "GetDollarRef"},
 		{"get!ref", "GetBangRef"},
+		{"get&ref", "GetAndRef"},
+		{"get|ref", "GetPipeRef"},
 		// TODO: non unicode char
 	}
 
