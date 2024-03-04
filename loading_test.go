@@ -36,7 +36,7 @@ func TestLoadFromHTTP(t *testing.T) {
 	_, err := LoadFromFileOrHTTP("httx://12394:abd")
 	require.Error(t, err)
 
-	serv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+	serv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
 		rw.WriteHeader(http.StatusNotFound)
 	}))
 	defer serv.Close()
@@ -44,7 +44,7 @@ func TestLoadFromHTTP(t *testing.T) {
 	_, err = LoadFromFileOrHTTP(serv.URL)
 	require.Error(t, err)
 
-	ts2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+	ts2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
 		rw.WriteHeader(http.StatusOK)
 		_, _ = rw.Write([]byte("the content"))
 	}))
@@ -137,10 +137,10 @@ func TestLoadHTTPBytes(t *testing.T) {
 }
 
 func TestLoadStrategy(t *testing.T) {
-	loader := func(p string) ([]byte, error) {
+	loader := func(_ string) ([]byte, error) {
 		return []byte(yamlPetStore), nil
 	}
-	remLoader := func(p string) ([]byte, error) {
+	remLoader := func(_ string) ([]byte, error) {
 		return []byte("not it"), nil
 	}
 
@@ -187,7 +187,7 @@ func TestLoadStrategyFile(t *testing.T) {
 			}
 		}
 
-		remLoader := func(p string) ([]byte, error) {
+		remLoader := func(_ string) ([]byte, error) {
 			return []byte(thisIsNotIt), nil
 		}
 

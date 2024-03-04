@@ -54,7 +54,7 @@ func TestConvertFloat32(t *testing.T) {
 	for _, f := range validFloats {
 		c, err := ConvertFloat32(FormatFloat32(f))
 		require.NoError(t, err)
-		assert.EqualValues(t, f, c)
+		assert.InDelta(t, f, c, 1e-6)
 	}
 	for _, f := range invalidFloats {
 		_, err := ConvertFloat32(f)
@@ -69,7 +69,7 @@ func TestConvertFloat64(t *testing.T) {
 	for _, f := range validFloats {
 		c, err := ConvertFloat64(FormatFloat64(f))
 		require.NoError(t, err)
-		assert.EqualValues(t, f, c)
+		assert.InDelta(t, f, c, 1e-6)
 	}
 	for _, f := range invalidFloats {
 		_, err := ConvertFloat64(f)

@@ -201,7 +201,7 @@ name: a string value
 	assert.Equal(t, json.RawMessage(`{"description":"object created"}`), d)
 }
 
-var yamlPestoreServer = func(rw http.ResponseWriter, r *http.Request) {
+var yamlPestoreServer = func(rw http.ResponseWriter, _ *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 	_, _ = rw.Write([]byte(yamlPetStore))
 }
