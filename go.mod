@@ -2,7 +2,7 @@ module github.com/go-openapi/swag
 
 require (
 	github.com/mailru/easyjson v0.7.7
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
