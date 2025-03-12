@@ -146,7 +146,7 @@ func TestLoadStrategy(t *testing.T) {
 
 	ld := LoadStrategy("blah", loader, remLoader)
 	b, _ := ld("")
-	assert.Equal(t, []byte(yamlPetStore), b)
+	assert.YAMLEq(t, yamlPetStore, string(b))
 
 	serv := httptest.NewServer(http.HandlerFunc(yamlPestoreServer))
 	defer serv.Close()

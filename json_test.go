@@ -139,7 +139,10 @@ func TestNameProvider(t *testing.T) {
 
 }
 
+//nolint:testifylint
 func TestJSONConcatenation(t *testing.T) {
+	// we require an exact assertion (with ordering), not just JSON equivalence. Hence: testifylint disabled.
+
 	assert.Nil(t, ConcatJSON())
 	assert.Equal(t, ConcatJSON([]byte(`{"id":1}`)), []byte(`{"id":1}`))
 	assert.Equal(t, ConcatJSON([]byte(`{}`), []byte(`{}`)), []byte(`{}`))

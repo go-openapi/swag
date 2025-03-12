@@ -110,7 +110,7 @@ name: a string value
 	d, err := YAMLToJSON(data)
 	require.NoError(t, err)
 	require.NotNil(t, d)
-	assert.Equal(t, `{"1":"the int key value","name":"a string value","y":"some value"}`, string(d))
+	assert.JSONEq(t, `{"1":"the int key value","name":"a string value","y":"some value"}`, string(d))
 
 	ns := []*yaml.Node{
 		{
@@ -157,7 +157,7 @@ name: a string value
 
 	d, err = YAMLToJSON(data)
 	require.NoError(t, err)
-	assert.Equal(t, `{"1":"the int key value","name":"a string value","y":"some value","tag":{"name":"tag name"}}`, string(d))
+	assert.JSONEq(t, `{"1":"the int key value","name":"a string value","y":"some value","tag":{"name":"tag name"}}`, string(d))
 
 	tag[1].Content = []*yaml.Node{
 		{
@@ -198,7 +198,7 @@ name: a string value
 
 	d, err = YAMLToJSON(dd)
 	require.NoError(t, err)
-	assert.Equal(t, json.RawMessage(`{"description":"object created"}`), d)
+	assert.JSONEq(t, `{"description":"object created"}`, string(d))
 }
 
 var yamlPestoreServer = func(rw http.ResponseWriter, _ *http.Request) {

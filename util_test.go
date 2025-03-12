@@ -15,7 +15,6 @@
 package swag
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -401,7 +400,7 @@ func TestIsZero(t *testing.T) {
 	}
 
 	for _, it := range data {
-		assert.Equal(t, it.Expected, IsZero(it.Data), fmt.Sprintf("%#v", it.Data))
+		assert.Equalf(t, it.Expected, IsZero(it.Data), "expected %#v, but got %#v", it.Expected, it.Data)
 	}
 }
 
