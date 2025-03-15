@@ -12,22 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
+package stringutils
 
-import "mime/multipart"
+import (
+	"slices"
+	"strings"
+)
 
-// File represents an uploaded file.
-type File struct {
-	Data   multipart.File
-	Header *multipart.FileHeader
+// ContainsStrings searches a slice of strings for a case-sensitive match
+//
+// Now equivalent to the standard library [slice.Contains].
+func ContainsStrings(coll []string, item string) bool {
+	return slices.Contains(coll, item)
 }
 
-// Read bytes from the file
-func (f *File) Read(p []byte) (n int, err error) {
-	return f.Data.Read(p)
-}
-
-// Close the file
-func (f *File) Close() error {
-	return f.Data.Close()
+// ContainsStringsCI searches a slice of strings for a case-insensitive match
+func ContainsStringsCI(coll []string, item string) bool {
+	return slices.ContainsFunc(coll, func(e string) bool {
+		return strings.EqualFold(e, item)
+	})
 }

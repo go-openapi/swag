@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
+package jsonname
 
 import (
 	"reflect"
@@ -20,12 +20,15 @@ import (
 	"sync"
 )
 
-// DefaultJSONNameProvider the default cache for types
+// DefaultJSONNameProvider is the default cache for types.
 var DefaultJSONNameProvider = NewNameProvider()
 
 // NameProvider represents an object capable of translating from go property names
-// to json property names
+// to json property names.
+//
 // This type is thread-safe.
+//
+// See [github.com/go-openapi/jsonpointer.Pointer] for an example.
 type NameProvider struct {
 	lock  *sync.Mutex
 	index map[reflect.Type]nameIndex
