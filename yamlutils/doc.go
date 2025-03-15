@@ -12,15 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package yamlutils provides utilities to work with YAML documents.
 package yamlutils
-
-type yamlError string
-
-const (
-	// ErrYAML is an error raised by YAML utilities
-	ErrYAML yamlError = "yaml error"
-)
-
-func (e yamlError) Error() string {
-	return string(e)
-}

@@ -12,15 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package yamlutils
+package fileutils
 
-type yamlError string
+import "mime/multipart"
 
-const (
-	// ErrYAML is an error raised by YAML utilities
-	ErrYAML yamlError = "yaml error"
-)
+// File represents an uploaded file.
+type File struct {
+	Data   multipart.File
+	Header *multipart.FileHeader
+}
 
-func (e yamlError) Error() string {
-	return string(e)
+// Read bytes from the file
+func (f *File) Read(p []byte) (n int, err error) {
+	return f.Data.Read(p)
+}
+
+// Close the file
+func (f *File) Close() error {
+	return f.Data.Close()
 }

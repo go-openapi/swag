@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,15 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package yamlutils
+package swag
 
-type yamlError string
+import (
+	"testing"
 
-const (
-	// ErrYAML is an error raised by YAML utilities
-	ErrYAML yamlError = "yaml error"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func (e yamlError) Error() string {
-	return string(e)
+func TestNetUtilsIface(t *testing.T) {
+	t.Run("deprecated functions should work", func(t *testing.T) {
+		host, port, err := SplitHostPort("localhost:1000")
+		require.NoError(t, err)
+		assert.Equal(t, "localhost", host)
+		assert.Equal(t, 1000, port)
+	})
 }

@@ -18,7 +18,7 @@ import "github.com/go-openapi/swag/jsonutils"
 
 // WriteJSON writes json data.
 //
-// See [jsonutils.WriteJSON]
+// Deprecated: use [jsonutils.WriteJSON] instead.
 func WriteJSON(data interface{}) ([]byte, error) { return jsonutils.WriteJSON(data) }
 
 // ReadJSON reads json data.

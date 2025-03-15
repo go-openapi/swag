@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
+package mangling
 
 import (
 	"sort"
@@ -151,7 +151,7 @@ func maxAllocHeuristic(in [][]rune) int {
 	return maxAlloc
 }
 
-// AddInitialisms add additional initialisms.
+// AddInitialisms adds additional initialisms.
 //
 // This method adds extra words as "initialisms" (i.e. words that won't be camel cased or titled cased),
 // to the existing list of common initialisms (such as ID, HTTP...).

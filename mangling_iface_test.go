@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package yamlutils
+package swag
 
-type yamlError string
+import "testing"
 
-const (
-	// ErrYAML is an error raised by YAML utilities
-	ErrYAML yamlError = "yaml error"
-)
-
-func (e yamlError) Error() string {
-	return string(e)
+func TestManglingIface(t *testing.T) {
+	t.Run("deprecated name mangling functions should work", func(t *testing.T) {
+		// TODO(fred)
+		t.Log("TODO")
+	})
 }
