@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
+package stringutils
 
-import (
-	"strings"
-)
+import "strings"
 
 const (
 	// collectionFormatComma = "csv"
@@ -24,6 +22,8 @@ const (
 	collectionFormatTab   = "tsv"
 	collectionFormatPipe  = "pipes"
 	collectionFormatMulti = "multi"
+
+	collectionFormatDefaultSep = ","
 )
 
 // JoinByFormat joins a string array by a known format (e.g. swagger's collectionFormat attribute):
@@ -47,7 +47,7 @@ func JoinByFormat(data []string, format string) []string {
 	case collectionFormatMulti:
 		return data
 	default:
-		sep = ","
+		sep = collectionFormatDefaultSep
 	}
 	return []string{strings.Join(data, sep)}
 }
@@ -73,7 +73,7 @@ func SplitByFormat(data, format string) []string {
 	case collectionFormatMulti:
 		return nil
 	default:
-		sep = ","
+		sep = collectionFormatDefaultSep
 	}
 	var result []string
 	for _, s := range strings.Split(data, sep) {
@@ -82,31 +82,4 @@ func SplitByFormat(data, format string) []string {
 		}
 	}
 	return result
-}
-
-// ContainsStrings searches a slice of strings for a case-sensitive match
-func ContainsStrings(coll []string, item string) bool {
-	for _, a := range coll {
-		if a == item {
-			return true
-		}
-	}
-	return false
-}
-
-// ContainsStringsCI searches a slice of strings for a case-insensitive match
-func ContainsStringsCI(coll []string, item string) bool {
-	for _, a := range coll {
-		if strings.EqualFold(a, item) {
-			return true
-		}
-	}
-	return false
-}
-
-// CommandLineOptionsGroup represents a group of user-defined command line options
-type CommandLineOptionsGroup struct {
-	ShortDescription string
-	LongDescription  string
-	Options          interface{}
 }

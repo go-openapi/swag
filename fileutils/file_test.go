@@ -12,15 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package yamlutils
+package fileutils
 
-type yamlError string
+import (
+	"io"
+	"testing"
 
-const (
-	// ErrYAML is an error raised by YAML utilities
-	ErrYAML yamlError = "yaml error"
+	"github.com/stretchr/testify/assert"
 )
 
-func (e yamlError) Error() string {
-	return string(e)
+func TestFileImplementsIOReader(t *testing.T) {
+	var file interface{} = &File{}
+	expected := "that File implements io.Reader"
+	assert.Implements(t, new(io.Reader), file, expected)
+}
+
+func TestFileImplementsIOReadCloser(t *testing.T) {
+	var file interface{} = &File{}
+	expected := "that File implements io.ReadCloser"
+	assert.Implements(t, new(io.ReadCloser), file, expected)
 }

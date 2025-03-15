@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
+package fileutils
 
 import (
 	"os"
@@ -21,10 +21,8 @@ import (
 	"strings"
 )
 
-const (
-	// GOPATHKey represents the env key for gopath
-	GOPATHKey = "GOPATH"
-)
+// GOPATHKey represents the env key for gopath
+const GOPATHKey = "GOPATH"
 
 // FindInSearchPath finds a package in a provided lists of paths
 func FindInSearchPath(searchPath, pkg string) string {

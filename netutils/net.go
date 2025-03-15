@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
+package netutils
 
 import (
 	"net"
@@ -20,7 +20,10 @@ import (
 )
 
 // SplitHostPort splits a network address into a host and a port.
-// The port is -1 when there is no port to be found
+//
+// The difference with the standard net.SplitHostPort is that the port is converted to an int.
+//
+// The port is -1 when there is no port to be found.
 func SplitHostPort(addr string) (host string, port int, err error) {
 	h, p, err := net.SplitHostPort(addr)
 	if err != nil {
@@ -34,5 +37,6 @@ func SplitHostPort(addr string) (host string, port int, err error) {
 	if err != nil {
 		return "", -1, err
 	}
+
 	return h, pi, nil
 }

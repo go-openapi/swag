@@ -12,15 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package yamlutils
-
-type yamlError string
-
-const (
-	// ErrYAML is an error raised by YAML utilities
-	ErrYAML yamlError = "yaml error"
-)
-
-func (e yamlError) Error() string {
-	return string(e)
-}
+// Package stringutils exposes helpers to search and process strings.
+package stringutils

@@ -12,5 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package loading provides tools to load a file from http or a local file.
+// Package loading provides tools to load a file from http or from a local file system.
 package loading
