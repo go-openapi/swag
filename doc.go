@@ -22,47 +22,51 @@
 //
 // Here is what is inside:
 //
-// Package [conv]:
+// Module [cmdutils]:
+//
+//   - utilities to work with CLIs
+//
+// Module [conv]:
 //
 //   - convert between value and pointers for builtin types
 //   - convert from string to builtin types (wraps strconv)
 //
-// Package [fileutils]:
+// Module [fileutils]:
 //
 //   - file upload type
 //   - search in path
 //
-// Package [jsonname]:
+// Module [jsonname]:
 //
 //   - json names for go properties
 //
-// Package [jsonutils]:
+// Module [jsonutils]:
 //
 //   - fast json concatenation
 //   - read and write JSON from and to dynamic go data structures
 //
-// Package [loading]:
+// Module [loading]:
 //
 //   - load from file or http
 //
-// Package [mangling]:
+// Module [mangling]:
 //
 //   - name mangling to generate clean identifiers
 //
-// Package [netutils]:
+// Module [netutils]:
 //
 //   - host, port from address
 //
-// Package [stringutils]:
+// Module [stringutils]:
 //
 //   - find string in list
 //   - join/split arrays of query parameters
 //
-// Package [typeutils]:
+// Module [typeutils]:
 //
 //   - check the zero value of any type
 //
-// Package [yamlutils]:
+// Module [yamlutils]:
 //
 //   - converting YAML to JSON
 //   - loading YAML into a dynamic YAML document

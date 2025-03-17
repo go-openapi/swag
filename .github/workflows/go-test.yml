@@ -44,14 +44,29 @@ jobs:
         cache: true
 
     - uses: actions/checkout@v4
-    - name: Run unit tests
+    - name: Run unit tests on all modules in this repo
       shell: bash
-      run: go test -v -race -coverprofile="coverage-${{ matrix.os }}.${{ matrix.go_version }}.out" -covermode=atomic -coverpkg=$(go list)/... ./...
+      run: |
+        # This script runs all tests on all modules and their subpackages.
+        #
+        # NOTES:
+        # * git bash on a windows runner should support GNU find. find flags should be supported by find on macos.
+        # * we don't attempt tricks using go work. Perhaps this will be the official way in future go releases.
+        set -euxo pipefail
+
+        find . -name \*.mod -execdir pwd \; | grep -v "\.git" | sort | uniq | \
+          while read module_dir ; do
+            pushd "${module_dir}"
+            # *.coverage.* pattern is automatically detected by codecov
+            coverprofile="${module_dir##*/}.coverage.${{ matrix.os }}.${{ matrix.go_version }}.out"
+            go test -v -race -coverprofile="${coverprofile}" -covermode=atomic -coverpkg=$(go list)/... ./...
+            popd
+          done
 
     - name: Upload coverage to codecov
       uses: codecov/codecov-action@v5
       with:
-        files: './coverage-${{ matrix.os }}.${{ matrix.go_version }}.out'
+        name: Multi modules aggregated coverage
         flags: '${{ matrix.go_version }}-${{ matrix.os }}'
         fail_ci_if_error: false
         verbose: true
