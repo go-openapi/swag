@@ -128,7 +128,14 @@ func maxAllocHeuristic(in [][]rune) int {
 	return maxAlloc
 }
 
-// AddInitialisms add additional initialisms
+// AddInitialisms add additional initialisms.
+//
+// This method adds extra words as "initialisms" (i.e. words that won't be camel cased or titled cased),
+// to the existing list of common initialisms (such as ID, HTTP...).
+//
+// The list of initialisms is maintained at the package level, so this method can't be used concurrently.
+//
+// It is typically used when initializing a command line utility, such as go-swagger.
 func AddInitialisms(words ...string) {
 	for _, word := range words {
 		// commonInitialisms[upper(word)] = true
