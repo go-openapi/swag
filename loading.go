@@ -15,12 +15,12 @@
 package swag
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -29,26 +29,39 @@ import (
 )
 
 // LoadHTTPTimeout the default timeout for load requests
+//
+// Deprecated: use [LoadingWithTimeout] option instead.
 var LoadHTTPTimeout = 30 * time.Second
 
 // LoadHTTPBasicAuthUsername the username to use when load requests require basic auth
+//
+// Deprecated: use [LoadingWithBasicAuth] option instead.
 var LoadHTTPBasicAuthUsername = ""
 
 // LoadHTTPBasicAuthPassword the password to use when load requests require basic auth
+//
+// Deprecated: use [LoadingWithBasicAuth] option instead.
 var LoadHTTPBasicAuthPassword = ""
 
 // LoadHTTPCustomHeaders an optional collection of custom HTTP headers for load requests
+//
+// Deprecated: use [LoadingWithCustomHeaders] option instead.
 var LoadHTTPCustomHeaders = map[string]string{}
 
 // LoadFromFileOrHTTP loads the bytes from a file or a remote http server based on the path passed in
-func LoadFromFileOrHTTP(pth string) ([]byte, error) {
-	return LoadStrategy(pth, os.ReadFile, loadHTTPBytes(LoadHTTPTimeout))(pth)
+func LoadFromFileOrHTTP(pth string, opts ...LoadingOption) ([]byte, error) {
+	o := loadingOptionsWithDefaults(opts)
+	return LoadStrategy(pth, o.ReadFileFunc(), loadHTTPBytes(opts...), opts...)(pth)
 }
 
 // LoadFromFileOrHTTPWithTimeout loads the bytes from a file or a remote http server based on the path passed in
-// timeout arg allows for per request overriding of the request timeout
-func LoadFromFileOrHTTPWithTimeout(pth string, timeout time.Duration) ([]byte, error) {
-	return LoadStrategy(pth, os.ReadFile, loadHTTPBytes(timeout))(pth)
+// timeout arg allows for per request overriding of the request timeout.
+//
+// Deprecated: use LoadFromFileOrHTTP with the [LoadingWithTimeout] option instead.
+func LoadFromFileOrHTTPWithTimeout(pth string, timeout time.Duration, opts ...LoadingOption) ([]byte, error) {
+	opts = append(opts, LoadingWithTimeout(timeout))
+
+	return LoadFromFileOrHTTP(pth, opts...)
 }
 
 // LoadStrategy returns a loader function for a given path or URI.
@@ -81,7 +94,7 @@ func LoadFromFileOrHTTPWithTimeout(pth string, timeout time.Duration) ([]byte, e
 // - `file://host/folder/file` becomes an UNC path like `\\host\folder\file` (no port specification is supported)
 // - `file:///c:/folder/file` becomes `C:\folder\file`
 // - `file://c:/folder/file` is tolerated (without leading `/`) and becomes `c:\folder\file`
-func LoadStrategy(pth string, local, remote func(string) ([]byte, error)) func(string) ([]byte, error) {
+func LoadStrategy(pth string, local, remote func(string) ([]byte, error), _ ...LoadingOption) func(string) ([]byte, error) {
 	if strings.HasPrefix(pth, "http") {
 		return remote
 	}
@@ -139,19 +152,29 @@ func LoadStrategy(pth string, local, remote func(string) ([]byte, error)) func(s
 	}
 }
 
-func loadHTTPBytes(timeout time.Duration) func(path string) ([]byte, error) {
+func loadHTTPBytes(opts ...LoadingOption) func(path string) ([]byte, error) {
+	o := loadingOptionsWithDefaults(opts)
+
 	return func(path string) ([]byte, error) {
-		client := &http.Client{Timeout: timeout}
-		req, err := http.NewRequest(http.MethodGet, path, nil) //nolint:noctx
+		client := o.client
+		timeoutCtx := context.Background()
+		var cancel func()
+
+		if o.httpTimeout > 0 {
+			timeoutCtx, cancel = context.WithTimeout(timeoutCtx, o.httpTimeout)
+			defer cancel()
+		}
+
+		req, err := http.NewRequestWithContext(timeoutCtx, http.MethodGet, path, nil)
 		if err != nil {
 			return nil, err
 		}
 
-		if LoadHTTPBasicAuthUsername != "" && LoadHTTPBasicAuthPassword != "" {
-			req.SetBasicAuth(LoadHTTPBasicAuthUsername, LoadHTTPBasicAuthPassword)
+		if o.basicAuthUsername != "" && o.basicAuthPassword != "" {
+			req.SetBasicAuth(o.basicAuthUsername, o.basicAuthPassword)
 		}
 
-		for key, val := range LoadHTTPCustomHeaders {
+		for key, val := range o.customHeaders {
 			req.Header.Set(key, val)
 		}
 
