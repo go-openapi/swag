@@ -157,16 +157,12 @@ func loadHTTPBytes(opts ...LoadingOption) func(path string) ([]byte, error) {
 
 	return func(path string) ([]byte, error) {
 		client := o.client
-		var (
-			timeoutCtx context.Context
-			cancel     func()
-		)
+		timeoutCtx := context.Background()
+		var cancel func()
 
 		if o.httpTimeout > 0 {
-			timeoutCtx, cancel = context.WithTimeout(context.Background(), o.httpTimeout)
+			timeoutCtx, cancel = context.WithTimeout(timeoutCtx, o.httpTimeout)
 			defer cancel()
-		} else {
-			timeoutCtx = context.Background()
 		}
 
 		req, err := http.NewRequestWithContext(timeoutCtx, http.MethodGet, path, nil)
