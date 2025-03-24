@@ -247,9 +247,8 @@ func ToGoName(name string) string {
 
 	// check if not starting with a letter, upper case
 	firstPart := lexemes[0].GetUnsafeGoName()
-	if lexemes[0].IsInitialism() {
-		firstPart = upper(firstPart)
-	}
+
+	// NOTE: no longer forcing the first part to be fully upper-cased
 
 	if c := firstPart[0]; c < utf8.RuneSelf {
 		// ASCII
@@ -272,10 +271,6 @@ func ToGoName(name string) string {
 			result.WriteString(prefixFunc(name, firstPart))
 		case !unicode.IsUpper(firstRune):
 			result.WriteString(prefixFunc(name, firstPart))
-			/*
-				result.WriteRune(unicode.ToUpper(firstRune))
-				result.WriteString(firstPart[offset:])
-			*/
 		default:
 			result.WriteString(firstPart)
 		}
@@ -284,10 +279,9 @@ func ToGoName(name string) string {
 	for _, lexem := range lexemes[1:] {
 		goName := lexem.GetUnsafeGoName()
 
-		// to support old behavior
-		if lexem.IsInitialism() {
-			goName = upper(goName)
-		}
+		// NOTE: no longer forcing initialism parts to be fully upper-cased:
+		// * pluralized initialism preserve their trailing "s"
+		// * mixed-cased initialisms, such as IPv4, are preserved
 		result.WriteString(goName)
 	}
 

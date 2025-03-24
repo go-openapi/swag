@@ -26,6 +26,7 @@ type (
 		initialisms              []string
 		initialismsRunes         [][]rune
 		initialismsUpperCased    [][]rune // initialisms cached in their trimmed, upper-cased version
+		initialismsPluralForm    []pluralForm
 		postSplitInitialismCheck bool
 	}
 
@@ -35,6 +36,7 @@ type (
 		body       []rune
 		start, end int
 		complete   bool
+		hasPlural  pluralForm
 	}
 	initialismMatches []initialismMatch
 )
@@ -149,6 +151,7 @@ func newSplitter(options ...splitterOption) splitter {
 		initialisms:              initialisms,
 		initialismsRunes:         initialismsRunes,
 		initialismsUpperCased:    initialismsUpperCased,
+		initialismsPluralForm:    initialismsPluralForm,
 	}
 
 	for _, option := range options {
@@ -242,25 +245,68 @@ func (s splitter) gatherInitialismMatches(nameRunes []rune) *initialismMatches {
 			for _, match := range *matches {
 				if keepCompleteMatch := match.complete; keepCompleteMatch {
 					*newMatches = append(*newMatches, match)
+
+					// the match is complete: keep it then move on to next rune
 					continue
 				}
 
-				// drop failed match
 				currentMatchRune := match.body[currentRunePosition-match.start]
 				if currentMatchRune != currentRune {
+					// failed match, move on to next rune
 					continue
 				}
 
 				// try to complete ongoing match
 				if currentRunePosition-match.start == len(match.body)-1 {
 					// we are close; the next step is to check the symbol ahead
-					// if it is a small letter, then it is not the end of match
-					// but beginning of the next word
+					// if it is a lowercase letter, then it is not the end of match
+					// but the beginning of the next word.
+					//
+					// NOTE(fredbi): this heuristic sometimes leads to counterintuitive splits and
+					// perhaps (not sure yet) we should check against case _alternance_.
+					//
+					// Example:
+					//
+					// In the current version, in the sentence "IDS initialism", "ID" is recognized as an initialism,
+					// leading to a split like "id_s_initialism" (or IDSInitialism),
+					// whereas in the sentence "IDx initialism", it is not and produces something like
+					// "i_d_x_initialism" (or IDxInitialism). The generated file name is not great.
+					//
+					// Both go identifiers are tolerated by linters.
+					//
+					// Notice that the slightly different input "IDs initialism" is correctly detected
+					// as a pluralized initialism and produces something like "ids_initialism" (or IDsInitialism).
 
 					if currentRunePosition < len(nameRunes)-1 {
 						nextRune := nameRunes[currentRunePosition+1]
+
+						// recognize a plural form for this initialism (only simple pluralization is supported)
+						if nextRune == 's' && match.hasPlural == simplePlural {
+							// detected a pluralized initialism
+							match.body = append(match.body, nextRune)
+							currentRunePosition++
+							if currentRunePosition < len(nameRunes)-1 {
+								nextRune = nameRunes[currentRunePosition+1]
+								if newWord := unicode.IsLower(nextRune); newWord {
+									// it is the start of a new word.
+									// Match is only partial and the initialism is not recognized : move on
+									continue
+								}
+							}
+
+							// this is a pluralized match: keep it
+							match.complete = true
+							match.hasPlural = simplePlural
+							match.end = currentRunePosition
+							*newMatches = append(*newMatches, match)
+
+							// match is complete: keep it then move on to next rune
+							continue
+						}
+
 						if newWord := unicode.IsLower(nextRune); newWord {
-							// oh ok, it was the start of a new word
+							// it is the start of a new word
+							// Match is only partial and the initialism is not recognized : move on
 							continue
 						}
 					}
@@ -269,18 +315,20 @@ func (s splitter) gatherInitialismMatches(nameRunes []rune) *initialismMatches {
 					match.end = currentRunePosition
 				}
 
+				// append the ongoing matching attempt (not necessarily complete)
 				*newMatches = append(*newMatches, match)
 			}
 		}
 
 		// check for new initialism matches
 		for i := range s.initialisms {
-			initialismRunes := s.initialismsRunes[i]
-			if initialismRunes[0] == currentRune {
+			r := s.initialismsRunes[i]
+			if r[0] == currentRune {
 				*newMatches = append(*newMatches, initialismMatch{
-					start:    currentRunePosition,
-					body:     initialismRunes,
-					complete: false,
+					start:     currentRunePosition,
+					body:      r,
+					complete:  false,
+					hasPlural: s.initialismsPluralForm[i],
 				})
 			}
 		}
