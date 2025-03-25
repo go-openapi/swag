@@ -15,20 +15,14 @@
 package swag
 
 import (
-	"io"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestFileImplementsIOReader(t *testing.T) {
-	var file interface{} = &File{}
-	expected := "that File implements io.Reader"
-	assert.Implements(t, new(io.Reader), file, expected)
-}
-
-func TestFileImplementsIOReadCloser(t *testing.T) {
-	var file interface{} = &File{}
-	expected := "that File implements io.ReadCloser"
-	assert.Implements(t, new(io.ReadCloser), file, expected)
+func TestTypeUtilsIface(t *testing.T) {
+	t.Run("deprecated type utility functions should work", func(t *testing.T) {
+		// only check happy path - more comprehensive testing is carried out inside the called packag
+		require.True(t, IsZero(0))
+	})
 }

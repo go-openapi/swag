@@ -12,23 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
+package conv
 
-import (
-	"io"
-	"testing"
+type (
+	// these type constraints are redefined after golang.org/x/exp/constraints,
+	// because importing that package causes an undesired go upgrade.
 
-	"github.com/stretchr/testify/assert"
+	// Signed integer types, cf. [golang.org/x/exp/constraints.Signed]
+	Signed interface {
+		~int | ~int8 | ~int16 | ~int32 | ~int64
+	}
+
+	// Unsigned integer types, cf. [golang.org/x/exp/constraints.Unsigned]
+	Unsigned interface {
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
+	}
+
+	// Float numerical types, cf. [golang.org/x/exp/constraints.Float]
+	Float interface {
+		~float32 | ~float64
+	}
 )
-
-func TestFileImplementsIOReader(t *testing.T) {
-	var file interface{} = &File{}
-	expected := "that File implements io.Reader"
-	assert.Implements(t, new(io.Reader), file, expected)
-}
-
-func TestFileImplementsIOReadCloser(t *testing.T) {
-	var file interface{} = &File{}
-	expected := "that File implements io.ReadCloser"
-	assert.Implements(t, new(io.ReadCloser), file, expected)
-}

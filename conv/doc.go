@@ -12,23 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
-
-import (
-	"io"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
-)
-
-func TestFileImplementsIOReader(t *testing.T) {
-	var file interface{} = &File{}
-	expected := "that File implements io.Reader"
-	assert.Implements(t, new(io.Reader), file, expected)
-}
-
-func TestFileImplementsIOReadCloser(t *testing.T) {
-	var file interface{} = &File{}
-	expected := "that File implements io.ReadCloser"
-	assert.Implements(t, new(io.ReadCloser), file, expected)
-}
+// Package conv exposes utilities to convert types.
+//
+// Convert and Format families of functions are essentially a shorthand to `strconv` functions,
+// using the decimal representation of numbers.
+//
+// * from string representation to value ("Convert*") and reciprocally ("Format*")
+// * from pointer to value ([Value]) and reciprocally ([Pointer])
+// * from slice of values to slice of pointers ([PointerSlice]) and reciprocally ([ValueSlice])
+// * from map of values to map of pointers ([PointerMap]) and reciprocally ([ValueMap])
+package conv
