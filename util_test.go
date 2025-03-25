@@ -44,22 +44,31 @@ func TestIndexOfInitialismsSorted(t *testing.T) {
 		"DNS":   true,
 		"VM":    true,
 		"XML":   true,
+		"IPv4":  true,
+		"IPV4":  true,
 		"XMPP":  true,
 		"XSRF":  true,
 		"XSS":   true,
 	}
 
+	// now the order is reverse lexicographic.
+	// With this ordering, when several initialisms differ in case only,
+	// lowercase comes first.
+	//
+	// Example below: IPv4 and IPV4 favors IPv4.
 	goldenSample := []string{
 		"ASCII",
-		"XMPP",
 		"XSRF",
-		"ACL",
-		"API",
-		"CPU",
-		"CSS",
-		"DNS",
-		"XML",
+		"XMPP",
+		"IPv4",
+		"IPV4",
 		"XSS",
+		"XML",
+		"DNS",
+		"CSS",
+		"CPU",
+		"API",
+		"ACL",
 		"VM",
 	}
 	for i := 0; i < 50; i++ {
@@ -80,6 +89,8 @@ func TestHighUnicode(t *testing.T) {
 }
 
 const (
+	// parts used to build fixtures
+
 	textTitle  = "Text"
 	blankText  = " text"
 	dashText   = "-text"
@@ -93,55 +104,71 @@ const (
 )
 
 func TestToGoName(t *testing.T) {
-	samples := []translationSample{
-		{"@Type", "AtType"},
-		{"Sample@where", "SampleAtWhere"},
-		{"Id", "ID"},
-		{"SomethingTTLSeconds", "SomethingTTLSeconds"},
-		{"sample text", "SampleText"},
-		{"IPv6Address", "IPV6Address"},
-		{"IPv4Address", "IPV4Address"},
-		{"sample-text", "SampleText"},
-		{"sample_text", "SampleText"},
-		{"sampleText", "SampleText"},
-		{"sample 2 Text", "Sample2Text"},
-		{"findThingById", "FindThingByID"},
-		{"日本語sample 2 Text", "X日本語sample2Text"},
-		{"日本語findThingById", "X日本語findThingByID"},
-		{"findTHINGSbyID", "FindTHINGSbyID"},
-		{"x-isAnOptionalHeader0", "XIsAnOptionalHeader0"},
-		{"get$ref", "GetDollarRef"},
-		{"éget$ref", "ÉgetDollarRef"},
-		{"日get$ref", "X日getDollarRef"},
-		{"", ""},
-		{"?", ""},
-		{"!", "Bang"},
-		{"", ""},
-	}
+	t.Run("with simple input", func(t *testing.T) {
+		samples := []translationSample{
+			// input, expected
+			{"@Type", "AtType"},
+			{"Sample@where", "SampleAtWhere"},
+			{"Id", "ID"},
+			{"SomethingTTLSeconds", "SomethingTTLSeconds"},
+			{"sample text", "SampleText"},
+			{"IPv6Address", "IPv6Address"}, // changed assertion: favor IPv6 over IPV6
+			{"IPv4Address", "IPv4Address"}, // changed assertion: favor IPv4 over IPV4
+			{"sample-text", "SampleText"},
+			{"sample_text", "SampleText"},
+			{"sampleText", "SampleText"},
+			{"sample 2 Text", "Sample2Text"},
+			{"findThingById", "FindThingByID"},
+			{"日本語sample 2 Text", "X日本語sample2Text"},
+			{"日本語findThingById", "X日本語findThingByID"},
+			{"findTHINGSbyID", "FindTHINGSbyID"},
+			{"x-isAnOptionalHeader0", "XIsAnOptionalHeader0"},
+			{"get$ref", "GetDollarRef"},
+			{"éget$ref", "ÉgetDollarRef"},
+			{"日get$ref", "X日getDollarRef"},
+			{"", ""},
+			{"?", ""},
+			{"!", "Bang"},
+			{"", ""},
+		}
 
-	for _, k := range commonInitialisms.sorted() {
-		k = upper(k)
+		t.Run("ToGoName should convert names as expected", func(t *testing.T) {
+			for _, sample := range samples {
+				result := ToGoName(sample.str)
+				assert.Equal(t, sample.out, result,
+					"expected ToGoName(%q) == %q but got %q", sample.str, sample.out, result)
+			}
+		})
+	})
 
-		samples = append(samples,
-			translationSample{sampleBlank + lower(k) + blankText, sampleTitle + k + textTitle},
-			translationSample{sampleDash + lower(k) + dashText, sampleTitle + k + textTitle},
-			translationSample{sampleUscore + lower(k) + uscoreText, sampleTitle + k + textTitle},
-			translationSample{sampleString + titleize(k) + textTitle, sampleTitle + k + textTitle},
-			translationSample{sampleBlank + lower(k), sampleTitle + k},
-			translationSample{sampleDash + lower(k), sampleTitle + k},
-			translationSample{sampleUscore + lower(k), sampleTitle + k},
-			translationSample{sampleString + titleize(k), sampleTitle + k},
-			translationSample{sampleBlank + titleize(k) + blankText, sampleTitle + k + textTitle},
-			translationSample{sampleDash + titleize(k) + dashText, sampleTitle + k + textTitle},
-			translationSample{sampleUscore + titleize(k) + uscoreText, sampleTitle + k + textTitle},
-		)
-	}
+	t.Run("with composed with initialism sample", func(t *testing.T) {
+		for _, k := range commonInitialisms.sorted() {
+			samples := []translationSample{
+				// input, expected
+				{sampleBlank + lower(k) + blankText, sampleTitle + k + textTitle},
+				{sampleDash + lower(k) + dashText, sampleTitle + k + textTitle},
+				{sampleUscore + lower(k) + uscoreText, sampleTitle + k + textTitle},
+				{sampleString + titleize(k) + textTitle, sampleTitle + k + textTitle},
+				{sampleBlank + lower(k), sampleTitle + k},
+				{sampleDash + lower(k), sampleTitle + k},
+				{sampleUscore + lower(k), sampleTitle + k},
+				{sampleString + titleize(k), sampleTitle + k},
+				{sampleBlank + titleize(k) + blankText, sampleTitle + k + textTitle},
+				{sampleDash + titleize(k) + dashText, sampleTitle + k + textTitle},
+				{sampleUscore + titleize(k) + uscoreText, sampleTitle + k + textTitle},
+				// leading initialism preserving case in initialism, e.g. Ipv4_Address -> IPv4Address and no IPV4Address
+				{titleize(k) + uscoreText, k + textTitle},
+				// leading initialism preserving case in initialism, e.g. ipv4_Address -> IPv4Address and no IPV4Address
+				{lower(k) + uscoreText, k + textTitle},
+			}
 
-	for _, sample := range samples {
-		result := ToGoName(sample.str)
-		assert.Equal(t, sample.out, result,
-			"ToGoName(%q) == %q but got %q", sample.str, sample.out, result)
-	}
+			for _, sample := range samples {
+				result := ToGoName(sample.str)
+				assert.Equal(t, sample.out, result,
+					"with initialism %q, expected ToGoName(%q) == %q but got %q", k, sample.str, sample.out, result)
+			}
+		}
+	})
 }
 
 func TestContainsStringsCI(t *testing.T) {
@@ -220,6 +247,7 @@ func TestToFileName(t *testing.T) {
 	samples := []translationSample{
 		{"SampleText", "sample_text"},
 		{"FindThingByID", "find_thing_by_id"},
+		{"FindThingByIDs", "find_thing_by_ids"},
 		{"CAPWD.folwdBylc", "capwd_folwd_bylc"},
 		{"CAPWDfolwdBylc", "cap_w_dfolwd_bylc"},
 		{"CAP_WD_folwdBylc", "cap_wd_folwd_bylc"},
@@ -267,6 +295,7 @@ func TestToCommandName(t *testing.T) {
 func TestToHumanName(t *testing.T) {
 	samples := []translationSample{
 		{"Id", "Id"},
+		{"IDs", "IDs"},
 		{"SampleText", "sample text"},
 		{"FindThingByID", "find thing by ID"},
 		{"elbHTTPLoadBalancer", "elb HTTP load balancer"},
