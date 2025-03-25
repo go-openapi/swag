@@ -16,7 +16,6 @@ package conv
 
 import (
 	"strconv"
-	"unsafe"
 )
 
 // FormatInteger turns an integer type into a string.
@@ -31,10 +30,7 @@ func FormatUinteger[T Unsigned](value T) string {
 
 // FormatFloat turns a floating point numerical value into a string.
 func FormatFloat[T Float](value T) string {
-	// NOTE: [unsafe.SizeOf] simply returns the size in bytes of the value.
-	// For primitive types T, the generic stencil is precompiled and this value
-	// is resolved at compile time, resulting in an immediate call to [strconv.FormatFloat].
-	return strconv.FormatFloat(float64(value), 'f', -1, int(unsafe.Sizeof(value))*8)
+	return strconv.FormatFloat(float64(value), 'f', -1, bitsize(value))
 }
 
 // FormatBool turns a boolean into a string.

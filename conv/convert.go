@@ -18,7 +18,6 @@ import (
 	"math"
 	"strconv"
 	"strings"
-	"unsafe"
 )
 
 // same as ECMA Number.MAX_SAFE_INTEGER and Number.MIN_SAFE_INTEGER
@@ -54,11 +53,8 @@ func IsFloat64AJSONInteger(f float64) bool {
 
 // ConvertFloat turns a string into a float numerical value.
 func ConvertFloat[T Float](str string) (T, error) {
-	// NOTE: [unsafe.SizeOf] simply returns the size in bytes of the value.
-	// For primitive types T, the generic stencil is precompiled and this value
-	// is resolved at compile time, resulting in an immediate call to [strconv.ParseFloat].
 	var v T
-	f, err := strconv.ParseFloat(str, int(unsafe.Sizeof(v))*8)
+	f, err := strconv.ParseFloat(str, bitsize(v))
 	if err != nil {
 		return 0, err
 	}
@@ -69,7 +65,7 @@ func ConvertFloat[T Float](str string) (T, error) {
 // ConvertInteger turns a string into a signed integer.
 func ConvertInteger[T Signed](str string) (T, error) {
 	var v T
-	f, err := strconv.ParseInt(str, 10, int(unsafe.Sizeof(v))*8)
+	f, err := strconv.ParseInt(str, 10, bitsize(v))
 	if err != nil {
 		return 0, err
 	}
@@ -80,7 +76,7 @@ func ConvertInteger[T Signed](str string) (T, error) {
 // ConvertUinteger turns a string into an unsigned integer.
 func ConvertUinteger[T Unsigned](str string) (T, error) {
 	var v T
-	f, err := strconv.ParseUint(str, 10, int(unsafe.Sizeof(v))*8)
+	f, err := strconv.ParseUint(str, 10, bitsize(v))
 	if err != nil {
 		return 0, err
 	}
