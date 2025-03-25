@@ -15,29 +15,34 @@
 package conv
 
 import (
+	"fmt"
+	"io"
 	"math"
 	"math/big"
+	"slices"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestConvertBool(t *testing.T) {
-	evaluatesAsTrue := []string{"true",
-		"1",
-		"yes",
-		"ok",
-		"y",
-		"on",
-		"selected",
-		"checked",
-		"t",
-		"enabled",
-	}
+var evaluatesAsTrue = map[string]struct{}{
+	"true":     {},
+	"1":        {},
+	"yes":      {},
+	"ok":       {},
+	"y":        {},
+	"on":       {},
+	"selected": {},
+	"checked":  {},
+	"t":        {},
+	"enabled":  {},
+}
 
-	for _, k := range evaluatesAsTrue {
+func TestConvertBool(t *testing.T) {
+	for k := range evaluatesAsTrue {
 		r, err := ConvertBool(k)
 		require.NoError(t, err)
 		assert.True(t, r)
@@ -341,4 +346,48 @@ func float64OverflowStr() string {
 	overflow.Add(&maxFloat64, &one)
 
 	return overflow.String()
+}
+
+// benchmarks
+func BenchmarkConvertBool(b *testing.B) {
+	inputs := []string{
+		"a", "t", "ok", "false", "true", "TRUE", "no", "n", "y",
+	}
+	var isTrue bool
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	b.Run("use switch", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			isTrue, _ = ConvertBool(inputs[i%len(inputs)])
+		}
+		fmt.Fprintln(io.Discard, isTrue)
+	})
+
+	b.Run("use map (previous version)", func(b *testing.B) {
+		previousConvertBool := func(str string) (bool, error) {
+			_, ok := evaluatesAsTrue[strings.ToLower(str)]
+			return ok, nil
+		}
+
+		for i := 0; i < b.N; i++ {
+			isTrue, _ = previousConvertBool(inputs[i%len(inputs)])
+		}
+		fmt.Fprintln(io.Discard, isTrue)
+	})
+
+	b.Run("use slice.Contains", func(b *testing.B) {
+		sliceContainsConvertBool := func(str string) (bool, error) {
+			return slices.Contains(
+				[]string{"true", "1", "yes", "ok", "y", "on", "selected", "checked", "t", "enabled"},
+				strings.ToLower(str),
+			), nil
+		}
+
+		for i := 0; i < b.N; i++ {
+			isTrue, _ = sliceContainsConvertBool(inputs[i%len(inputs)])
+		}
+		fmt.Fprintln(io.Discard, isTrue)
+	})
 }
