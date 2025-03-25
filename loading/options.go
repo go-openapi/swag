@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
+package loading
 
 import (
 	"io/fs"
@@ -22,8 +22,8 @@ import (
 )
 
 type (
-	// LoadingOption provides options for loading a file over HTTP or from a file.
-	LoadingOption func(*loadingOptions)
+	// Option provides options for loading a file over HTTP or from a file.
+	Option func(*options)
 
 	httpOptions struct {
 		httpTimeout       time.Duration
@@ -37,7 +37,7 @@ type (
 		fs fs.ReadFileFS
 	}
 
-	loadingOptions struct {
+	options struct {
 		httpOptions
 		fileOptions
 	}
@@ -51,24 +51,26 @@ func (fo fileOptions) ReadFileFunc() func(string) ([]byte, error) {
 	return fo.fs.ReadFile
 }
 
-// LoadingWithTimeout sets a timeout for the remote file loader.
-func LoadingWithTimeout(timeout time.Duration) LoadingOption {
-	return func(o *loadingOptions) {
+// WithTimeout sets a timeout for the remote file loader.
+//
+// The default timeout is 30s.
+func WithTimeout(timeout time.Duration) Option {
+	return func(o *options) {
 		o.httpTimeout = timeout
 	}
 }
 
-// LoadingWithBasicAuth sets a basic authentication scheme for the remote file loader.
-func LoadingWithBasicAuth(username, password string) LoadingOption {
-	return func(o *loadingOptions) {
+// WithBasicAuth sets a basic authentication scheme for the remote file loader.
+func WithBasicAuth(username, password string) Option {
+	return func(o *options) {
 		o.basicAuthUsername = username
 		o.basicAuthPassword = password
 	}
 }
 
-// LoadingWithCustomHeaders sets custom headers for the remote file loader.
-func LoadingWithCustomHeaders(headers map[string]string) LoadingOption {
-	return func(o *loadingOptions) {
+// WithCustomHeaders sets custom headers for the remote file loader.
+func WithCustomHeaders(headers map[string]string) Option {
+	return func(o *options) {
 		if o.customHeaders == nil {
 			o.customHeaders = make(map[string]string, len(headers))
 		}
@@ -79,35 +81,34 @@ func LoadingWithCustomHeaders(headers map[string]string) LoadingOption {
 	}
 }
 
-// LoadingWithHTTClient overrides the default HTTP client used to fetch a remote file.
+// WithHTTClient overrides the default HTTP client used to fetch a remote file.
 //
 // By default, [http.DefaultClient] is used.
-func LoadingWithHTTPClient(client *http.Client) LoadingOption {
-	return func(o *loadingOptions) {
+func WithHTTPClient(client *http.Client) Option {
+	return func(o *options) {
 		o.client = client
 	}
 }
 
-// LoadingWithFS sets a file system for the local file loader.
+// WithFS sets a file system for the local file loader.
 //
 // By default, the file system is the one provided by the os package.
 //
 // For example, this may be set to consume from an embedded file system, or a rooted FS.
-func LoadingWithFS(fs fs.ReadFileFS) LoadingOption {
-	return func(o *loadingOptions) {
+func WithFS(fs fs.ReadFileFS) Option {
+	return func(o *options) {
 		o.fs = fs
 	}
 }
 
-func loadingOptionsWithDefaults(opts []LoadingOption) loadingOptions {
-	o := loadingOptions{
+func optionsWithDefaults(opts []Option) options {
+	const defaultTimeout = 30 * time.Second
+
+	o := options{
 		// package level defaults
 		httpOptions: httpOptions{
-			httpTimeout:       LoadHTTPTimeout,
-			customHeaders:     LoadHTTPCustomHeaders,
-			basicAuthUsername: LoadHTTPBasicAuthUsername,
-			basicAuthPassword: LoadHTTPBasicAuthPassword,
-			client:            http.DefaultClient,
+			httpTimeout: defaultTimeout,
+			client:      http.DefaultClient,
 		},
 	}
 

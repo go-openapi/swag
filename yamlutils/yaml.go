@@ -12,26 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
+package yamlutils
 
 import (
-	"encoding/json"
+	json "encoding/json"
 	"fmt"
-	"path/filepath"
 	"reflect"
 	"sort"
 	"strconv"
 
+	"github.com/go-openapi/swag/jsonutils"
 	"github.com/mailru/easyjson/jlexer"
 	"github.com/mailru/easyjson/jwriter"
 	yaml "gopkg.in/yaml.v3"
 )
-
-// YAMLMatcher matches yaml
-func YAMLMatcher(path string) bool {
-	ext := filepath.Ext(path)
-	return ext == ".yaml" || ext == ".yml"
-}
 
 // YAMLToJSON converts YAML unmarshaled data into json compatible data
 func YAMLToJSON(data interface{}) (json.RawMessage, error) {
@@ -39,7 +33,7 @@ func YAMLToJSON(data interface{}) (json.RawMessage, error) {
 	if err != nil {
 		return nil, err
 	}
-	b, err := WriteJSON(jm)
+	b, err := jsonutils.WriteJSON(jm)
 	return json.RawMessage(b), err
 }
 
@@ -168,7 +162,7 @@ func yamlStringScalarC(node *yaml.Node) (string, error) {
 	}
 }
 
-// JSONMapSlice represent a JSON object, with the order of keys maintained
+// JSONMapSlice represents a JSON object, with the order of keys maintained
 type JSONMapSlice []JSONMapItem
 
 // MarshalJSON renders a JSONMapSlice as JSON
@@ -370,7 +364,7 @@ func (s JSONMapItem) MarshalJSON() ([]byte, error) {
 func (s JSONMapItem) MarshalEasyJSON(w *jwriter.Writer) {
 	w.String(s.Key)
 	w.RawByte(':')
-	w.Raw(WriteJSON(s.Value))
+	w.Raw(jsonutils.WriteJSON(s.Value))
 }
 
 // UnmarshalJSON makes a JSONMapItem from JSON
@@ -453,29 +447,4 @@ func transformData(input interface{}) (out interface{}, err error) {
 		return o, nil
 	}
 	return input, nil
-}
-
-// YAMLDoc loads a yaml document from either http or a file and converts it to json
-func YAMLDoc(path string) (json.RawMessage, error) {
-	yamlDoc, err := YAMLData(path)
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := YAMLToJSON(yamlDoc)
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
-}
-
-// YAMLData loads a yaml document from either http or a file
-func YAMLData(path string) (interface{}, error) {
-	data, err := LoadFromFileOrHTTP(path)
-	if err != nil {
-		return nil, err
-	}
-
-	return BytesToYAMLDoc(data)
 }

@@ -18,18 +18,32 @@
 //
 // Here is what is inside:
 //
-//	Sub-package conv:
-//	  - convert between value and pointers for builtin types
-//	  - convert from string to builtin types (wraps strconv)
+//				Package conv:
+//					* convert between value and pointers for builtin types
+//					* convert from string to builtin types (wraps strconv)
 //
-//	Package swag:
-//	- fast json concatenation
-//	- search in path
-//	- load from file or http
-//	- name mangling
+//				Package typeutils:
+//				  *  check the zero value for any type
 //
-// This repo has a few dependencies outside of the standard library:
+//				Package jsonutils:
+//				  * fast json concatenation
+//				  * read and write JSON from and to dynamic go data structures
 //
-//   - YAML utilities depend on [gopkg.in/yaml.v3]
+//				Package yamlutils:
+//				  * converting YAML to JSON
+//			    * loading YAML into a dynamic YAML document
+//
+//				Package loading:
+//				  * load from file or http
+//
+//				Package swag:
+//				  * search in path
+//		      * host, port from address
+//				  * name mangling
+//	       * file upload type
+//
+// This repo has only few dependencies outside of the standard library:
+//
+//   - YAML utilities depend on gopkg.in/yaml.v2
 //   - JSON utilities depend on [mailru/easyjson]
 package swag

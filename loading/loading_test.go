@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
+package loading
 
 import (
 	"context"
@@ -28,29 +28,34 @@ import (
 )
 
 func TestLoadFromHTTP(t *testing.T) {
+	t.Run("should load pet store API doc", func(t *testing.T) {
+		ts := httptest.NewServer(http.HandlerFunc(serveYAMLPestore))
+		defer ts.Close()
+
+		content, err := LoadFromFileOrHTTP(ts.URL)
+		require.NoError(t, err)
+
+		assert.YAMLEq(t, string(YAMLPetStore), string(content))
+	})
+
 	t.Run("should not load from invalid URL", func(t *testing.T) {
 		_, err := LoadFromFileOrHTTP("httx://12394:abd")
 		require.Error(t, err)
 	})
 
 	t.Run("should not load from remote URL with error", func(t *testing.T) {
-		serv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
-			rw.WriteHeader(http.StatusNotFound)
-		}))
-		defer serv.Close()
+		ts := httptest.NewServer(http.HandlerFunc(serveKO))
+		defer ts.Close()
 
-		_, err := LoadFromFileOrHTTP(serv.URL)
+		_, err := LoadFromFileOrHTTP(ts.URL)
 		require.Error(t, err)
 	})
 
 	t.Run("should load from remote URL", func(t *testing.T) {
-		ts2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
-			rw.WriteHeader(http.StatusOK)
-			_, _ = rw.Write([]byte("the content"))
-		}))
-		defer ts2.Close()
+		ts := httptest.NewServer(http.HandlerFunc(serveOK))
+		defer ts.Close()
 
-		d, err := LoadFromFileOrHTTP(ts2.URL)
+		d, err := LoadFromFileOrHTTP(ts.URL)
 		require.NoError(t, err)
 		assert.Equal(t, []byte("the content"), d)
 	})
@@ -62,59 +67,25 @@ func TestLoadFromHTTP(t *testing.T) {
 			invalidPassword = "incorrect-password"
 		)
 
-		ts3 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-			u, p, ok := r.BasicAuth()
-			if ok && u == validUsername && p == validPassword {
-				rw.WriteHeader(http.StatusOK)
-			} else {
-				rw.WriteHeader(http.StatusForbidden)
-			}
-		}))
-		defer ts3.Close()
+		ts := httptest.NewServer(http.HandlerFunc(serveBasicAuthFunc(validUsername, validPassword)))
+		defer ts.Close()
 
 		t.Run("should not load from remote URL unauthenticated", func(t *testing.T) {
-			// no auth
-			_, err := LoadFromFileOrHTTP(ts3.URL)
+			_, err := LoadFromFileOrHTTP(ts.URL) // no auth
 			require.Error(t, err)
-		})
-
-		t.Run("using global config", func(t *testing.T) {
-			t.Cleanup(func() {
-				LoadHTTPBasicAuthUsername = ""
-				LoadHTTPBasicAuthPassword = ""
-			})
-
-			t.Run("should not load from remote URL with invalid credentials", func(t *testing.T) {
-				// basic auth, invalid credentials
-				LoadHTTPBasicAuthUsername = validUsername
-				LoadHTTPBasicAuthPassword = invalidPassword
-
-				_, err := LoadFromFileOrHTTP(ts3.URL)
-				require.Error(t, err)
-			})
-
-			t.Run("should load from remote URL with basic auth", func(t *testing.T) {
-				// basic auth, valid credentials
-				LoadHTTPBasicAuthUsername = validUsername
-				LoadHTTPBasicAuthPassword = validPassword
-
-				_, err := LoadFromFileOrHTTP(ts3.URL)
-				require.NoError(t, err)
-			})
 		})
 
 		t.Run("using loading options", func(t *testing.T) {
 			t.Run("should not load from remote URL with invalid credentials", func(t *testing.T) {
-				_, err := LoadFromFileOrHTTP(ts3.URL,
-					LoadingWithBasicAuth(validUsername, invalidPassword),
+				_, err := LoadFromFileOrHTTP(ts.URL,
+					WithBasicAuth(validUsername, invalidPassword),
 				)
 				require.Error(t, err)
 			})
 
 			t.Run("should load from remote URL with basic auth", func(t *testing.T) {
-				// basic auth, valid credentials
-				_, err := LoadFromFileOrHTTP(ts3.URL,
-					LoadingWithBasicAuth(validUsername, validPassword),
+				_, err := LoadFromFileOrHTTP(ts.URL,
+					WithBasicAuth(validUsername, validPassword), // basic auth, valid credentials
 				)
 				require.NoError(t, err)
 			})
@@ -127,50 +98,18 @@ func TestLoadFromHTTP(t *testing.T) {
 			sharedHeaderValue = "MySecretKey"
 		)
 
-		ts4 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-			myHeaders := r.Header[sharedHeaderKey]
-			ok := false
-			for _, v := range myHeaders {
-				if v == sharedHeaderValue {
-					ok = true
-					break
-				}
-			}
-			if ok {
-				rw.WriteHeader(http.StatusOK)
-			} else {
-				rw.WriteHeader(http.StatusForbidden)
-			}
-		}))
-		defer ts4.Close()
-
-		t.Run("using global config", func(t *testing.T) {
-			t.Cleanup(func() {
-				LoadHTTPCustomHeaders = map[string]string{}
-			})
-
-			t.Run("should not load from remote URL with missing header", func(t *testing.T) {
-				_, err := LoadFromFileOrHTTP(ts4.URL)
-				require.Error(t, err)
-			})
-
-			t.Run("should load from remote URL with API key header", func(t *testing.T) {
-				LoadHTTPCustomHeaders[sharedHeaderKey] = sharedHeaderValue
-
-				_, err := LoadFromFileOrHTTP(ts4.URL)
-				require.NoError(t, err)
-			})
-		})
+		ts := httptest.NewServer(http.HandlerFunc(serveRequireHeaderFunc(sharedHeaderKey, sharedHeaderValue)))
+		defer ts.Close()
 
 		t.Run("using loading options", func(t *testing.T) {
 			t.Run("should not load from remote URL with missing header", func(t *testing.T) {
-				_, err := LoadFromFileOrHTTP(ts4.URL)
+				_, err := LoadFromFileOrHTTP(ts.URL)
 				require.Error(t, err)
 			})
 
 			t.Run("should load from remote URL with API key header", func(t *testing.T) {
-				_, err := LoadFromFileOrHTTP(ts4.URL,
-					LoadingWithCustomHeaders(map[string]string{sharedHeaderKey: sharedHeaderValue}),
+				_, err := LoadFromFileOrHTTP(ts.URL,
+					WithCustomHeaders(map[string]string{sharedHeaderKey: sharedHeaderValue}),
 				)
 				require.NoError(t, err)
 			})
@@ -183,20 +122,20 @@ func TestLoadFromHTTP(t *testing.T) {
 				}
 
 				t.Run("should not load unknown path", func(t *testing.T) {
-					_, err := LoadFromFileOrHTTP(ts4.URL+"/unknown",
-						LoadingWithCustomHeaders(map[string]string{sharedHeaderKey: sharedHeaderValue}),
-						LoadingWithHTTPClient(client),
+					_, err := LoadFromFileOrHTTP(ts.URL+"/unknown",
+						WithCustomHeaders(map[string]string{sharedHeaderKey: sharedHeaderValue}),
+						WithHTTPClient(client),
 					)
 					require.Error(t, err)
 				})
 
 				t.Run("should load from local path", func(t *testing.T) {
-					readme, err := LoadFromFileOrHTTP(ts4.URL+"/README.md",
-						LoadingWithCustomHeaders(map[string]string{sharedHeaderKey: sharedHeaderValue}),
-						LoadingWithHTTPClient(client),
+					petstore, err := LoadFromFileOrHTTP(ts.URL+"/petstore_fixture.yaml",
+						WithCustomHeaders(map[string]string{sharedHeaderKey: sharedHeaderValue}),
+						WithHTTPClient(client),
 					)
 					require.NoError(t, err)
-					require.NotEmpty(t, readme)
+					require.NotEmpty(t, petstore)
 				})
 			})
 		})
@@ -216,7 +155,7 @@ func TestLoadFromHTTP(t *testing.T) {
 
 		t.Run("using loading options", func(t *testing.T) {
 			_, err := LoadFromFileOrHTTP(serv.URL,
-				LoadingWithTimeout(wait),
+				WithTimeout(wait),
 			)
 			require.Error(t, err)
 			require.ErrorIs(t, err, context.DeadlineExceeded)
@@ -224,78 +163,46 @@ func TestLoadFromHTTP(t *testing.T) {
 
 		t.Run("disabling timeout with loading options", func(t *testing.T) {
 			_, err := LoadFromFileOrHTTP(serv.URL,
-				LoadingWithTimeout(0),
+				WithTimeout(0),
 			)
 			require.NoError(t, err)
 		})
+	})
 
-		t.Run("using global configuration", func(t *testing.T) {
-			original := LoadHTTPTimeout
-			t.Cleanup(func() {
-				LoadHTTPTimeout = original
-			})
-			LoadHTTPTimeout = wait
-
-			_, err := LoadFromFileOrHTTP(serv.URL)
-			require.Error(t, err)
-			require.ErrorIs(t, err, context.DeadlineExceeded)
-		})
-
-		t.Run("using deprecated method", func(t *testing.T) {
-			_, err := LoadFromFileOrHTTPWithTimeout(serv.URL, wait)
-			require.Error(t, err)
-			require.ErrorIs(t, err, context.DeadlineExceeded)
-		})
+	t.Run("should load from local embedded file system", func(t *testing.T) {
+		b, err := LoadFromFileOrHTTP("petstore_fixture.yaml",
+			WithFS(embeddedFixtures),
+		)
+		require.NoError(t, err)
+		assert.YAMLEq(t, string(YAMLPetStore), string(b))
 	})
 }
 
 func TestLoadStrategy(t *testing.T) {
 	const thisIsNotIt = "not it"
 	loader := func(_ string) ([]byte, error) {
-		return []byte(yamlPetStore), nil
+		return YAMLPetStore, nil
 	}
 	remLoader := func(_ string) ([]byte, error) {
 		return []byte(thisIsNotIt), nil
 	}
 
 	t.Run("should serve local strategy", func(t *testing.T) {
-		loader := LoadStrategy("blah", loader, remLoader)
-		b, _ := loader("")
-		assert.YAMLEq(t, yamlPetStore, string(b))
+		ldr := LoadStrategy("blah", loader, remLoader)
+		b, _ := ldr("")
+		assert.YAMLEq(t, string(YAMLPetStore), string(b))
 	})
 
 	t.Run("should serve remote strategy with http", func(t *testing.T) {
-		loader := LoadStrategy("http://blah", loader, remLoader)
-		b, _ := loader("")
+		ldr := LoadStrategy("http://blah", loader, remLoader)
+		b, _ := ldr("")
 		assert.Equal(t, thisIsNotIt, string(b))
 	})
 
 	t.Run("should serve remote strategy with https", func(t *testing.T) {
-		loader := LoadStrategy("https://blah", loader, remLoader)
-		b, _ := loader("")
+		ldr := LoadStrategy("https://blah", loader, remLoader)
+		b, _ := ldr("")
 		assert.Equal(t, thisIsNotIt, string(b))
-	})
-}
-
-func TestYAMLDoc(t *testing.T) {
-	t.Run("should retrieve pet store API as YAML", func(t *testing.T) {
-		serv := httptest.NewServer(http.HandlerFunc(yamlPestoreServer))
-		defer serv.Close()
-
-		s, err := YAMLDoc(serv.URL)
-		require.NoError(t, err)
-		require.NotNil(t, s)
-	})
-
-	t.Run("should not retrieve any doc", func(t *testing.T) {
-		ts2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
-			rw.WriteHeader(http.StatusNotFound)
-			_, _ = rw.Write([]byte("\n"))
-		}))
-		defer ts2.Close()
-
-		_, err := YAMLDoc(ts2.URL)
-		require.Error(t, err)
 	})
 }
 
