@@ -210,7 +210,7 @@ func TestConvertInteger(t *testing.T) {
 func TestConvertUinteger(t *testing.T) {
 	t.Run("with uint8", func(t *testing.T) {
 		validInts := []uint8{0, 1, math.MaxUint8}
-		invalidInts := []string{"1.233", "a", "false", strconv.FormatUint(math.MaxUint64, 10), strconv.FormatInt(-1, 10)}
+		invalidInts := []string{"1.233", "a", "false", strconv.FormatUint(math.MaxUint64, 10), "-1"}
 
 		for _, f := range validInts {
 			str := FormatUinteger(f)
