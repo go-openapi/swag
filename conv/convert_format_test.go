@@ -118,11 +118,11 @@ func TestConvertInteger(t *testing.T) {
 			str := FormatInteger(f)
 			c1, err := ConvertInt8(str)
 			require.NoError(t, err)
-			assert.EqualValues(t, f, c1)
+			assert.Equal(t, f, c1)
 
 			c2, err := ConvertInteger[int8](str)
 			require.NoError(t, err)
-			assert.EqualValues(t, c1, c2)
+			assert.Equal(t, c1, c2)
 		}
 
 		for _, f := range invalidInts {
@@ -142,11 +142,11 @@ func TestConvertInteger(t *testing.T) {
 			str := FormatInteger(f)
 			c1, err := ConvertInt16(str)
 			require.NoError(t, err)
-			assert.EqualValues(t, f, c1)
+			assert.Equal(t, f, c1)
 
 			c2, err := ConvertInteger[int16](str)
 			require.NoError(t, err)
-			assert.EqualValues(t, c1, c2)
+			assert.Equal(t, c1, c2)
 		}
 
 		for _, f := range invalidInts {
@@ -166,11 +166,11 @@ func TestConvertInteger(t *testing.T) {
 			str := FormatInteger(f)
 			c1, err := ConvertInt32(str)
 			require.NoError(t, err)
-			assert.EqualValues(t, f, c1)
+			assert.Equal(t, f, c1)
 
 			c2, err := ConvertInteger[int32](str)
 			require.NoError(t, err)
-			assert.EqualValues(t, c1, c2)
+			assert.Equal(t, c1, c2)
 		}
 
 		for _, f := range invalidInts {
@@ -190,11 +190,11 @@ func TestConvertInteger(t *testing.T) {
 			str := FormatInteger(f)
 			c1, err := ConvertInt64(str)
 			require.NoError(t, err)
-			assert.EqualValues(t, f, c1)
+			assert.Equal(t, f, c1)
 
 			c2, err := ConvertInt64(str)
 			require.NoError(t, err)
-			assert.EqualValues(t, c1, c2)
+			assert.Equal(t, c1, c2)
 		}
 
 		for _, f := range invalidInts {
@@ -216,11 +216,11 @@ func TestConvertUinteger(t *testing.T) {
 			str := FormatUinteger(f)
 			c1, err := ConvertUint8(str)
 			require.NoError(t, err)
-			assert.EqualValues(t, f, c1)
+			assert.Equal(t, f, c1)
 
 			c2, err := ConvertUinteger[uint8](str)
 			require.NoError(t, err)
-			assert.EqualValues(t, c1, c2)
+			assert.Equal(t, c1, c2)
 		}
 
 		for _, f := range invalidInts {
@@ -240,11 +240,11 @@ func TestConvertUinteger(t *testing.T) {
 			str := FormatUinteger(f)
 			c1, err := ConvertUint16(str)
 			require.NoError(t, err)
-			assert.EqualValues(t, f, c1)
+			assert.Equal(t, f, c1)
 
 			c2, err := ConvertUinteger[uint16](str)
 			require.NoError(t, err)
-			assert.EqualValues(t, c1, c2)
+			assert.Equal(t, c1, c2)
 		}
 
 		for _, f := range invalidUints {
@@ -264,11 +264,11 @@ func TestConvertUinteger(t *testing.T) {
 			str := FormatUinteger(f)
 			c1, err := ConvertUint32(str)
 			require.NoError(t, err)
-			assert.EqualValues(t, f, c1)
+			assert.Equal(t, f, c1)
 
 			c2, err := ConvertUint32(str)
 			require.NoError(t, err)
-			assert.EqualValues(t, c1, c2)
+			assert.Equal(t, c1, c2)
 		}
 
 		for _, f := range invalidUints {
@@ -288,11 +288,11 @@ func TestConvertUinteger(t *testing.T) {
 			str := FormatUinteger(f)
 			c1, err := ConvertUint64(str)
 			require.NoError(t, err)
-			assert.EqualValues(t, f, c1)
+			assert.Equal(t, f, c1)
 
 			c2, err := ConvertUinteger[uint64](str)
 			require.NoError(t, err)
-			assert.EqualValues(t, c1, c2)
+			assert.Equal(t, c1, c2)
 		}
 		for _, f := range invalidUints {
 			_, err := ConvertUint64(f)

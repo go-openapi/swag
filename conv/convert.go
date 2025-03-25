@@ -54,6 +54,9 @@ func IsFloat64AJSONInteger(f float64) bool {
 
 // ConvertFloat turns a string into a float numerical value.
 func ConvertFloat[T Float](str string) (T, error) {
+	// NOTE: [unsafe.SizeOf] simply returns the size in bytes of the value.
+	// For primitive types T, the generic stencil is precompiled and this value
+	// is resolved at compile time, resulting in an immediate call to [strconv.ParseFloat].
 	var v T
 	f, err := strconv.ParseFloat(str, int(unsafe.Sizeof(v))*8)
 	if err != nil {

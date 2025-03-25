@@ -14,11 +14,11 @@
 
 // Package conv exposes utilities to convert types.
 //
-// Convert and format functions are essentially a shorthand to `strconv` functions,
+// Convert and Format families of functions are essentially a shorthand to `strconv` functions,
 // using the decimal representation of numbers.
 //
-// * from string representation to value ("Convert") and reciprocally ("Format")
-// * from pointer to value ("Value") and reciprocally ("Pointer")
-// * from slice of values to slice of pointers ("PointerSlice") and reciprocally ("ValueSlice")
-// * from map of values to map of pointers ("PointerMap") and reciprocally ("ValueMap")
+// * from string representation to value ("Convert*") and reciprocally ("Format*")
+// * from pointer to value ([Value]) and reciprocally ([Pointer])
+// * from slice of values to slice of pointers ([PointerSlice]) and reciprocally ([ValueSlice])
+// * from map of values to map of pointers ([PointerMap]) and reciprocally ([ValueMap])
 package conv

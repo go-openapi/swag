@@ -144,7 +144,7 @@ func TestPointer(t *testing.T) {
 func assertSingleValue(t *testing.T, inElem, elem reflect.Value, expectPointer bool, idx int) {
 	require.Equalf(t,
 		expectPointer, (elem.Kind() == reflect.Ptr),
-		"unexpected expectPointer=%t value type", expectPointer,
+		"unexpected expectPointer=%t value type %T at idx %d", expectPointer, elem, idx,
 	)
 
 	if inElem.Kind() == reflect.Ptr && !inElem.IsNil() {
@@ -163,8 +163,12 @@ func assertSingleValue(t *testing.T, inElem, elem reflect.Value, expectPointer b
 	)
 
 	if !((elem.Kind() == reflect.Ptr && elem.IsNil()) || typeutils.IsZero(elem.Interface())) {
-		require.IsTypef(t, inElem.Interface(), elem.Interface(), "Expected in/out to match types")
-		assert.EqualValuesf(t, inElem.Interface(), elem.Interface(), "Unexpected value at idx %d: %v", idx, elem.Interface())
+		require.IsTypef(t, inElem.Interface(), elem.Interface(),
+			"expected in/out to match types at idx %d", idx,
+		)
+		assert.EqualValuesf(t, inElem.Interface(), elem.Interface(),
+			"unexpected value at idx %d: %v", idx, elem.Interface(),
+		)
 	}
 }
 
@@ -175,8 +179,12 @@ func assertValues(t *testing.T, in, out interface{}, expectPointer bool, idx int
 
 	switch vin.Kind() { //nolint:exhaustive
 	case reflect.Slice, reflect.Map:
-		require.Equalf(t, vin.Kind(), vout.Kind(), "Unexpected output type at idx %d", idx)
-		require.Equalf(t, vin.Len(), vout.Len(), "Unexpected len at idx %d", idx)
+		require.Equalf(t, vin.Kind(), vout.Kind(),
+			"unexpected output type at idx %d", idx,
+		)
+		require.Equalf(t, vin.Len(), vout.Len(),
+			"unexpected len at idx %d", idx,
+		)
 
 		var elem, inElem reflect.Value
 		for i := 0; i < vin.Len(); i++ {
