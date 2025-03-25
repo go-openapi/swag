@@ -32,4 +32,9 @@ type (
 	Float interface {
 		~float32 | ~float64
 	}
+
+	// Numerical types
+	Numerical interface {
+		Signed | Unsigned | Float
+	}
 )
