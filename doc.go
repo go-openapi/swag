@@ -67,10 +67,8 @@
 //   - converting YAML to JSON
 //   - loading YAML into a dynamic YAML document
 //
-// ---
-//
 // This repo has a few dependencies outside of the standard library:
 //
-//   - YAML utilities depend on gopkg.in/yaml.v2
-//   - JSON utilities depend on [mailru/easyjson]
+//   - YAML utilities depend on [gopkg.in/yaml.v3]
+//   - JSON utilities depend on [github.com/mailru/easyjson]
 package swag
