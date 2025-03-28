@@ -12,15 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package yamlutils
+package stringutils
 
-type yamlError string
+import "strings"
 
-const (
-	// ErrYAML is an error raised by YAML utilities
-	ErrYAML yamlError = "yaml error"
-)
+// ContainsStrings searches a slice of strings for a case-sensitive match
+func ContainsStrings(coll []string, item string) bool {
+	for _, a := range coll {
+		if a == item {
+			return true
+		}
+	}
+	return false
+}
 
-func (e yamlError) Error() string {
-	return string(e)
+// ContainsStringsCI searches a slice of strings for a case-insensitive match
+func ContainsStringsCI(coll []string, item string) bool {
+	for _, a := range coll {
+		if strings.EqualFold(a, item) {
+			return true
+		}
+	}
+	return false
 }

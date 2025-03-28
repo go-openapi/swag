@@ -12,22 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
+package mangling
 
-import "mime/multipart"
+import "unsafe"
 
-// File represents an uploaded file.
-type File struct {
-	Data   multipart.File
-	Header *multipart.FileHeader
-}
-
-// Read bytes from the file
-func (f *File) Read(p []byte) (n int, err error) {
-	return f.Data.Read(p)
-}
-
-// Close the file
-func (f *File) Close() error {
-	return f.Data.Close()
+// hackStringBytes returns the (unsafe) underlying bytes slice of a string.
+func hackStringBytes(str string) []byte {
+	return unsafe.Slice(unsafe.StringData(str), len(str))
 }

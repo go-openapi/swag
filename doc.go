@@ -16,33 +16,60 @@
 //
 // You may also use it standalone for your projects.
 //
+// NOTE: all features that were previously exposed as package-level members (constants, variables,
+// functions and types) are now deprecated and are superseded by equivalent features in
+// more specialized sub-packages.
+//
 // Here is what is inside:
 //
-//				Package conv:
-//					* convert between value and pointers for builtin types
-//					* convert from string to builtin types (wraps strconv)
+// Package [conv]:
 //
-//				Package typeutils:
-//				  *  check the zero value for any type
+//   - convert between value and pointers for builtin types
+//   - convert from string to builtin types (wraps strconv)
 //
-//				Package jsonutils:
-//				  * fast json concatenation
-//				  * read and write JSON from and to dynamic go data structures
+// Package [fileutils]:
 //
-//				Package yamlutils:
-//				  * converting YAML to JSON
-//			    * loading YAML into a dynamic YAML document
+//   - file upload type
+//   - search in path
 //
-//				Package loading:
-//				  * load from file or http
+// Package [jsonname]:
 //
-//				Package swag:
-//				  * search in path
-//		      * host, port from address
-//				  * name mangling
-//	       * file upload type
+//   - json names for go properties
 //
-// This repo has only few dependencies outside of the standard library:
+// Package [jsonutils]:
+//
+//   - fast json concatenation
+//   - read and write JSON from and to dynamic go data structures
+//
+// Package [loading]:
+//
+//   - load from file or http
+//
+// Package [mangling]:
+//
+//   - name mangling to generate clean identifiers
+//
+// Package [netutils]:
+//
+//   - host, port from address
+//
+// Package [stringutils]:
+//
+//   - find string in list
+//   - join/split arrays of query parameters
+//
+// Package [typeutils]:
+//
+//   - check the zero value of any type
+//
+// Package [yamlutils]:
+//
+//   - converting YAML to JSON
+//   - loading YAML into a dynamic YAML document
+//
+// ---
+//
+// This repo has a few dependencies outside of the standard library:
 //
 //   - YAML utilities depend on gopkg.in/yaml.v2
 //   - JSON utilities depend on [mailru/easyjson]

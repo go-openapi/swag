@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
+package mangling
 
 import (
 	"strings"
@@ -27,7 +27,9 @@ import (
 //
 // e.g. to help convert "123" into "{prefix}123"
 //
-// The default is to prefix with "X"
+// The default is to prefix with "X".
+//
+// See [github.com/go-swagger/go-swagger/generator.DefaultFuncMap] for an example.
 var GoNamePrefixFunc func(string) string
 
 func prefixFunc(name, in string) string {
@@ -36,72 +38,6 @@ func prefixFunc(name, in string) string {
 	}
 
 	return GoNamePrefixFunc(name) + in
-}
-
-const (
-	// collectionFormatComma = "csv"
-	collectionFormatSpace = "ssv"
-	collectionFormatTab   = "tsv"
-	collectionFormatPipe  = "pipes"
-	collectionFormatMulti = "multi"
-)
-
-// JoinByFormat joins a string array by a known format (e.g. swagger's collectionFormat attribute):
-//
-//	ssv: space separated value
-//	tsv: tab separated value
-//	pipes: pipe (|) separated value
-//	csv: comma separated value (default)
-func JoinByFormat(data []string, format string) []string {
-	if len(data) == 0 {
-		return data
-	}
-	var sep string
-	switch format {
-	case collectionFormatSpace:
-		sep = " "
-	case collectionFormatTab:
-		sep = "\t"
-	case collectionFormatPipe:
-		sep = "|"
-	case collectionFormatMulti:
-		return data
-	default:
-		sep = ","
-	}
-	return []string{strings.Join(data, sep)}
-}
-
-// SplitByFormat splits a string by a known format:
-//
-//	ssv: space separated value
-//	tsv: tab separated value
-//	pipes: pipe (|) separated value
-//	csv: comma separated value (default)
-func SplitByFormat(data, format string) []string {
-	if data == "" {
-		return nil
-	}
-	var sep string
-	switch format {
-	case collectionFormatSpace:
-		sep = " "
-	case collectionFormatTab:
-		sep = "\t"
-	case collectionFormatPipe:
-		sep = "|"
-	case collectionFormatMulti:
-		return nil
-	default:
-		sep = ","
-	}
-	var result []string
-	for _, s := range strings.Split(data, sep) {
-		if ts := strings.TrimSpace(s); ts != "" {
-			result = append(result, ts)
-		}
-	}
-	return result
 }
 
 // Removes leading whitespaces
@@ -285,31 +221,4 @@ func ToGoName(name string) string {
 	}
 
 	return result.String()
-}
-
-// ContainsStrings searches a slice of strings for a case-sensitive match
-func ContainsStrings(coll []string, item string) bool {
-	for _, a := range coll {
-		if a == item {
-			return true
-		}
-	}
-	return false
-}
-
-// ContainsStringsCI searches a slice of strings for a case-insensitive match
-func ContainsStringsCI(coll []string, item string) bool {
-	for _, a := range coll {
-		if strings.EqualFold(a, item) {
-			return true
-		}
-	}
-	return false
-}
-
-// CommandLineOptionsGroup represents a group of user-defined command line options
-type CommandLineOptionsGroup struct {
-	ShortDescription string
-	LongDescription  string
-	Options          interface{}
 }
