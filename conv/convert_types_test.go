@@ -124,7 +124,7 @@ func TestPointer(t *testing.T) {
 			out2 := Value(out)
 			assertValues(t, in, out2, wantsValue, idx)
 		}
-		assert.Zerof(t, Value[string](nil), "expected conversion from nil to return zero value")
+		assert.Emptyf(t, Value[string](nil), "expected conversion from nil to return zero value")
 	})
 
 	t.Run("with Value on bool", func(t *testing.T) {
@@ -162,11 +162,11 @@ func assertSingleValue(t *testing.T, inElem, elem reflect.Value, expectPointer b
 		"unexpected nil pointer at idx %d", idx,
 	)
 
-	if !((elem.Kind() == reflect.Ptr && elem.IsNil()) || typeutils.IsZero(elem.Interface())) {
+	if (elem.Kind() != reflect.Ptr || !elem.IsNil()) && !typeutils.IsZero(elem.Interface()) {
 		require.IsTypef(t, inElem.Interface(), elem.Interface(),
 			"expected in/out to match types at idx %d", idx,
 		)
-		assert.EqualValuesf(t, inElem.Interface(), elem.Interface(),
+		assert.Equalf(t, inElem.Interface(), elem.Interface(),
 			"unexpected value at idx %d: %v", idx, elem.Interface(),
 		)
 	}

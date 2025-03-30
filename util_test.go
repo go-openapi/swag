@@ -58,16 +58,16 @@ func TestSplitByFormat(t *testing.T) {
 			assert.Nil(t, SplitByFormat("blah", fmt))
 		case collectionFormatSpace:
 			actual = SplitByFormat(strings.Join(expected, " "), fmt)
-			assert.EqualValues(t, expected, actual)
+			assert.Equal(t, expected, actual)
 		case collectionFormatPipe:
 			actual = SplitByFormat(strings.Join(expected, "|"), fmt)
-			assert.EqualValues(t, expected, actual)
+			assert.Equal(t, expected, actual)
 		case collectionFormatTab:
 			actual = SplitByFormat(strings.Join(expected, "\t"), fmt)
-			assert.EqualValues(t, expected, actual)
+			assert.Equal(t, expected, actual)
 		default:
 			actual = SplitByFormat(strings.Join(expected, ","), fmt)
-			assert.EqualValues(t, expected, actual)
+			assert.Equal(t, expected, actual)
 		}
 	}
 }
@@ -90,7 +90,7 @@ func TestJoinByFormat(t *testing.T) {
 			expected = []string{strings.Join(lval, ",")}
 		}
 		assert.Nil(t, JoinByFormat(nil, fmt))
-		assert.EqualValues(t, expected, JoinByFormat(lval, fmt))
+		assert.Equal(t, expected, JoinByFormat(lval, fmt))
 	}
 }
 
