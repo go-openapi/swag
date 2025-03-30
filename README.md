@@ -27,8 +27,7 @@ Here is what is inside:
 *	Package `fileutils`
 
   * [x] file upload type
-  * [x] search in path (depracated)
-
+  * [x] search in path (deprecated)
 * Package `jsonname`
 
   * [x] infer JSON names from go properties
