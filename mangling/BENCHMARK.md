@@ -1,12 +1,10 @@
-# Benchmarks
-
-## Name mangling utilities
+# Benchmarking name mangling utilities
 
 ```bash
 go test -bench XXX -run XXX -benchtime 30s
 ```
 
-### Benchmarks at b3e7a5386f996177e4808f11acb2aa93a0f660df
+## Benchmarks at b3e7a5386f996177e4808f11acb2aa93a0f660df
 
 ```
 goos: linux
@@ -21,7 +19,7 @@ BenchmarkToXXXName/ToHumanNameLower-4 	  895334	     40354 ns/op	   10472 B/op	 
 BenchmarkToXXXName/ToHumanNameTitle-4 	  882441	     40678 ns/op	   10566 B/op	     749 allocs/op
 ```
 
-### Benchmarks after PR #79
+## Benchmarks after PR #79
 
 ~ x10 performance improvement and ~ /100 memory allocations.
 
@@ -49,4 +47,44 @@ BenchmarkToXXXName/ToFileName-16       	32161176	      1117 ns/op	     147 B/op	
 BenchmarkToXXXName/ToCommandName-16    	32256634	      1137 ns/op	     147 B/op	       7 allocs/op
 BenchmarkToXXXName/ToHumanNameLower-16 	18599661	      1946 ns/op	      92 B/op	       6 allocs/op
 BenchmarkToXXXName/ToHumanNameTitle-16 	17581353	      2054 ns/op	     105 B/op	       6 allocs/op
+```
+
+## Benchmarks at d7d2d1b895f5b6747afaff312dd2a402e69e818b
+
+go1.24
+
+```
+goos: linux
+goarch: amd64
+pkg: github.com/go-openapi/swag
+cpu: AMD Ryzen 7 5800X 8-Core Processor             
+BenchmarkToXXXName/ToGoName-16         	19757858	      1881 ns/op	      42 B/op	       5 allocs/op
+BenchmarkToXXXName/ToVarName-16        	17494111	      2094 ns/op	      74 B/op	       7 allocs/op
+BenchmarkToXXXName/ToFileName-16       	28161226	      1492 ns/op	     158 B/op	       7 allocs/op
+BenchmarkToXXXName/ToCommandName-16    	23787333	      1489 ns/op	     158 B/op	       7 allocs/op
+BenchmarkToXXXName/ToHumanNameLower-16 	17537257	      2030 ns/op	     103 B/op	       6 allocs/op
+BenchmarkToXXXName/ToHumanNameTitle-16 	16977453	      2156 ns/op	     105 B/op	       6 allocs/op
+```
+
+## Benchmarks after PR #106
+
+Moving the scope of everything down to a struct allowed to reduce a bit garbage and pooling.
+
+On top of that, ToGoName (and thus ToVarName) have been subject to a minor optimization, removing a few allocations.
+
+Overall timings improve by ~ -10%.
+
+go1.24
+
+```
+goos: linux
+goarch: amd64
+pkg: github.com/go-openapi/swag/mangling
+cpu: AMD Ryzen 7 5800X 8-Core Processor             
+BenchmarkToXXXName/ToGoName-16         	22496130	      1618 ns/op	      31 B/op	       3 allocs/op
+BenchmarkToXXXName/ToVarName-16        	22538068	      1618 ns/op	      33 B/op	       3 allocs/op
+BenchmarkToXXXName/ToFileName-16       	27722977	      1236 ns/op	     105 B/op	       6 allocs/op
+BenchmarkToXXXName/ToCommandName-16    	27967395	      1258 ns/op	     105 B/op	       6 allocs/op
+BenchmarkToXXXName/ToHumanNameLower-16 	18587901	      1917 ns/op	     103 B/op	       6 allocs/op
+BenchmarkToXXXName/ToHumanNameTitle-16 	17193208	      2019 ns/op	     108 B/op	       7 allocs/op
 ```

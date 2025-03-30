@@ -12,26 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swag
+package mangling
 
 import (
-	"bytes"
-	"sync"
 	"unicode"
-	"unicode/utf8"
 )
 
-type (
-	splitter struct {
-		initialisms              []string
-		initialismsRunes         [][]rune
-		initialismsUpperCased    [][]rune // initialisms cached in their trimmed, upper-cased version
-		initialismsPluralForm    []pluralForm
-		postSplitInitialismCheck bool
+type splitterOption func(*splitter)
+
+// withPostSplitInitialismCheck allows to catch initialisms after main split process
+func withPostSplitInitialismCheck(s *splitter) {
+	s.postSplitInitialismCheck = true
+}
+
+func withReplaceFunc(fn ReplaceFunc) func(*splitter) {
+	return func(s *splitter) {
+		s.replaceFunc = fn
 	}
+}
 
-	splitterOption func(*splitter)
+func withInitialismsCache(c *initialismsCache) splitterOption {
+	return func(s *splitter) {
+		s.initialismsCache = c
+	}
+}
 
+type (
 	initialismMatch struct {
 		body       []rune
 		start, end int
@@ -41,184 +47,28 @@ type (
 	initialismMatches []initialismMatch
 )
 
-type (
-	// memory pools of temporary objects.
-	//
-	// These are used to recycle temporarily allocated objects
-	// and relieve the GC from undue pressure.
-
-	matchesPool struct {
-		*sync.Pool
-	}
-
-	buffersPool struct {
-		*sync.Pool
-	}
-
-	lexemsPool struct {
-		*sync.Pool
-	}
-
-	splittersPool struct {
-		*sync.Pool
-	}
-)
-
-var (
-	// poolOfMatches holds temporary slices for recycling during the initialism match process
-	poolOfMatches = matchesPool{
-		Pool: &sync.Pool{
-			New: func() any {
-				s := make(initialismMatches, 0, maxAllocMatches)
-
-				return &s
-			},
-		},
-	}
-
-	poolOfBuffers = buffersPool{
-		Pool: &sync.Pool{
-			New: func() any {
-				return new(bytes.Buffer)
-			},
-		},
-	}
-
-	poolOfLexems = lexemsPool{
-		Pool: &sync.Pool{
-			New: func() any {
-				s := make([]nameLexem, 0, maxAllocMatches)
-
-				return &s
-			},
-		},
-	}
-
-	poolOfSplitters = splittersPool{
-		Pool: &sync.Pool{
-			New: func() any {
-				s := newSplitter()
-
-				return &s
-			},
-		},
-	}
-)
-
-// nameReplaceTable finds a word representation for special characters.
-func nameReplaceTable(r rune) (string, bool) {
-	switch r {
-	case '@':
-		return "At ", true
-	case '&':
-		return "And ", true
-	case '|':
-		return "Pipe ", true
-	case '$':
-		return "Dollar ", true
-	case '!':
-		return "Bang ", true
-	case '-':
-		return "", true
-	case '_':
-		return "", true
-	default:
-		return "", false
-	}
+func (m initialismMatch) isZero() bool {
+	return m.start == 0 && m.end == 0
 }
 
-// split calls the splitter.
-//
-// Use newSplitter for more control and options
-func split(str string) []string {
-	s := poolOfSplitters.BorrowSplitter()
-	lexems := s.split(str)
-	result := make([]string, 0, len(*lexems))
-
-	for _, lexem := range *lexems {
-		result = append(result, lexem.GetOriginal())
-	}
-	poolOfLexems.RedeemLexems(lexems)
-	poolOfSplitters.RedeemSplitter(s)
-
-	return result
-
+type splitter struct {
+	*initialismsCache
+	postSplitInitialismCheck bool
+	replaceFunc              ReplaceFunc
 }
 
 func newSplitter(options ...splitterOption) splitter {
-	s := splitter{
-		postSplitInitialismCheck: false,
-		initialisms:              initialisms,
-		initialismsRunes:         initialismsRunes,
-		initialismsUpperCased:    initialismsUpperCased,
-		initialismsPluralForm:    initialismsPluralForm,
-	}
+	var s splitter
 
 	for _, option := range options {
 		option(&s)
 	}
 
-	return s
-}
-
-// withPostSplitInitialismCheck allows to catch initialisms after main split process
-func withPostSplitInitialismCheck(s *splitter) {
-	s.postSplitInitialismCheck = true
-}
-
-func (p matchesPool) BorrowMatches() *initialismMatches {
-	s := p.Get().(*initialismMatches)
-	*s = (*s)[:0] // reset slice, keep allocated capacity
-
-	return s
-}
-
-func (p buffersPool) BorrowBuffer(size int) *bytes.Buffer {
-	s := p.Get().(*bytes.Buffer)
-	s.Reset()
-
-	if s.Cap() < size {
-		s.Grow(size)
+	if s.replaceFunc == nil {
+		s.replaceFunc = defaultReplaceTable
 	}
 
 	return s
-}
-
-func (p lexemsPool) BorrowLexems() *[]nameLexem {
-	s := p.Get().(*[]nameLexem)
-	*s = (*s)[:0] // reset slice, keep allocated capacity
-
-	return s
-}
-
-func (p splittersPool) BorrowSplitter(options ...splitterOption) *splitter {
-	s := p.Get().(*splitter)
-	s.postSplitInitialismCheck = false // reset options
-	for _, apply := range options {
-		apply(s)
-	}
-
-	return s
-}
-
-func (p matchesPool) RedeemMatches(s *initialismMatches) {
-	p.Put(s)
-}
-
-func (p buffersPool) RedeemBuffer(s *bytes.Buffer) {
-	p.Put(s)
-}
-
-func (p lexemsPool) RedeemLexems(s *[]nameLexem) {
-	p.Put(s)
-}
-
-func (p splittersPool) RedeemSplitter(s *splitter) {
-	p.Put(s)
-}
-
-func (m initialismMatch) isZero() bool {
-	return m.start == 0 && m.end == 0
 }
 
 func (s splitter) split(name string) *[]nameLexem {
@@ -321,8 +171,7 @@ func (s splitter) gatherInitialismMatches(nameRunes []rune) *initialismMatches {
 		}
 
 		// check for new initialism matches
-		for i := range s.initialisms {
-			r := s.initialismsRunes[i]
+		for i, r := range s.initialismsRunes {
 			if r[0] == currentRune {
 				*newMatches = append(*newMatches, initialismMatch{
 					start:     currentRunePosition,
@@ -421,8 +270,10 @@ func (s splitter) appendBrokenDownCasualString(segments *[]nameLexem, str []rune
 		addNameLexem = addCasualNameLexem
 	}
 
+	// NOTE: (performance). The few remaining non-amortized allocations
+	// lay in the code below: using String() forces
 	for _, rn := range str {
-		if replace, found := nameReplaceTable(rn); found {
+		if replace, found := s.replaceFunc(rn); found {
 			if currentSegment.Len() > 0 {
 				addNameLexem(currentSegment.String())
 				currentSegment.Reset()
@@ -457,100 +308,4 @@ func (s splitter) appendBrokenDownCasualString(segments *[]nameLexem, str []rune
 	if currentSegment.Len() > 0 {
 		addNameLexem(currentSegment.String())
 	}
-}
-
-// isEqualFoldIgnoreSpace is the same as strings.EqualFold, but
-// it ignores leading and trailing blank spaces in the compared
-// string.
-//
-// base is assumed to be composed of upper-cased runes, and be already
-// trimmed.
-//
-// This code is heavily inspired from strings.EqualFold.
-func isEqualFoldIgnoreSpace(base []rune, str string) bool {
-	var i, baseIndex int
-	// equivalent to b := []byte(str), but without data copy
-	b := hackStringBytes(str)
-
-	for i < len(b) {
-		if c := b[i]; c < utf8.RuneSelf {
-			// fast path for ASCII
-			if c != ' ' && c != '\t' {
-				break
-			}
-			i++
-
-			continue
-		}
-
-		// unicode case
-		r, size := utf8.DecodeRune(b[i:])
-		if !unicode.IsSpace(r) {
-			break
-		}
-		i += size
-	}
-
-	if i >= len(b) {
-		return len(base) == 0
-	}
-
-	for _, baseRune := range base {
-		if i >= len(b) {
-			break
-		}
-
-		if c := b[i]; c < utf8.RuneSelf {
-			// single byte rune case (ASCII)
-			if baseRune >= utf8.RuneSelf {
-				return false
-			}
-
-			baseChar := byte(baseRune)
-			if c != baseChar &&
-				!('a' <= c && c <= 'z' && c-'a'+'A' == baseChar) {
-				return false
-			}
-
-			baseIndex++
-			i++
-
-			continue
-		}
-
-		// unicode case
-		r, size := utf8.DecodeRune(b[i:])
-		if unicode.ToUpper(r) != baseRune {
-			return false
-		}
-		baseIndex++
-		i += size
-	}
-
-	if baseIndex != len(base) {
-		return false
-	}
-
-	// all passed: now we should only have blanks
-	for i < len(b) {
-		if c := b[i]; c < utf8.RuneSelf {
-			// fast path for ASCII
-			if c != ' ' && c != '\t' {
-				return false
-			}
-			i++
-
-			continue
-		}
-
-		// unicode case
-		r, size := utf8.DecodeRune(b[i:])
-		if !unicode.IsSpace(r) {
-			return false
-		}
-
-		i += size
-	}
-
-	return true
 }

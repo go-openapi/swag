@@ -23,6 +23,7 @@ linters:
     - nlreturn
     - nonamedreturns
     - paralleltest
+    - recvcheck
     - testpackage
     - thelper
     - tparallel
