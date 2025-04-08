@@ -77,15 +77,15 @@ func YAMLMatcher(path string) bool { return loading.YAMLMatcher(path) }
 // YAMLDoc loads a yaml document from either http or a file and converts it to json.
 //
 // Deprecated: use [loading.YAMLDoc] instead.
-func YAMLDoc(path string, opts ...loading.Option) (json.RawMessage, error) {
-	return loading.YAMLDoc(path, opts...)
+func YAMLDoc(path string) (json.RawMessage, error) {
+	return loading.YAMLDoc(path)
 }
 
 // YAMLData loads a yaml document from either http or a file.
 //
 // Deprecated: use [loading.YAMLData] instead.
-func YAMLData(path string, opts ...loading.Option) (interface{}, error) {
-	return loading.YAMLData(path, opts...)
+func YAMLData(path string) (interface{}, error) {
+	return loading.YAMLData(path)
 }
 
 // loadingOptionsWithDefaults bridges deprecated default settings that use package-level variables,

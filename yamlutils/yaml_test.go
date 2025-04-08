@@ -15,7 +15,12 @@
 package yamlutils
 
 import (
-	json "encoding/json"
+	"embed"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -23,40 +28,86 @@ import (
 	yaml "gopkg.in/yaml.v3"
 )
 
-func TestJSONToYAML(t *testing.T) {
-	sd := `{"1":"the int key value","name":"a string value","y":"some value"}`
-	var data JSONMapSlice
-	require.NoError(t, json.Unmarshal([]byte(sd), &data))
+// embedded test files
 
-	y, err := data.MarshalYAML()
-	require.NoError(t, err)
-	const expected = `"1": the int key value
+//go:embed fixtures/*.yaml
+var embeddedFixtures embed.FS
+
+var fixtureSpecTags, fixture2224, fixtureWithQuotedYKey, fixtureWithYKey []byte
+
+func TestMain(m *testing.M) {
+	fixtureSpecTags = mustLoadFixture("fixture_spec_tags.yaml")
+	fixture2224 = mustLoadFixture("fixture_2224.yaml")
+	fixtureWithQuotedYKey = mustLoadFixture("fixture_with_quoted.yaml")
+	fixtureWithYKey = mustLoadFixture("fixture_with_ykey.yaml")
+
+	os.Exit(m.Run())
+}
+
+func TestJSONToYAML(t *testing.T) {
+	t.Run("should convert JSON to YAML", func(t *testing.T) {
+		t.Run("with string values", func(t *testing.T) {
+			const (
+				input    = `{"1":"the int key value","name":"a string value","y":"some value"}`
+				expected = `"1": the int key value
 name: a string value
 y: some value
 `
-	assert.Equal(t, expected, string(y.([]byte)))
+			)
 
-	nstd := `{"1":"the int key value","name":"a string value","y":"some value","tag":{"name":"tag name"}}`
-	const nestpected = `"1": the int key value
+			var data YAMLMapSlice
+			require.NoError(t, json.Unmarshal([]byte(input), &data))
+
+			y, err := data.MarshalYAML()
+			require.NoError(t, err)
+			assert.Equal(t, expected, string(y.([]byte)))
+		})
+
+		t.Run("with nested object", func(t *testing.T) {
+			const (
+				input    = `{"1":"the int key value","name":"a string value","y":"some value","tag":{"name":"tag name"}}`
+				expected = `"1": the int key value
 name: a string value
 y: some value
 tag:
     name: tag name
 `
-	var ndata JSONMapSlice
-	require.NoError(t, json.Unmarshal([]byte(nstd), &ndata))
-	ny, err := ndata.MarshalYAML()
-	require.NoError(t, err)
-	assert.Equal(t, nestpected, string(ny.([]byte)))
+			)
 
-	ydoc, err := BytesToYAMLDoc([]byte(fixtures2224))
-	require.NoError(t, err)
-	b, err := YAMLToJSON(ydoc)
-	require.NoError(t, err)
+			var data YAMLMapSlice
+			require.NoError(t, json.Unmarshal([]byte(input), &data))
+			ny, err := data.MarshalYAML()
+			require.NoError(t, err)
+			assert.Equal(t, expected, string(ny.([]byte)))
+		})
+	})
 
-	var bdata JSONMapSlice
-	require.NoError(t, json.Unmarshal(b, &bdata))
+	t.Run("with complete doc", func(t *testing.T) {
+		t.Run("should convert bytes to YAML doc", func(t *testing.T) {
+			ydoc, err := BytesToYAMLDoc(fixture2224)
+			require.NoError(t, err)
 
+			t.Run("should convert YAML doc to JSON", func(t *testing.T) {
+				buf, err := YAMLToJSON(ydoc)
+				require.NoError(t, err)
+
+				t.Run("should unmarshal JSON into YAMLMapSlice", func(t *testing.T) {
+					var data YAMLMapSlice
+					require.NoError(t, json.Unmarshal(buf, &data))
+
+					t.Run("should marshal YAMLMapSlice into the original doc", func(t *testing.T) {
+						reconstructed, err := data.MarshalYAML()
+						require.NoError(t, err)
+
+						text, ok := reconstructed.([]byte)
+						require.True(t, ok)
+
+						assert.YAMLEq(t, string(fixture2224), string(text))
+					})
+				})
+			})
+		})
+	})
 }
 
 func TestJSONToYAMLWithNull(t *testing.T) {
@@ -67,7 +118,7 @@ name: null
 y: some value
 `
 	)
-	var data JSONMapSlice
+	var data YAMLMapSlice
 	require.NoError(t, json.Unmarshal([]byte(jazon), &data))
 	ny, err := data.MarshalYAML()
 	require.NoError(t, err)
@@ -77,18 +128,18 @@ y: some value
 func TestMarshalYAML(t *testing.T) {
 	t.Run("marshalYAML should be deterministic", func(t *testing.T) {
 		const (
-			jazon    = `{"1":"x","2":null,"3":{"a":1,"b":2,"c":3}}`
+			jazon    = `{"1":"x","2":null,"3":{"a":1.1,"b":2.2,"c":3.3}}`
 			expected = `"1": x
 "2": null
 "3":
-    a: !!float 1
-    b: !!float 2
-    c: !!float 3
+    a: 1.1
+    b: 2.2
+    c: 3.3
 `
 		)
 		const iterations = 10
 		for n := 0; n < iterations; n++ {
-			var data JSONMapSlice
+			var data YAMLMapSlice
 			require.NoError(t, json.Unmarshal([]byte(jazon), &data))
 			ny, err := data.MarshalYAML()
 			require.NoError(t, err)
@@ -98,116 +149,156 @@ func TestMarshalYAML(t *testing.T) {
 }
 
 func TestYAMLToJSON(t *testing.T) {
-	sd := `---
+	const sd = `---
 1: the int key value
 name: a string value
 'y': some value
 `
-	var data yaml.Node
-	_ = yaml.Unmarshal([]byte(sd), &data)
 
-	d, err := YAMLToJSON(data)
-	require.NoError(t, err)
-	require.NotNil(t, d)
-	assert.JSONEq(t, `{"1":"the int key value","name":"a string value","y":"some value"}`, string(d))
+	t.Run("with initial YAML doc", func(t *testing.T) {
+		var data yaml.Node
+		_ = yaml.Unmarshal([]byte(sd), &data)
 
-	ns := []*yaml.Node{
-		{
-			Kind:  yaml.ScalarNode,
-			Value: "true",
-			Tag:   "!!bool",
-		},
-		{
-			Kind:  yaml.ScalarNode,
-			Value: "the bool value",
-			Tag:   "!!str",
-		},
-	}
-	data.Content[0].Content = append(data.Content[0].Content, ns...)
-	d, err = YAMLToJSON(data)
-	require.Error(t, err)
-	require.Nil(t, d)
+		t.Run("should convert YAML doc to JSON", func(t *testing.T) {
+			d, err := YAMLToJSON(data)
+			require.NoError(t, err)
+			require.NotNil(t, d)
+			assert.JSONEq(t, `{"1":"the int key value","name":"a string value","y":"some value"}`, string(d))
+		})
 
-	data.Content[0].Content = data.Content[0].Content[:len(data.Content[0].Content)-2]
-
-	tag := []*yaml.Node{
-		{
-			Kind:  yaml.ScalarNode,
-			Value: "tag",
-			Tag:   "!!str",
-		},
-		{
-			Kind: yaml.MappingNode,
-			Content: []*yaml.Node{
+		t.Run("should NOT convert appended YAML doc to JSON", func(t *testing.T) {
+			ns := []*yaml.Node{
 				{
 					Kind:  yaml.ScalarNode,
-					Value: "name",
-					Tag:   "!!str",
+					Value: "true",
+					Tag:   "!!bool",
 				},
 				{
 					Kind:  yaml.ScalarNode,
-					Value: "tag name",
+					Value: "the bool value",
 					Tag:   "!!str",
+				},
+			}
+			data.Content[0].Content = append(data.Content[0].Content, ns...)
+
+			d, err := YAMLToJSON(data)
+			require.Error(t, err)
+			require.Nil(t, d)
+			require.ErrorContains(t, err, "is not supported as map key")
+		})
+	})
+
+	t.Run("with initial YAML doc", func(t *testing.T) {
+		var data yaml.Node
+		_ = yaml.Unmarshal([]byte(sd), &data)
+
+		tag := []*yaml.Node{
+			{
+				Kind:  yaml.ScalarNode,
+				Value: "tag",
+				Tag:   "!!str",
+			},
+			{
+				Kind: yaml.MappingNode,
+				Content: []*yaml.Node{
+					{
+						Kind:  yaml.ScalarNode,
+						Value: "name",
+						Tag:   "!!str",
+					},
+					{
+						Kind:  yaml.ScalarNode,
+						Value: "tag name",
+						Tag:   "!!str",
+					},
 				},
 			},
-		},
-	}
-	data.Content[0].Content = append(data.Content[0].Content, tag...)
+		}
+		data.Content[0].Content = append(data.Content[0].Content, tag...)
 
-	d, err = YAMLToJSON(data)
-	require.NoError(t, err)
-	assert.JSONEq(t, `{"1":"the int key value","name":"a string value","y":"some value","tag":{"name":"tag name"}}`, string(d))
+		t.Run("should convert appended YAML doc to JSON", func(t *testing.T) {
+			d, err := YAMLToJSON(data)
+			require.NoError(t, err)
+			assert.JSONEq(t, `{"1":"the int key value","name":"a string value","y":"some value","tag":{"name":"tag name"}}`, string(d))
+		})
 
-	tag[1].Content = []*yaml.Node{
-		{
-			Kind:  yaml.ScalarNode,
-			Value: "true",
-			Tag:   "!!bool",
-		},
-		{
-			Kind:  yaml.ScalarNode,
-			Value: "the bool tag name",
-			Tag:   "!!str",
-		},
-	}
+		t.Run("should NOT convert appended YAML doc to JSON: key cannot be a bool", func(t *testing.T) {
+			tag[1].Content = []*yaml.Node{
+				{
+					Kind:  yaml.ScalarNode,
+					Value: "true",
+					Tag:   "!!bool",
+				},
+				{
+					Kind:  yaml.ScalarNode,
+					Value: "the bool tag name",
+					Tag:   "!!str",
+				},
+			}
 
-	d, err = YAMLToJSON(data)
-	require.Error(t, err)
-	require.Nil(t, d)
+			d, err := YAMLToJSON(data)
+			require.Error(t, err)
+			require.Nil(t, d)
+			require.ErrorContains(t, err, "is not supported as map key")
+		})
+	})
 
-	var lst []interface{}
-	lst = append(lst, "hello")
+	t.Run("with initial YAML doc", func(t *testing.T) {
+		var data yaml.Node
+		_ = yaml.Unmarshal([]byte(sd), &data)
 
-	d, err = YAMLToJSON(lst)
-	require.NoError(t, err)
-	require.NotNil(t, d)
-	assert.Equal(t, []byte(`["hello"]`), []byte(d))
+		t.Run("should convert any array to JSON", func(t *testing.T) {
+			var lst []interface{}
+			lst = append(lst, "hello")
 
-	lst = append(lst, data)
+			d, err := YAMLToJSON(lst)
+			require.NoError(t, err)
+			require.NotNil(t, d)
+			assert.JSONEq(t, `["hello"]`, string(d))
 
-	d, err = YAMLToJSON(lst)
-	require.Error(t, err)
-	require.Nil(t, d)
+			t.Run("should convert object appended to array to JSON", func(t *testing.T) {
+				lst = append(lst, data)
 
-	_, err = BytesToYAMLDoc([]byte("- name: hello\n"))
-	require.Error(t, err)
+				d, err = YAMLToJSON(lst)
+				require.NoError(t, err)
+				require.NotEmpty(t, d)
+				assert.JSONEq(t, `["hello",{"1":"the int key value","name":"a string value","y":"some value"}]`, string(d))
+			})
+		})
+	})
 
-	dd, err := BytesToYAMLDoc([]byte("description: 'object created'\n"))
-	require.NoError(t, err)
+	t.Run("from YAML bytes", func(t *testing.T) {
+		t.Run("root document is an object. Should not convert", func(t *testing.T) {
+			_, err := BytesToYAMLDoc([]byte("- name: hello\n"))
+			require.Error(t, err)
+		})
 
-	d, err = YAMLToJSON(dd)
-	require.NoError(t, err)
-	assert.JSONEq(t, `{"description":"object created"}`, string(d))
+		t.Run("document is invalid YAML. Should not convert", func(t *testing.T) {
+			_, err := BytesToYAMLDoc([]byte("name:\tgreetings: hello\n"))
+			require.Error(t, err)
+		})
+
+		t.Run("root document is an object. Should convert", func(t *testing.T) {
+			dd, err := BytesToYAMLDoc([]byte("description: 'object created'\n"))
+			require.NoError(t, err)
+
+			t.Run("should convert YAML object to JSON", func(t *testing.T) {
+				d, err := YAMLToJSON(dd)
+				require.NoError(t, err)
+				assert.JSONEq(t, `{"description":"object created"}`, string(d))
+			})
+		})
+	})
 }
 
 func TestWithYKey(t *testing.T) {
-	doc, err := BytesToYAMLDoc([]byte(withYKey))
+	doc, err := BytesToYAMLDoc([]byte(fixtureWithYKey))
 	require.NoError(t, err)
 
 	_, err = YAMLToJSON(doc)
 	require.NoError(t, err)
 
-	doc, err = BytesToYAMLDoc([]byte(withQuotedYKey))
+	doc, err = BytesToYAMLDoc([]byte(fixtureWithQuotedYKey))
 	require.NoError(t, err)
 	jsond, err := YAMLToJSON(doc)
 	require.NoError(t, err)
@@ -244,284 +335,48 @@ func TestMapKeyTypes(t *testing.T) {
 	require.NoError(t, err)
 }
 
-const fixtures2224 = `definitions:
-  Time:
-    type: string
-    format: date-time
-    x-go-type:
-      import:
-        package: time
-      embedded: true
-      type: Time
-    x-nullable: true
+func TestYAMLTags(t *testing.T) {
+	t.Run("should marshal as a YAML doc", func(t *testing.T) {
+		doc, err := BytesToYAMLDoc(fixtureSpecTags)
+		require.NoError(t, err)
 
-  TimeAsObject:  # <- time.Time is actually a struct
-    type: string
-    format: date-time
-    x-go-type:
-      import:
-        package: time
-        hints:
-          kind: object
-      embedded: true
-      type: Time
-    x-nullable: true
+		t.Run("doc should marshal as the original doc", func(t *testing.T) {
+			text, err := yaml.Marshal(doc)
+			require.NoError(t, err)
+			assert.YAMLEq(t, string(fixtureSpecTags), string(text))
+		})
 
-  Raw:
-    x-go-type:
-      import:
-        package: encoding/json
-      hints:
-        kind: primitive
-      embedded: true
-      type: RawMessage
+		t.Run("doc should marshal to JSON", func(t *testing.T) {
+			jazon, err := YAMLToJSON(doc)
+			require.NoError(t, err)
 
-  Request:
-    x-go-type:
-      import:
-        package: net/http
-      hints:
-        kind: object
-      embedded: true
-      type: Request
+			t.Run("json should unmarshal to YAMLMapSlice", func(t *testing.T) {
+				var data YAMLMapSlice
+				require.NoError(t, json.Unmarshal(jazon, &data))
 
-  RequestPointer:
-    x-go-type:
-      import:
-        package: net/http
-      hints:
-        kind: object
-        nullable: true
-      embedded: true
-      type: Request
+				t.Run("YAMLMapSlice should marshal to YAML bytes", func(t *testing.T) {
+					text, err := data.MarshalYAML()
+					require.NoError(t, err)
 
-  OldStyleImport:
-    type: object
-    x-go-type:
-      import:
-        package: net/http
-      type: Request
-      hints:
-        noValidation: true
+					buf, ok := text.([]byte)
+					require.True(t, ok)
 
-  OldStyleRenamed:
-    type: object
-    x-go-type:
-      import:
-        package: net/http
-      type: Request
-      hints:
-        noValidation: true
-    x-go-name: OldRenamed
+					// standard YAML used by [assert.YAMLEq] interprets YAML timestamp as [time.Time],
+					// but in our context, we use string
+					neutralizeTimestamp := strings.ReplaceAll(string(fixtureSpecTags), "default:", "default: !!str ")
+					assert.YAMLEq(t, neutralizeTimestamp, string(buf))
+				})
+			})
+		})
+	})
+}
 
-  ObjectWithEmbedded:
-    type: object
-    properties:
-      a:
-        $ref: '#/definitions/Time'
-      b:
-        $ref: '#/definitions/Request'
-      c:
-        $ref: '#/definitions/TimeAsObject'
-      d:
-        $ref: '#/definitions/Raw'
-      e:
-        $ref: '#/definitions/JSONObject'
-      f:
-        $ref: '#/definitions/JSONMessage'
-      g:
-        $ref: '#/definitions/JSONObjectWithAlias'
+func mustLoadFixture(name string) []byte {
+	const msg = "wrong embedded FS configuration: %w"
+	data, err := embeddedFixtures.ReadFile(path.Join("fixtures", name)) // "/" even on windows
+	if err != nil {
+		panic(fmt.Errorf(msg, err))
+	}
 
-  ObjectWithExternals:
-    type: object
-    properties:
-      a:
-        $ref: '#/definitions/OldStyleImport'
-      b:
-        $ref: '#/definitions/OldStyleRenamed'
-
-  Base:
-    properties: &base
-      id:
-        type: integer
-        format: uint64
-        x-go-custom-tag: 'gorm:"primary_key"'
-      FBID:
-        type: integer
-        format: uint64
-        x-go-custom-tag: 'gorm:"index"'
-      created_at:
-        $ref: "#/definitions/Time"
-      updated_at:
-        $ref: "#/definitions/Time"
-      version:
-        type: integer
-        format: uint64
-
-  HotspotType:
-    type: string
-    enum:
-      - A
-      - B
-      - C
-
-  Hotspot:
-    type: object
-    allOf:
-      - properties: *base
-      - properties:
-          access_points:
-            type: array
-            items:
-              $ref: '#/definitions/AccessPoint'
-          type:
-            $ref: '#/definitions/HotspotType'
-        required:
-          - type
-
-  AccessPoint:
-    type: object
-    allOf:
-      - properties: *base
-      - properties:
-          mac_address:
-            type: string
-            x-go-custom-tag: 'gorm:"index;not null;unique"'
-          hotspot_id:
-            type: integer
-            format: uint64
-          hotspot:
-            $ref: '#/definitions/Hotspot'
-
-  JSONObject:
-    type: object
-    additionalProperties:
-      type: array
-      items:
-        $ref: '#/definitions/Raw'
-
-  JSONObjectWithAlias:
-    type: object
-    additionalProperties:
-      type: object
-      properties:
-        message:
-          $ref: '#/definitions/JSONMessage'
-
-  JSONMessage:
-    $ref: '#/definitions/Raw'
-
-  Incorrect:
-    x-go-type:
-      import:
-        package: net
-        hints:
-          kind: array
-      embedded: true
-      type: Buffers
-    x-nullable: true
-`
-
-const withQuotedYKey = `consumes:
-- application/json
-definitions:
-  viewBox:
-    type: object
-    properties:
-      x:
-        type: integer
-        format: int16
-      # y -> types don't match: expect map key string or int get: bool
-      "y":
-        type: integer
-        format: int16
-      width:
-        type: integer
-        format: int16
-      height:
-        type: integer
-        format: int16
-info:
-  description: Test RESTful APIs
-  title: Test Server
-  version: 1.0.0
-basePath: /api
-paths:
-  /test:
-    get:
-      operationId: findAll
-      parameters:
-        - name: since
-          in: query
-          type: integer
-          format: int64
-        - name: limit
-          in: query
-          type: integer
-          format: int32
-          default: 20
-      responses:
-        200:
-          description: Array[Trigger]
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/viewBox"
-produces:
-- application/json
-schemes:
-- https
-swagger: "2.0"
-`
-
-const withYKey = `consumes:
-- application/json
-definitions:
-  viewBox:
-    type: object
-    properties:
-      x:
-        type: integer
-        format: int16
-      # y -> types don't match: expect map key string or int get: bool
-      y:
-        type: integer
-        format: int16
-      width:
-        type: integer
-        format: int16
-      height:
-        type: integer
-        format: int16
-info:
-  description: Test RESTful APIs
-  title: Test Server
-  version: 1.0.0
-basePath: /api
-paths:
-  /test:
-    get:
-      operationId: findAll
-      parameters:
-        - name: since
-          in: query
-          type: integer
-          format: int64
-        - name: limit
-          in: query
-          type: integer
-          format: int32
-          default: 20
-      responses:
-        200:
-          description: Array[Trigger]
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/viewBox"
-produces:
-- application/json
-schemes:
-- https
-swagger: "2.0"
-`
+	return data
+}

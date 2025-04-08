@@ -1,0 +1,46 @@
+/getRecordsMax:
+  post: ~   # YAML null
+  get:
+    operationId: getRecordsMax
+    parameters:
+    - name: maxRecords
+      in: body
+      required: true
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: object
+          properties:
+            m:
+              type: number
+              maximum: 104.4
+              minimum: 11.5
+            n:
+              type: integer
+              maximum: 10
+              minimum: 1
+            s:
+              type: string
+              enum:
+              - a
+              - b
+              - c
+            datum:
+              type: string
+              default: 2025-04-01 16:52:00  # YAML timestamp
+    - name: simpleArrayWithSliceValidation
+      in: body
+      schema:
+        type: array
+        items:
+          type: integer
+          enum:
+          -
+            - 1
+            - 2
+            - 3
+          -
+            - 4
+            - 5
+            - 6

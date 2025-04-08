@@ -15,48 +15,16 @@
 package jsonutils
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-//nolint:testifylint
-func TestJSONConcatenation(t *testing.T) {
-	// we require an exact assertion (with ordering), not just JSON equivalence. Hence: testifylint disabled.
-
-	assert.Nil(t, ConcatJSON())
-	assert.Equal(t, ConcatJSON([]byte(`{"id":1}`)), []byte(`{"id":1}`))
-	assert.Equal(t, ConcatJSON([]byte(`{}`), []byte(`{}`)), []byte(`{}`))
-	assert.Equal(t, ConcatJSON([]byte(`[]`), []byte(`[]`)), []byte(`[]`))
-	assert.Equal(t, ConcatJSON([]byte(`{"id":1}`), []byte(`{"name":"Rachel"}`)), []byte(`{"id":1,"name":"Rachel"}`))
-	assert.Equal(t, ConcatJSON([]byte(`[{"id":1}]`), []byte(`[{"name":"Rachel"}]`)), []byte(`[{"id":1},{"name":"Rachel"}]`))
-	assert.Equal(t, ConcatJSON([]byte(`{}`), []byte(`{"name":"Rachel"}`)), []byte(`{"name":"Rachel"}`))
-	assert.Equal(t, ConcatJSON([]byte(`[]`), []byte(`[{"name":"Rachel"}]`)), []byte(`[{"name":"Rachel"}]`))
-	assert.Equal(t, ConcatJSON([]byte(`{"id":1}`), []byte(`{}`)), []byte(`{"id":1}`))
-	assert.Equal(t, ConcatJSON([]byte(`[{"id":1}]`), []byte(`[]`)), []byte(`[{"id":1}]`))
-	assert.Equal(t, ConcatJSON([]byte(`{}`), []byte(`{}`), []byte(`{}`)), []byte(`{}`))
-	assert.Equal(t, ConcatJSON([]byte(`[]`), []byte(`[]`), []byte(`[]`)), []byte(`[]`))
-	assert.Equal(t, ConcatJSON([]byte(`{"id":1}`), []byte(`{"name":"Rachel"}`), []byte(`{"age":32}`)), []byte(`{"id":1,"name":"Rachel","age":32}`))
-	assert.Equal(t, ConcatJSON([]byte(`[{"id":1}]`), []byte(`[{"name":"Rachel"}]`), []byte(`[{"age":32}]`)), []byte(`[{"id":1},{"name":"Rachel"},{"age":32}]`))
-	assert.Equal(t, ConcatJSON([]byte(`{}`), []byte(`{"name":"Rachel"}`), []byte(`{"age":32}`)), []byte(`{"name":"Rachel","age":32}`))
-	assert.Equal(t, ConcatJSON([]byte(`[]`), []byte(`[{"name":"Rachel"}]`), []byte(`[{"age":32}]`)), []byte(`[{"name":"Rachel"},{"age":32}]`))
-	assert.Equal(t, ConcatJSON([]byte(`{"id":1}`), []byte(`{}`), []byte(`{"age":32}`)), []byte(`{"id":1,"age":32}`))
-	assert.Equal(t, ConcatJSON([]byte(`[{"id":1}]`), []byte(`[]`), []byte(`[{"age":32}]`)), []byte(`[{"id":1},{"age":32}]`))
-	assert.Equal(t, ConcatJSON([]byte(`{"id":1}`), []byte(`{"name":"Rachel"}`), []byte(`{}`)), []byte(`{"id":1,"name":"Rachel"}`))
-	assert.Equal(t, ConcatJSON([]byte(`[{"id":1}]`), []byte(`[{"name":"Rachel"}]`), []byte(`[]`)), []byte(`[{"id":1},{"name":"Rachel"}]`))
-
-	// add test on null
-	assert.Equal(t, ConcatJSON([]byte(nil)), []byte(nil))
-	assert.Equal(t, ConcatJSON([]byte(`null`)), []byte(nil))
-	assert.Equal(t, ConcatJSON([]byte(nil), []byte(`null`)), []byte(nil))
-	assert.Equal(t, ConcatJSON([]byte(`{"id":null}`), []byte(`null`)), []byte(`{"id":null}`))
-	assert.Equal(t, ConcatJSON([]byte(`{"id":null}`), []byte(`null`), []byte(`{"name":"Rachel"}`)), []byte(`{"id":null,"name":"Rachel"}`))
-}
-
 type SharedCounters struct {
 	Counter1 int64 `json:"counter1,omitempty"`
-	Counter2 int64 `json:"counter2:,omitempty"`
+	Counter2 int64 `json:"counter2:,omitempty"` // the ":" in the json field name is left on-purpose for this test
 }
 
 type AggregationObject struct {
@@ -70,6 +38,7 @@ func (m *AggregationObject) UnmarshalJSON(raw []byte) error {
 	if err := ReadJSON(raw, &aO0); err != nil {
 		return err
 	}
+
 	m.SharedCounters = aO0
 
 	// now for regular properties
@@ -79,6 +48,7 @@ func (m *AggregationObject) UnmarshalJSON(raw []byte) error {
 	if err := ReadJSON(raw, &propsAggregationObject); err != nil {
 		return err
 	}
+
 	m.Count = propsAggregationObject.Count
 
 	return nil
@@ -105,29 +75,107 @@ func (m AggregationObject) MarshalJSON() ([]byte, error) {
 		return nil, errAggregationObject
 	}
 	_parts = append(_parts, jsonDataPropsAggregationObject)
+
 	return ConcatJSON(_parts...), nil
 }
 
-func TestIssue2350(t *testing.T) {
+func TestReadWriteJSON(t *testing.T) {
 	obj := AggregationObject{Count: 290, SharedCounters: SharedCounters{Counter1: 304, Counter2: 948}}
 
-	rtjson, err := WriteJSON(obj)
-	require.NoError(t, err)
+	t.Run("with default adapter", func(t *testing.T) {
+		t.Run("should WriteJSON from struct", func(t *testing.T) {
+			rtjson, err := WriteJSON(obj)
+			require.NoError(t, err)
 
-	otjson, err := obj.MarshalJSON()
-	require.NoError(t, err)
-	require.JSONEq(t, string(rtjson), string(otjson))
+			t.Run("should MarshalJSON using WriteJSON from this type", func(t *testing.T) {
+				otjson, err := obj.MarshalJSON()
+				require.NoError(t, err)
 
-	var obj1 AggregationObject
-	require.NoError(t, ReadJSON(rtjson, &obj1))
-	require.Equal(t, obj, obj1)
+				t.Run("both marshaling methods should be equivalent", func(t *testing.T) {
+					require.JSONEq(t, string(rtjson), string(otjson))
+				})
+			})
 
-	var obj11 AggregationObject
-	require.NoError(t, obj11.UnmarshalJSON(rtjson))
-	require.Equal(t, obj, obj11)
+			t.Run("should MarshalJSON using the standard library", func(t *testing.T) {
+				otjson, err := json.Marshal(obj)
+				require.NoError(t, err)
 
-	jsons := `{"counter1":123,"counter2:":456,"count":999}`
-	var obj2 AggregationObject
-	require.NoError(t, ReadJSON([]byte(jsons), &obj2))
-	require.Equal(t, AggregationObject{SharedCounters: SharedCounters{Counter1: 123, Counter2: 456}, Count: 999}, obj2)
+				t.Run("both marshaling methods should be equivalent", func(t *testing.T) {
+					require.JSONEq(t, string(rtjson), string(otjson))
+				})
+			})
+
+			t.Run("should ReadJSON into new struct", func(t *testing.T) {
+				var obj1 AggregationObject
+				require.NoError(t, ReadJSON(rtjson, &obj1))
+
+				t.Run("this should copy the object", func(t *testing.T) {
+					require.Equal(t, obj, obj1)
+				})
+			})
+
+			t.Run("should UnmarshalJSON using ReadJSON into new struct", func(t *testing.T) {
+				var obj11 AggregationObject
+				require.NoError(t, obj11.UnmarshalJSON(rtjson))
+
+				t.Run("this should copy the object", func(t *testing.T) {
+					require.Equal(t, obj, obj11)
+				})
+			})
+
+			t.Run("should UnmarshalJSON using the standard library", func(t *testing.T) {
+				var obj11 AggregationObject
+				require.NoError(t, json.Unmarshal(rtjson, &obj11))
+
+				t.Run("this should copy the object", func(t *testing.T) {
+					require.Equal(t, obj, obj11)
+				})
+			})
+		})
+
+		t.Run("with counters", func(t *testing.T) {
+			t.Run("should ReadJSON into struct", func(t *testing.T) {
+				jsons := `{"counter1":123,"counter2:":456,"count":999}`
+				var obj2 AggregationObject
+
+				require.NoError(t, ReadJSON([]byte(jsons), &obj2))
+				require.Equal(t, AggregationObject{SharedCounters: SharedCounters{Counter1: 123, Counter2: 456}, Count: 999}, obj2)
+			})
+		})
+		t.Run("using FromDynamicJSON", func(t *testing.T) {
+			const epsilon = 1e-6
+			var obj2 interface{}
+
+			require.NoError(t, FromDynamicJSON(obj, &obj2))
+			asMap, ok := obj2.(map[string]interface{})
+			require.True(t, ok)
+			assert.Len(t, asMap, 3) // 3 fields in struct
+			c1, ok := asMap["counter1"]
+			require.True(t, ok)
+			assert.InDelta(t, float64(304), c1, epsilon)
+
+			c2, ok := asMap["counter2:"]
+			require.True(t, ok)
+			assert.InDelta(t, float64(948), c2, epsilon)
+
+			c, ok := asMap["count"]
+			require.True(t, ok)
+			assert.InDelta(t, float64(290), c, epsilon)
+		})
+
+		t.Run("error in FromDynamicJSON (1)", func(t *testing.T) {
+			var obj2 interface{}
+
+			require.Error(t, FromDynamicJSON(obj, obj2)) // target is not a pointer
+		})
+
+		t.Run("error in FromDynamicJSON (2)", func(t *testing.T) {
+			var obj2 interface{}
+			var source struct {
+				A int `json:"a"`
+				B func()
+			}
+			require.Error(t, FromDynamicJSON(source, obj2))
+		})
+	})
 }
