@@ -16,11 +16,14 @@ package loading
 
 import (
 	"context"
+	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"runtime"
 	"testing"
+	"testing/fstest"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -35,7 +38,7 @@ func TestLoadFromHTTP(t *testing.T) {
 		content, err := LoadFromFileOrHTTP(ts.URL)
 		require.NoError(t, err)
 
-		assert.YAMLEq(t, string(YAMLPetStore), string(content))
+		assert.YAMLEq(t, string(yamlPetStore), string(content))
 	})
 
 	t.Run("should not load from invalid URL", func(t *testing.T) {
@@ -116,9 +119,10 @@ func TestLoadFromHTTP(t *testing.T) {
 
 			t.Run("with custom HTTP client mocking a remote", func(t *testing.T) {
 				cwd, _ := os.Getwd()
+				fixtureDir := filepath.Join(cwd, "fixtures")
 				client := &http.Client{
 					// intercepts calls to the server and serves local files instead
-					Transport: http.NewFileTransport(http.FS(os.DirFS(cwd))),
+					Transport: http.NewFileTransport(http.Dir(fixtureDir)),
 				}
 
 				t.Run("should not load unknown path", func(t *testing.T) {
@@ -169,19 +173,43 @@ func TestLoadFromHTTP(t *testing.T) {
 		})
 	})
 
-	t.Run("should load from local embedded file system", func(t *testing.T) {
+	t.Run("should load from local embedded file system (single file)", func(t *testing.T) {
+		// using plain fs.FS
+		rooted, err := fs.Sub(embeddedFixtures, "fixtures")
+		require.NoError(t, err)
 		b, err := LoadFromFileOrHTTP("petstore_fixture.yaml",
+			WithFS(rooted),
+		)
+		require.NoError(t, err)
+		assert.YAMLEq(t, string(yamlPetStore), string(b))
+	})
+
+	t.Run("should load from memory file system (single file)", func(t *testing.T) {
+		mapfs := make(fstest.MapFS)
+		mapfs["file"] = &fstest.MapFile{Data: []byte("content"), Mode: fs.ModePerm}
+		// using fs.ReadFileFS
+		b, err := LoadFromFileOrHTTP("file",
+			WithFS(mapfs),
+		)
+		require.NoError(t, err)
+		assert.Equal(t, string("content"), string(b))
+	})
+
+	t.Run("should load from local embedded file system (path)", func(t *testing.T) {
+		// using plain fs.ReadFileFS
+		// NOTE: this doesn't work on windows, because embed.FS uses / even on windows
+		b, err := LoadFromFileOrHTTP("fixtures/petstore_fixture.yaml",
 			WithFS(embeddedFixtures),
 		)
 		require.NoError(t, err)
-		assert.YAMLEq(t, string(YAMLPetStore), string(b))
+		assert.YAMLEq(t, string(yamlPetStore), string(b))
 	})
 }
 
 func TestLoadStrategy(t *testing.T) {
 	const thisIsNotIt = "not it"
 	loader := func(_ string) ([]byte, error) {
-		return YAMLPetStore, nil
+		return yamlPetStore, nil
 	}
 	remLoader := func(_ string) ([]byte, error) {
 		return []byte(thisIsNotIt), nil
@@ -190,7 +218,7 @@ func TestLoadStrategy(t *testing.T) {
 	t.Run("should serve local strategy", func(t *testing.T) {
 		ldr := LoadStrategy("blah", loader, remLoader)
 		b, _ := ldr("")
-		assert.YAMLEq(t, string(YAMLPetStore), string(b))
+		assert.YAMLEq(t, string(yamlPetStore), string(b))
 	})
 
 	t.Run("should serve remote strategy with http", func(t *testing.T) {
