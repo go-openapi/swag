@@ -90,15 +90,31 @@ func WithHTTPClient(client *http.Client) Option {
 	}
 }
 
-// WithFS sets a file system for the local file loader.
+// WithFileFS sets a file system for the local file loader.
+//
+// If the provided file system is a [fs.ReadFileFS], the ReadFile function is used.
+// Otherwise, ReadFile is wrapped using [fs.ReadFile].
 //
 // By default, the file system is the one provided by the os package.
 //
 // For example, this may be set to consume from an embedded file system, or a rooted FS.
-func WithFS(fs fs.ReadFileFS) Option {
+func WithFS(filesystem fs.FS) Option {
 	return func(o *options) {
-		o.fs = fs
+		if rfs, ok := filesystem.(fs.ReadFileFS); ok {
+			o.fs = rfs
+
+			return
+		}
+		o.fs = readFileFS{FS: filesystem}
 	}
+}
+
+type readFileFS struct {
+	fs.FS
+}
+
+func (r readFileFS) ReadFile(name string) ([]byte, error) {
+	return fs.ReadFile(r.FS, name)
 }
 
 func optionsWithDefaults(opts []Option) options {

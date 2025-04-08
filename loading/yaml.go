@@ -34,12 +34,7 @@ func YAMLDoc(path string, opts ...Option) (json.RawMessage, error) {
 		return nil, err
 	}
 
-	data, err := yamlutils.YAMLToJSON(yamlDoc)
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
+	return yamlutils.YAMLToJSON(yamlDoc)
 }
 
 // YAMLData loads a yaml document from either http or a file.

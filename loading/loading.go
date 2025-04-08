@@ -16,6 +16,7 @@ package loading
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"io"
 	"log"
@@ -63,10 +64,12 @@ func LoadFromFileOrHTTP(pth string, opts ...Option) ([]byte, error) {
 // - `file://host/folder/file` becomes an UNC path like `\\host\folder\file` (no port specification is supported)
 // - `file:///c:/folder/file` becomes `C:\folder\file`
 // - `file://c:/folder/file` is tolerated (without leading `/`) and becomes `c:\folder\file`
-func LoadStrategy(pth string, local, remote func(string) ([]byte, error), _ ...Option) func(string) ([]byte, error) {
+func LoadStrategy(pth string, local, remote func(string) ([]byte, error), opts ...Option) func(string) ([]byte, error) {
 	if strings.HasPrefix(pth, "http") {
 		return remote
 	}
+	o := optionsWithDefaults(opts)
+	_, isEmbedFS := o.fs.(embed.FS)
 
 	return func(p string) ([]byte, error) {
 		upth, err := url.PathUnescape(p)
@@ -74,19 +77,19 @@ func LoadStrategy(pth string, local, remote func(string) ([]byte, error), _ ...O
 			return nil, err
 		}
 
-		if !strings.HasPrefix(p, `file://`) {
+		cpth, hasPrefix := strings.CutPrefix(upth, "file://")
+		if !hasPrefix || isEmbedFS || runtime.GOOS != "windows" {
+			// crude processing: trim the file:// prefix. This leaves full URIs with a host with a (mostly) unexpected result
 			// regular file path provided: just normalize slashes
-			return local(filepath.FromSlash(upth))
+			if isEmbedFS {
+				// on windows, we need to slash the path if FS is an embed FS.
+				return local(strings.TrimLeft(filepath.ToSlash(cpth), "./")) // remove invalid leading characters for embed FS
+			}
+
+			return local(filepath.FromSlash(cpth))
 		}
 
-		if runtime.GOOS != "windows" {
-			// crude processing: this leaves full URIs with a host with a (mostly) unexpected result
-			upth = strings.TrimPrefix(upth, `file://`)
-
-			return local(filepath.FromSlash(upth))
-		}
-
-		// windows-only pre-processing of file://... URIs
+		// windows-only pre-processing of file://... URIs, excluding embed.FS
 
 		// support for canonical file URIs on windows.
 		u, err := url.Parse(filepath.ToSlash(upth))

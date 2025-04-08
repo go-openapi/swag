@@ -18,23 +18,25 @@ import (
 	"embed"
 	"fmt"
 	"net/http"
+	"os"
+	"path"
+	"testing"
 )
 
 // embedded test files
 
-//go:embed petstore_fixture.yaml
+//go:embed fixtures/*
 var embeddedFixtures embed.FS
 
-// YAMLPetStore embeds the classical pet store API swagger example.
-var YAMLPetStore []byte
+// yamlPetStore embeds the classical pet store API swagger example.
+var yamlPetStore []byte
+var jsonPetStore []byte
 
-func init() {
-	data, err := embeddedFixtures.ReadFile("petstore_fixture.yaml")
-	if err != nil {
-		panic(fmt.Errorf("wrong embedded FS configuration: %w", err))
-	}
+func TestMain(m *testing.M) {
+	yamlPetStore = mustLoadFixture("petstore_fixture.yaml")
+	jsonPetStore = mustLoadFixture("petstore_fixture.json")
 
-	YAMLPetStore = data
+	os.Exit(m.Run())
 }
 
 // test handlers
@@ -42,7 +44,13 @@ func init() {
 // serveYAMLPestore is a http handler to serve the YAMLPestore doc.
 func serveYAMLPestore(rw http.ResponseWriter, _ *http.Request) {
 	rw.WriteHeader(http.StatusOK)
-	_, _ = rw.Write(YAMLPetStore)
+	_, _ = rw.Write(yamlPetStore)
+}
+
+// serveJSONPestore is a http handler to serve the jsonPestore doc.
+func serveJSONPestore(rw http.ResponseWriter, _ *http.Request) {
+	rw.WriteHeader(http.StatusOK)
+	_, _ = rw.Write(jsonPetStore)
 }
 
 func serveOK(rw http.ResponseWriter, _ *http.Request) {
@@ -85,4 +93,14 @@ func serveRequireHeaderFunc(key, value string) func(http.ResponseWriter, *http.R
 
 		rw.WriteHeader(http.StatusForbidden)
 	}
+}
+
+func mustLoadFixture(name string) []byte {
+	const msg = "wrong embedded FS configuration: %w"
+	data, err := embeddedFixtures.ReadFile(path.Join("fixtures", name))
+	if err != nil {
+		panic(fmt.Errorf(msg, err))
+	}
+
+	return data
 }
