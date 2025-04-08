@@ -17,27 +17,31 @@ package yamlutils
 import (
 	json "encoding/json"
 	"fmt"
-	"reflect"
-	"sort"
 	"strconv"
 
 	"github.com/go-openapi/swag/jsonutils"
-	"github.com/mailru/easyjson/jlexer"
-	"github.com/mailru/easyjson/jwriter"
 	yaml "gopkg.in/yaml.v3"
 )
 
-// YAMLToJSON converts YAML unmarshaled data into json compatible data
-func YAMLToJSON(data interface{}) (json.RawMessage, error) {
-	jm, err := transformData(data)
+// YAMLToJSON converts a YAML document into JSON bytes.
+//
+// Note: a YAML document is the output from a [yaml.Marshaler], e.g a pointer to a [yaml.Node].
+func YAMLToJSON(value interface{}) (json.RawMessage, error) {
+	jm, err := transformData(value)
 	if err != nil {
 		return nil, err
 	}
+
 	b, err := jsonutils.WriteJSON(jm)
+
 	return json.RawMessage(b), err
 }
 
-// BytesToYAMLDoc converts a byte slice into a YAML document
+// BytesToYAMLDoc converts a byte slice into a YAML document.
+//
+// This function only supports root documents that are objects.
+//
+// A YAML document is a pointer to a [yaml.Node].
 func BytesToYAMLDoc(data []byte) (interface{}, error) {
 	var document yaml.Node // preserve order that is present in the document
 	if err := yaml.Unmarshal(data, &document); err != nil {
@@ -75,11 +79,11 @@ func yamlDocument(node *yaml.Node) (interface{}, error) {
 
 func yamlMapping(node *yaml.Node) (interface{}, error) {
 	const sensibleAllocDivider = 2
-	m := make(JSONMapSlice, len(node.Content)/sensibleAllocDivider)
+	m := make(YAMLMapSlice, len(node.Content)/sensibleAllocDivider)
 
 	var j int
 	for i := 0; i < len(node.Content); i += 2 {
-		var nmi JSONMapItem
+		var nmi YAMLMapItem
 		k, err := yamlStringScalarC(node.Content[i])
 		if err != nil {
 			return nil, fmt.Errorf("unable to decode YAML map key: %w: %w", err, ErrYAML)
@@ -142,6 +146,7 @@ func yamlScalar(node *yaml.Node) (interface{}, error) {
 		}
 		return f, nil
 	case yamlTimestamp:
+		// YAML timestamp is marshaled as string, not time
 		return node.Value, nil
 	case yamlNull:
 		return nil, nil //nolint:nilnil
@@ -160,228 +165,6 @@ func yamlStringScalarC(node *yaml.Node) (string, error) {
 	default:
 		return "", fmt.Errorf("YAML tag %q is not supported as map key: %w", node.LongTag(), ErrYAML)
 	}
-}
-
-// JSONMapSlice represents a JSON object, with the order of keys maintained
-type JSONMapSlice []JSONMapItem
-
-// MarshalJSON renders a JSONMapSlice as JSON
-func (s JSONMapSlice) MarshalJSON() ([]byte, error) {
-	w := &jwriter.Writer{Flags: jwriter.NilMapAsEmpty | jwriter.NilSliceAsEmpty}
-	s.MarshalEasyJSON(w)
-	return w.BuildBytes()
-}
-
-// MarshalEasyJSON renders a JSONMapSlice as JSON, using easyJSON
-func (s JSONMapSlice) MarshalEasyJSON(w *jwriter.Writer) {
-	w.RawByte('{')
-
-	ln := len(s)
-	last := ln - 1
-	for i := 0; i < ln; i++ {
-		s[i].MarshalEasyJSON(w)
-		if i != last { // last item
-			w.RawByte(',')
-		}
-	}
-
-	w.RawByte('}')
-}
-
-// UnmarshalJSON makes a JSONMapSlice from JSON
-func (s *JSONMapSlice) UnmarshalJSON(data []byte) error {
-	l := jlexer.Lexer{Data: data}
-	s.UnmarshalEasyJSON(&l)
-	return l.Error()
-}
-
-// UnmarshalEasyJSON makes a JSONMapSlice from JSON, using easyJSON
-func (s *JSONMapSlice) UnmarshalEasyJSON(in *jlexer.Lexer) {
-	if in.IsNull() {
-		in.Skip()
-		return
-	}
-
-	var result JSONMapSlice
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		var mi JSONMapItem
-		mi.UnmarshalEasyJSON(in)
-		result = append(result, mi)
-	}
-	*s = result
-}
-
-func (s JSONMapSlice) MarshalYAML() (interface{}, error) {
-	var n yaml.Node
-	n.Kind = yaml.DocumentNode
-	var nodes []*yaml.Node
-	for _, item := range s {
-		nn, err := json2yaml(item.Value)
-		if err != nil {
-			return nil, err
-		}
-		ns := []*yaml.Node{
-			{
-				Kind:  yaml.ScalarNode,
-				Tag:   yamlStringScalar,
-				Value: item.Key,
-			},
-			nn,
-		}
-		nodes = append(nodes, ns...)
-	}
-
-	n.Content = []*yaml.Node{
-		{
-			Kind:    yaml.MappingNode,
-			Content: nodes,
-		},
-	}
-
-	return yaml.Marshal(&n)
-}
-
-func isNil(input interface{}) bool {
-	if input == nil {
-		return true
-	}
-	kind := reflect.TypeOf(input).Kind()
-	switch kind { //nolint:exhaustive
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Chan:
-		return reflect.ValueOf(input).IsNil()
-	default:
-		return false
-	}
-}
-
-func json2yaml(item interface{}) (*yaml.Node, error) {
-	if isNil(item) {
-		return &yaml.Node{
-			Kind:  yaml.ScalarNode,
-			Value: "null",
-		}, nil
-	}
-
-	switch val := item.(type) {
-	case JSONMapSlice:
-		var n yaml.Node
-		n.Kind = yaml.MappingNode
-		for i := range val {
-			childNode, err := json2yaml(&val[i].Value)
-			if err != nil {
-				return nil, err
-			}
-			n.Content = append(n.Content, &yaml.Node{
-				Kind:  yaml.ScalarNode,
-				Tag:   yamlStringScalar,
-				Value: val[i].Key,
-			}, childNode)
-		}
-		return &n, nil
-	case map[string]interface{}:
-		var n yaml.Node
-		n.Kind = yaml.MappingNode
-		keys := make([]string, 0, len(val))
-		for k := range val {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-
-		for _, k := range keys {
-			v := val[k]
-			childNode, err := json2yaml(v)
-			if err != nil {
-				return nil, err
-			}
-			n.Content = append(n.Content, &yaml.Node{
-				Kind:  yaml.ScalarNode,
-				Tag:   yamlStringScalar,
-				Value: k,
-			}, childNode)
-		}
-		return &n, nil
-	case []interface{}:
-		var n yaml.Node
-		n.Kind = yaml.SequenceNode
-		for i := range val {
-			childNode, err := json2yaml(val[i])
-			if err != nil {
-				return nil, err
-			}
-			n.Content = append(n.Content, childNode)
-		}
-		return &n, nil
-	case string:
-		return &yaml.Node{
-			Kind:  yaml.ScalarNode,
-			Tag:   yamlStringScalar,
-			Value: val,
-		}, nil
-	case float64:
-		return &yaml.Node{
-			Kind:  yaml.ScalarNode,
-			Tag:   yamlFloatScalar,
-			Value: strconv.FormatFloat(val, 'f', -1, 64),
-		}, nil
-	case int64:
-		return &yaml.Node{
-			Kind:  yaml.ScalarNode,
-			Tag:   yamlIntScalar,
-			Value: strconv.FormatInt(val, 10),
-		}, nil
-	case uint64:
-		return &yaml.Node{
-			Kind:  yaml.ScalarNode,
-			Tag:   yamlIntScalar,
-			Value: strconv.FormatUint(val, 10),
-		}, nil
-	case bool:
-		return &yaml.Node{
-			Kind:  yaml.ScalarNode,
-			Tag:   yamlBoolScalar,
-			Value: strconv.FormatBool(val),
-		}, nil
-	default:
-		return nil, fmt.Errorf("unhandled type: %T: %w", val, ErrYAML)
-	}
-}
-
-// JSONMapItem represents the value of a key in a JSON object held by JSONMapSlice
-type JSONMapItem struct {
-	Key   string
-	Value interface{}
-}
-
-// MarshalJSON renders a JSONMapItem as JSON
-func (s JSONMapItem) MarshalJSON() ([]byte, error) {
-	w := &jwriter.Writer{Flags: jwriter.NilMapAsEmpty | jwriter.NilSliceAsEmpty}
-	s.MarshalEasyJSON(w)
-	return w.BuildBytes()
-}
-
-// MarshalEasyJSON renders a JSONMapItem as JSON, using easyJSON
-func (s JSONMapItem) MarshalEasyJSON(w *jwriter.Writer) {
-	w.String(s.Key)
-	w.RawByte(':')
-	w.Raw(jsonutils.WriteJSON(s.Value))
-}
-
-// UnmarshalJSON makes a JSONMapItem from JSON
-func (s *JSONMapItem) UnmarshalJSON(data []byte) error {
-	l := jlexer.Lexer{Data: data}
-	s.UnmarshalEasyJSON(&l)
-	return l.Error()
-}
-
-// UnmarshalEasyJSON makes a JSONMapItem from JSON, using easyJSON
-func (s *JSONMapItem) UnmarshalEasyJSON(in *jlexer.Lexer) {
-	key := in.UnsafeString()
-	in.WantColon()
-	value := in.Interface()
-	in.WantComma()
-	s.Key = key
-	s.Value = value
 }
 
 func transformData(input interface{}) (out interface{}, err error) {
@@ -420,9 +203,9 @@ func transformData(input interface{}) (out interface{}, err error) {
 	case *yaml.Node:
 		return yamlNode(in)
 	case map[interface{}]interface{}:
-		o := make(JSONMapSlice, 0, len(in))
+		o := make(YAMLMapSlice, 0, len(in))
 		for ke, va := range in {
-			var nmi JSONMapItem
+			var nmi YAMLMapItem
 			if nmi.Key, err = format(ke); err != nil {
 				return nil, err
 			}

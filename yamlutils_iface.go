@@ -29,13 +29,3 @@ func YAMLToJSON(data interface{}) (json.RawMessage, error) { return yamlutils.YA
 //
 // Deprecated: use [yamlutils.BytesToYAMLDoc] instead.
 func BytesToYAMLDoc(data []byte) (interface{}, error) { return yamlutils.BytesToYAMLDoc(data) }
-
-// JSONMapSlice represents a JSON object, with the order of keys maintained
-//
-// Deprecated: use [yamlutils.JSONMapSlice] instead.
-type JSONMapSlice = yamlutils.JSONMapSlice
-
-// JSONMapItem represents a JSON object, with the order of keys maintained
-//
-// Deprecated: use [yamlutils.JSONMapItem] instead.
-type JSONMapItem = yamlutils.JSONMapItem
