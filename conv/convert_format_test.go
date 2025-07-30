@@ -314,6 +314,10 @@ func TestIsFloat64AJSONInteger(t *testing.T) {
 	assert.True(t, IsFloat64AJSONInteger(maxJSONFloat))
 	assert.True(t, IsFloat64AJSONInteger(minJSONFloat))
 	assert.True(t, IsFloat64AJSONInteger(1/0.01*67.15000001))
+
+	// Wrapping in a function forces non-constant evaluation to test float64 rounding behavior
+	assert.True(t, IsFloat64AJSONInteger(1/func() float64 { return 0.01 }()*4643.4))
+
 	assert.True(t, IsFloat64AJSONInteger(math.SmallestNonzeroFloat64/2))
 	assert.True(t, IsFloat64AJSONInteger(math.SmallestNonzeroFloat64/3))
 	assert.True(t, IsFloat64AJSONInteger(math.SmallestNonzeroFloat64/4))
