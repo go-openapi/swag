@@ -25,55 +25,39 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func makeDirStructure(tgt string) (string, string, error) {
+func makeDirStructure(tb testing.TB, tgt string) (string, string) {
+	tb.Helper()
+
 	if tgt == "" {
 		tgt = "pkgpaths"
 	}
-	td, err := os.MkdirTemp("", tgt)
-	if err != nil {
-		return "", "", err
-	}
-	td2, err := os.MkdirTemp("", tgt+"-2")
-	if err != nil {
-		return "", "", err
-	}
-	realPath := filepath.Join(td, "src", "foo", "bar")
-	if err := os.MkdirAll(realPath, os.ModePerm); err != nil {
-		return "", "", err
-	}
-	linkPathBase := filepath.Join(td, "src", "baz")
-	if err := os.MkdirAll(linkPathBase, os.ModePerm); err != nil {
-		return "", "", err
-	}
-	linkPath := filepath.Join(linkPathBase, "das")
-	if err := os.Symlink(realPath, linkPath); err != nil {
-		return "", "", err
-	}
 
+	td := tb.TempDir()
+	realPath := filepath.Join(td, "src", "foo", "bar")
+	err := os.MkdirAll(realPath, os.ModePerm)
+	require.NoError(tb, err)
+	linkPathBase := filepath.Join(td, "src", "baz")
+	err = os.MkdirAll(linkPathBase, os.ModePerm)
+	require.NoError(tb, err)
+	linkPath := filepath.Join(linkPathBase, "das")
+	err = os.Symlink(realPath, linkPath)
+	require.NoError(tb, err)
+
+	td2 := tb.TempDir()
 	realPath = filepath.Join(td2, "src", "fuu", "bir")
-	if err := os.MkdirAll(realPath, os.ModePerm); err != nil {
-		return "", "", err
-	}
+	err = os.MkdirAll(realPath, os.ModePerm)
+	require.NoError(tb, err)
 	linkPathBase = filepath.Join(td2, "src", "biz")
-	if err := os.MkdirAll(linkPathBase, os.ModePerm); err != nil {
-		return "", "", err
-	}
+	err = os.MkdirAll(linkPathBase, os.ModePerm)
+	require.NoError(tb, err)
 	linkPath = filepath.Join(linkPathBase, "dis")
-	if err := os.Symlink(realPath, linkPath); err != nil {
-		return "", "", err
-	}
-	return td, td2, nil
+	err = os.Symlink(realPath, linkPath)
+	require.NoError(tb, err)
+	return td, td2
 }
 
 func TestFindPackage(t *testing.T) {
-	pth, pth2, err := makeDirStructure("")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() {
-		os.RemoveAll(pth)
-		os.RemoveAll(pth2)
-	}()
+	pth, pth2 := makeDirStructure(t, "")
 
 	searchPath := pth + string(filepath.ListSeparator) + pth2
 	// finds package when real name mentioned
