@@ -309,6 +309,7 @@ func TestIsFloat64AJSONInteger(t *testing.T) {
 	assert.False(t, IsFloat64AJSONInteger(maxJSONFloat+1))
 	assert.False(t, IsFloat64AJSONInteger(minJSONFloat-1))
 	assert.False(t, IsFloat64AJSONInteger(math.SmallestNonzeroFloat64))
+	assert.False(t, IsFloat64AJSONInteger(0.5))
 
 	assert.True(t, IsFloat64AJSONInteger(1.0))
 	assert.True(t, IsFloat64AJSONInteger(maxJSONFloat))
@@ -321,6 +322,95 @@ func TestIsFloat64AJSONInteger(t *testing.T) {
 	assert.True(t, IsFloat64AJSONInteger(math.SmallestNonzeroFloat64/2))
 	assert.True(t, IsFloat64AJSONInteger(math.SmallestNonzeroFloat64/3))
 	assert.True(t, IsFloat64AJSONInteger(math.SmallestNonzeroFloat64/4))
+}
+
+func BenchmarkIsFloat64JSONInteger(b *testing.B) {
+	b.ResetTimer()
+	b.ReportAllocs()
+	b.SetBytes(0)
+
+	b.Run("new float vs integer comparison", benchmarkIsFloat64JSONInteger(IsFloat64AJSONInteger))
+	b.Run("previous float vs integer comparison", benchmarkIsFloat64JSONInteger(previousIsFloat64JSONInteger))
+}
+
+func previousIsFloat64JSONInteger(f float64) bool {
+	if math.IsNaN(f) || math.IsInf(f, 0) || f < minJSONFloat || f > maxJSONFloat {
+		return false
+	}
+	fa := math.Abs(f)
+	g := float64(uint64(f))
+	ga := math.Abs(g)
+
+	diff := math.Abs(f - g)
+
+	// more info: https://floating-point-gui.de/errors/comparison/#look-out-for-edge-cases
+	switch {
+	case f == g: // best case
+		return true
+	case f == float64(int64(f)) || f == float64(uint64(f)): // optimistic case
+		return true
+	case f == 0 || g == 0 || diff < math.SmallestNonzeroFloat64: // very close to 0 values
+		return diff < (epsilon * math.SmallestNonzeroFloat64)
+	}
+	// check the relative error
+	return diff/math.Min(fa+ga, math.MaxFloat64) < epsilon
+}
+
+func benchmarkIsFloat64JSONInteger(fn func(float64) bool) func(*testing.B) {
+	assertCode := func() {
+		panic("unexpected result during benchmark")
+	}
+
+	return func(b *testing.B) {
+		testFunc := func() {
+			if fn(math.Inf(1)) {
+				assertCode()
+			}
+			if fn(maxJSONFloat + 1) {
+				assertCode()
+			}
+			if fn(minJSONFloat - 1) {
+				assertCode()
+			}
+			if fn(math.SmallestNonzeroFloat64) {
+				assertCode()
+			}
+			if fn(0.5) {
+				assertCode()
+			}
+
+			if !fn(1.0) {
+				assertCode()
+			}
+			if !fn(maxJSONFloat) {
+				assertCode()
+			}
+			if !fn(minJSONFloat) {
+				assertCode()
+			}
+			if !fn(1 / 0.01 * 67.15000001) {
+				assertCode()
+			}
+			/* can't compare both versions on this test case
+			if !fn(1 / func() float64 { return 0.01 }() * 4643.4) {
+				assertCode()
+			}
+			*/
+			if !fn(math.SmallestNonzeroFloat64 / 2) {
+				assertCode()
+			}
+			if !fn(math.SmallestNonzeroFloat64 / 3) {
+				assertCode()
+			}
+			if !fn(math.SmallestNonzeroFloat64 / 4) {
+				assertCode()
+			}
+		}
+
+		for n := 0; n < b.N; n++ {
+			testFunc()
+		}
+	}
 }
 
 // test utilities
