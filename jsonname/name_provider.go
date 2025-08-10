@@ -124,12 +124,6 @@ func (n *NameProvider) GetJSONNameForType(tpe reflect.Type, name string) (string
 	return nme, ok
 }
 
-func (n *NameProvider) makeNameIndex(tpe reflect.Type) nameIndex {
-	names := newNameIndex(tpe)
-	n.index[tpe] = names
-	return names
-}
-
 // GetGoName gets the go name for a json property name
 func (n *NameProvider) GetGoName(subject interface{}, name string) (string, bool) {
 	tpe := reflect.Indirect(reflect.ValueOf(subject)).Type()
@@ -146,4 +140,10 @@ func (n *NameProvider) GetGoNameForType(tpe reflect.Type, name string) (string, 
 	}
 	nme, ok := names.jsonNames[name]
 	return nme, ok
+}
+
+func (n *NameProvider) makeNameIndex(tpe reflect.Type) nameIndex {
+	names := newNameIndex(tpe)
+	n.index[tpe] = names
+	return names
 }
