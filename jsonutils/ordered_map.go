@@ -138,10 +138,10 @@ func (s *JSONMapItem) asInterface(in *jlexer.Lexer) any {
 		if strings.ContainsRune(n, '.') {
 			f, _ := strconv.ParseFloat(n, 64)
 			return f
-		} else {
-			i, _ := strconv.ParseInt(n, 10, 64)
-			return i
 		}
+
+		i, _ := strconv.ParseInt(n, 10, 64)
+		return i
 
 	case jlexer.TokenBool:
 		return in.Bool()

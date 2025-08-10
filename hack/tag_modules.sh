@@ -17,8 +17,9 @@ cd "${root}"
 echo "Tagging all modules in repo ${root##*/}..."
 
 while read module_location ; do
-  module_dir=${module_location%/*}
-  base_tag="${module_dir#*/}"
+  relative_location=${module_location#"$root"/}
+  module_dir=${relative_location%"/go.mod"}
+  base_tag="${module_dir#"./"}"
   if [[ "${base_tag}" ==  "." ]] ; then
     module_tag="${tag}" # e.g. "v0.24.0"
   else

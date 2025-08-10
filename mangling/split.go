@@ -53,6 +53,7 @@ func (m initialismMatch) isZero() bool {
 
 type splitter struct {
 	*initialismsCache
+
 	postSplitInitialismCheck bool
 	replaceFunc              ReplaceFunc
 }

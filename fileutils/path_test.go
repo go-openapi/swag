@@ -26,11 +26,9 @@ import (
 )
 
 func makeDirStructure(tb testing.TB, tgt string) (string, string) {
-	tb.Helper()
+	_ = tgt
 
-	if tgt == "" {
-		tgt = "pkgpaths"
-	}
+	tb.Helper()
 
 	td := tb.TempDir()
 	realPath := filepath.Join(td, "src", "foo", "bar")

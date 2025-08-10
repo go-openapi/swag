@@ -10,9 +10,60 @@ on:
   pull_request:
 
 jobs:
-  lint:
-    name: Lint
+  module-matrix:
+    name: Go module matrix
     runs-on: ubuntu-latest
+
+    outputs:
+      modules: ${{ steps.modules.outputs.modules }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find go modules
+        id: modules
+        shell: bash
+        run: |
+          # This script finds all go modules declared in this repo and resolves to a relative path to each of those.
+          #
+          # NOTES:
+          #
+          # > * git bash on a windows runner should support GNU find. find flags should be supported by find on macos.
+          # > * We don't attempt any tricks with the go work command. Perhaps this will be the official way in future go releases.
+          # > * There is no simple way to get the expected result with go list, unless all submodules are dependencies of the
+          #     root module (which is not a requirement).
+          set -euxo pipefail
+
+          root="$(git rev-parse --show-toplevel)"
+          cd "${root}"
+
+          declare -i index=0
+          declare -a all_mods
+          printf "modules=[" >> "$GITHUB_OUTPUT"
+          while read module_location ; do
+            if [ $index -gt 0 ] ; then
+              printf "," >> "$GITHUB_OUTPUT"
+            fi
+            relative_location=${module_location#"$root"/}
+            module_dir=${relative_location%"/go.mod"}
+            base_dir="${module_dir#"./"}"
+            printf " \"${base_dir}\"" >> "$GITHUB_OUTPUT"
+            all_mods+=("${base_dir}")
+            ((index++)) || true
+          done < <(find . -name \*.mod | grep -v "\.git" | sort | uniq)
+          printf "]" >> "$GITHUB_OUTPUT"
+
+          echo "::notice title=Modules found::${all_mods[@]}"
+
+  module-lint:
+    name: Go module lint
+    runs-on: ubuntu-latest
+    needs: [ module-matrix ]
+
+    strategy:
+      matrix:
+        # all sub modules in this repo must be linted separately
+        module: ${{ fromJSON(needs.module-matrix.outputs.modules) }}
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -26,15 +77,27 @@ jobs:
           version: latest
           only-new-issues: true
           skip-cache: true
+          working-directory: '${{ matrix.module }}'
 
-  test:
+  lint:
+    needs: [ module-lint ]
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Linting complete
+        run: |
+          echo "All modules linted"
+
+  module-test:
     name: Unit tests
     runs-on: ${{ matrix.os }}
+    needs: [ module-matrix ]
 
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
         go_version: ['oldstable', 'stable' ]
+        module: ${{ fromJSON(needs.module-matrix.outputs.modules) }}
 
     steps:
     - uses: actions/setup-go@v5
@@ -44,24 +107,14 @@ jobs:
         cache: true
 
     - uses: actions/checkout@v4
-    - name: Run unit tests on all modules in this repo
+    - name: Run unit tests on a single module in this repo
       shell: bash
+      working-directory: '${{ matrix.module }}'
+      env:
+        # *.coverage.* pattern is automatically detected by codecov
+        COVER_PROFILE: "${{ matrix.module }}.coverage.${{ matrix.os }}.${{ matrix.go_version }}.out"
       run: |
-        # This script runs all tests on all modules and their subpackages.
-        #
-        # NOTES:
-        # * git bash on a windows runner should support GNU find. find flags should be supported by find on macos.
-        # * we don't attempt tricks using go work. Perhaps this will be the official way in future go releases.
-        set -euxo pipefail
-
-        find . -name \*.mod -execdir pwd \; | grep -v "\.git" | sort | uniq | \
-          while read module_dir ; do
-            pushd "${module_dir}"
-            # *.coverage.* pattern is automatically detected by codecov
-            coverprofile="${module_dir##*/}.coverage.${{ matrix.os }}.${{ matrix.go_version }}.out"
-            go test -v -race -coverprofile="${coverprofile}" -covermode=atomic -coverpkg=$(go list)/... ./...
-            popd
-          done
+        go test -v -race -coverprofile="${COVER_PROFILE}" -covermode=atomic -coverpkg=$(go list)/... ./...
 
     - name: Upload coverage to codecov
       uses: codecov/codecov-action@v5
@@ -70,3 +123,12 @@ jobs:
         flags: '${{ matrix.go_version }}-${{ matrix.os }}'
         fail_ci_if_error: false
         verbose: true
+
+  test:
+    needs: [ module-test ]
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tests complete
+        run: |
+          echo "All tests completed"
