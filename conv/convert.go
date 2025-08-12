@@ -36,12 +36,16 @@ func IsFloat64AJSONInteger(f float64) bool {
 	if f == rounded {
 		return true
 	}
+	if rounded == 0 { // f = 0.0 exited above
+		return false
+	}
 
 	diff := math.Abs(f - rounded)
 	if diff == 0 {
 		return true
 	}
 
+	// relative error Abs{f - Round(f)) / Round(f)} < ε ; Round(f)
 	return diff < epsilon*math.Abs(rounded)
 }
 
