@@ -115,8 +115,9 @@ func DefaultInitialisms() []string {
 }
 
 type indexOfInitialisms struct {
-	index map[string]struct{}
 	initialismsCache
+
+	index map[string]struct{}
 }
 
 func newIndexOfInitialisms() *indexOfInitialisms {

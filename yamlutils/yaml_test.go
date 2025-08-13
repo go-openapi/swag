@@ -292,13 +292,13 @@ name: a string value
 }
 
 func TestWithYKey(t *testing.T) {
-	doc, err := BytesToYAMLDoc([]byte(fixtureWithYKey))
+	doc, err := BytesToYAMLDoc(fixtureWithYKey)
 	require.NoError(t, err)
 
 	_, err = YAMLToJSON(doc)
 	require.NoError(t, err)
 
-	doc, err = BytesToYAMLDoc([]byte(fixtureWithQuotedYKey))
+	doc, err = BytesToYAMLDoc(fixtureWithQuotedYKey)
 	require.NoError(t, err)
 	jsond, err := YAMLToJSON(doc)
 	require.NoError(t, err)

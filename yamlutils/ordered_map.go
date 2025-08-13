@@ -12,7 +12,7 @@ import (
 
 var (
 	_ yaml.Marshaler = YAMLMapSlice{}
-	//_ yaml.Unmarshaler = &YAMLMapSlice{} // TODO: implement yaml.Unmarshaler
+	// _ yaml.Unmarshaler = &YAMLMapSlice{} // TODO: implement yaml.Unmarshaler
 )
 
 // YAMLMapSlice represents a YAML object, with the order of keys maintained.

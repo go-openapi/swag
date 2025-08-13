@@ -80,11 +80,6 @@ func NewNameMangler(opts ...Option) NameMangler {
 	return m
 }
 
-func (m *NameMangler) addInitialisms(words ...string) {
-	m.index.add(words...)
-	m.index.buildCache()
-}
-
 // AddInitialisms declares extra initialisms to the mangler.
 //
 // It declares extra words as "initialisms" (i.e. words that won't be camel cased or titled cased),
@@ -106,20 +101,6 @@ func (m *NameMangler) AddInitialisms(words ...string) {
 // Initialisms renders the list of initialisms supported by this mangler.
 func (m *NameMangler) Initialisms() []string {
 	return m.index.initialisms
-}
-
-// split calls the inner splitter.
-func (m NameMangler) split(str string) *[]string {
-	s := m.splitter
-	lexems := s.split(str)
-	result := poolOfStrings.BorrowStrings()
-
-	for _, lexem := range *lexems {
-		*result = append(*result, lexem.GetOriginal())
-	}
-	poolOfLexems.RedeemLexems(lexems)
-
-	return result
 }
 
 // Camelize a single word.
@@ -378,4 +359,23 @@ func (m NameMangler) goIdentifier(name string, exported bool) string {
 	}
 
 	return result.String()
+}
+
+func (m *NameMangler) addInitialisms(words ...string) {
+	m.index.add(words...)
+	m.index.buildCache()
+}
+
+// split calls the inner splitter.
+func (m NameMangler) split(str string) *[]string {
+	s := m.splitter
+	lexems := s.split(str)
+	result := poolOfStrings.BorrowStrings()
+
+	for _, lexem := range *lexems {
+		*result = append(*result, lexem.GetOriginal())
+	}
+	poolOfLexems.RedeemLexems(lexems)
+
+	return result
 }

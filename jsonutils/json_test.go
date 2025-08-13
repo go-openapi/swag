@@ -29,6 +29,7 @@ type SharedCounters struct {
 
 type AggregationObject struct {
 	SharedCounters
+
 	Count int64 `json:"count,omitempty"`
 }
 

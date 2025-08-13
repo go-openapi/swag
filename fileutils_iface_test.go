@@ -26,13 +26,7 @@ import (
 func TestFileUtilsIface(t *testing.T) {
 	t.Run("deprecated functions should work", func(t *testing.T) {
 		t.Run("with test package path", func(t *testing.T) {
-			const tgt = "testpath"
-
-			td, err := os.MkdirTemp("", tgt) //nolint:usetesting // as t.TempDir in testing not yet fully working (on windows)
-			require.NoError(t, err)
-			t.Cleanup(func() {
-				_ = os.RemoveAll(td)
-			})
+			td := t.TempDir()
 
 			realPath := filepath.Join(td, "src", "foo", "bar")
 			require.NoError(t, os.MkdirAll(realPath, os.ModePerm))
