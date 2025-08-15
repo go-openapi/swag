@@ -18,7 +18,7 @@ jobs:
       modules: ${{ steps.modules.outputs.modules }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Find go modules
         id: modules
         shell: bash
@@ -65,7 +65,7 @@ jobs:
         module: ${{ fromJSON(needs.module-matrix.outputs.modules) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-go@v5
         with:
           go-version: stable
@@ -106,7 +106,7 @@ jobs:
         check-latest: true
         cache: true
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Run unit tests on a single module in this repo
       shell: bash
       working-directory: '${{ matrix.module }}'
