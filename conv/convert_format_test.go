@@ -447,7 +447,6 @@ func bitwiseIsFloat64JSONInteger2(f float64) bool {
 	}
 
 	// inlined
-	//mant, exp := frexp(f) // get normalized mantissa
 	var (
 		mant uint64
 		exp  int
@@ -461,7 +460,7 @@ func bitwiseIsFloat64JSONInteger2(f float64) bool {
 		}
 
 		x := math.Float64bits(f)
-		exp += int((x>>shift)&mask) - bias + 1 // x>>12 & 0x7FF - 1022 : extract exp, recentered from bias
+		exp += int((x>>shift)&mask) - bias + 1 //nolint:gosec // x>>12 & 0x7FF - 1022 : extract exp, recentered from bias
 
 		x &^= mask << shift       // x= x &^ 0x7FF << 12 (clear 11 exp bits then shift 12)
 		x |= (-1 + bias) << shift // x = x | 1022 << 12 ==> or with 1022 as exp location
