@@ -32,23 +32,21 @@ func IsFloat64AJSONInteger(f float64) bool {
 	if math.IsNaN(f) || math.IsInf(f, 0) || f < minJSONFloat || f > maxJSONFloat {
 		return false
 	}
-	fa := math.Abs(f)
-	g := float64(uint64(f))
-	ga := math.Abs(g)
-
-	diff := math.Abs(f - g)
-
-	// more info: https://floating-point-gui.de/errors/comparison/#look-out-for-edge-cases
-	switch {
-	case f == g: // best case
+	rounded := math.Round(f)
+	if f == rounded {
 		return true
-	case f == float64(int64(f)) || f == float64(uint64(f)): // optimistic case
-		return true
-	case f == 0 || g == 0 || diff < math.SmallestNonzeroFloat64: // very close to 0 values
-		return diff < (epsilon * math.SmallestNonzeroFloat64)
 	}
-	// check the relative error
-	return diff/math.Min(fa+ga, math.MaxFloat64) < epsilon
+	if rounded == 0 { // f = 0.0 exited above
+		return false
+	}
+
+	diff := math.Abs(f - rounded)
+	if diff == 0 {
+		return true
+	}
+
+	// relative error Abs{f - Round(f)) / Round(f)} < ε ; Round(f)
+	return diff < epsilon*math.Abs(rounded)
 }
 
 // ConvertFloat turns a string into a float numerical value.
