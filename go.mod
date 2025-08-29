@@ -12,7 +12,7 @@ require (
 	github.com/go-openapi/swag/stringutils v0.0.0-00010101000000-000000000000
 	github.com/go-openapi/swag/typeutils v0.0.0-00010101000000-000000000000
 	github.com/go-openapi/swag/yamlutils v0.0.0-00010101000000-000000000000
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (
