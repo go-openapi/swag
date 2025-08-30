@@ -88,7 +88,14 @@ This is not necessarily the case for all sub-modules.
 
 ## Release notes
 
-### v0.24.0 [Unreleased]
+### v0.25.0 [draft, unreleased]
+
+* v0.25.0 will remove the dependency to `mailru/easyjson` by default.
+* users of JSON or YAML utility who want to use `easyjson` as their
+  prefered JSON marshaler will be able to do so by registering it
+  at runtime.
+
+### v0.24.0
 
 With this release, we have largely modernized the API of `swag`:
 
