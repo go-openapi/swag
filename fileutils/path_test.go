@@ -92,6 +92,6 @@ func TestFullGOPATH(t *testing.T) {
 	ngp := "/some/where:/other/place"
 	t.Setenv(GOPATHKey, ngp)
 
-	expected := ngp + ":" + runtime.GOROOT()
+	expected := ngp + ":" + runtime.GOROOT() //nolint: staticcheck // this is a deprecated function
 	assert.Equal(t, expected, FullGoSearchPath())
 }

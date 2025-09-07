@@ -16,194 +16,247 @@ package jsonutils
 
 import (
 	"encoding/json"
+	"iter"
 	"testing"
 
-	"github.com/mailru/easyjson/jlexer"
+	"github.com/go-openapi/swag/jsonutils/adapters/ifaces"
+	fixtures "github.com/go-openapi/swag/jsonutils/fixtures_test"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestJSONMapSlice(t *testing.T) {
-	t.Run("should unmarshal and marshal MapSlice", func(t *testing.T) {
-		t.Run("with object", func(t *testing.T) {
-			const sd = `{"1":"the int key value","name":"a string value","y":"some value"}`
-			var data JSONMapSlice
-			require.NoError(t, json.Unmarshal([]byte(sd), &data))
+	harness := fixtures.NewHarness(t)
+	harness.Init()
 
-			jazon, err := json.Marshal(data)
-			require.NoError(t, err)
+	for name, test := range harness.AllTests(fixtures.WithoutError(true)) {
+		t.Run(name, func(t *testing.T) {
+			t.Run("should unmarshal JSON", func(t *testing.T) {
+				input := test.JSONPayload
 
-			assert.JSONEq(t, sd, string(jazon))
+				var data JSONMapSlice
+				require.NoError(t, json.Unmarshal([]byte(input), &data))
+
+				t.Run("should marshal JSON", func(t *testing.T) {
+					jazon, err := json.Marshal(data)
+					require.NoError(t, err)
+
+					fixtures.JSONEqualOrdered(t, input, string(jazon))
+				})
+			})
 		})
-
-		t.Run("with nested object", func(t *testing.T) {
-			const sd = `
-		{
-		  "1":"the int key value",
-		  "name":"a string value",
-		  "y":{
-		    "a":"some value",
-		    "b":[
-		     {"x":1,"y":2},
-		     {"z":4,"w":5}
-		    ]
-		  }
-		}
-		`
-			var data JSONMapSlice
-			require.NoError(t, json.Unmarshal([]byte(sd), &data))
-
-			jazon, err := json.Marshal(data)
-			require.NoError(t, err)
-
-			assert.JSONEq(t, sd, string(jazon))
-		})
-
-		t.Run("with nested array", func(t *testing.T) {
-			const sd = `
-	[
-	  {
-			"1":"the int key value",
-	    "name":"a string value"
-		},
-		{
-	    "y":{
-	      "a":"some value",
-	      "b": [
-	         {"x":1,"y":2},
-	         {"z":4,"w":5}
-	      ],
-			  "c": false,
-			  "d": null
-	    },
-	    "z": true
-	  },
-		{
-			"v": [true, "string", 10.35]
-		}
-	]
-	`
-			var data []JSONMapSlice
-			require.NoError(t, json.Unmarshal([]byte(sd), &data))
-
-			jazon, err := json.Marshal(data)
-			require.NoError(t, err)
-
-			assert.JSONEq(t, sd, string(jazon))
-		})
-
-		t.Run("with empty array", func(t *testing.T) {
-			const sd = `{"a":[]}`
-			var data JSONMapSlice
-			require.NoError(t, json.Unmarshal([]byte(sd), &data))
-
-			jazon, err := json.Marshal(data)
-			require.NoError(t, err)
-
-			assert.JSONEq(t, sd, string(jazon))
-		})
-
-		t.Run("with empty object", func(t *testing.T) {
-			const sd = `{}`
-			var data JSONMapSlice
-			require.NoError(t, json.Unmarshal([]byte(sd), &data))
-
-			jazon, err := json.Marshal(data)
-			require.NoError(t, err)
-
-			assert.JSONEq(t, sd, string(jazon))
-		})
-
-		t.Run("with null value", func(t *testing.T) {
-			const sd = `null`
-			var data JSONMapSlice
-			require.NoError(t, json.Unmarshal([]byte(sd), &data))
-			assert.Nil(t, data)
-
-			jazon, err := json.Marshal(data)
-			require.NoError(t, err)
-
-			assert.JSONEq(t, sd, string(jazon))
-		})
-	})
+	}
 
 	t.Run("should keep the order of keys", func(t *testing.T) {
-		const sd = `{"a":1,"b":2,"c":3,"d":4}`
+		fixture := harness.ShouldGet("with numbers")
+		input := fixture.JSONPayload
+
+		const iterations = 10
+		for range iterations {
+			var data JSONMapSlice
+			require.NoError(t, json.Unmarshal([]byte(input), &data))
+			jazon, err := json.Marshal(data)
+			require.NoError(t, err)
+
+			fixtures.JSONEqualOrdered(t, input, string(jazon)) // specifically check the same order, not require.JSONEq()
+		}
+	})
+
+	t.Run("key ordering doesn't have to be stable with Read/Write JSON", func(t *testing.T) {
+		fixture := harness.ShouldGet("with numbers")
+		input := fixture.JSONPayload
+
 		var data JSONMapSlice
-		require.NoError(t, json.Unmarshal([]byte(sd), &data))
-		jazon, err := json.Marshal(data)
+		require.NoError(t, json.Unmarshal([]byte(input), &data))
+
+		var obj any
+		require.NoError(t, FromDynamicJSON(data, &obj))
+
+		asMap, ok := obj.(map[string]any)
+		require.True(t, ok)
+		assert.Len(t, asMap, 3) // 3 fields in struct
+
+		var target JSONMapSlice
+		require.NoError(t, FromDynamicJSON(obj, &target))
+
+		// the order of keys may be altered, since the intermediary representation is a map[string]any
+		jazon, err := WriteJSON(target)
 		require.NoError(t, err)
+		require.JSONEq(t, input, string(jazon))
+	})
 
-		require.Equal(t, sd, string(jazon)) // specifically check the same order, not JSONEq()
+	t.Run("key ordering is maintained with nested ifaces.Ordered types", func(t *testing.T) {
+		fixture := harness.ShouldGet("with numbers")
+		input := fixture.JSONPayload
 
-		t.Run("should Read/Write JSON using easyJSON", func(t *testing.T) {
-			var obj interface{}
-			require.NoError(t, FromDynamicJSON(data, &obj))
+		var data JSONMapSlice
+		require.NoError(t, json.Unmarshal([]byte(input), &data))
+		require.Len(t, data, 3) // 3 fields
 
-			asMap, ok := obj.(map[string]interface{})
-			require.True(t, ok)
-			assert.Len(t, asMap, 4) // 3 fields in struct
+		custom := makeCustomOrdered(
+			data...,
+		)
+
+		const iterations = 10
+		for range iterations {
+			var obj customOrdered
+			require.NoError(t, FromDynamicJSON(custom, &obj))
+			assert.Len(t, obj.elems, 3) // 3 fields in struct
 
 			var target JSONMapSlice
 			require.NoError(t, FromDynamicJSON(obj, &target))
-			// the order of keys may be altered, since the intermediary representation is a map[string]interface{}
-		})
+			// the order of keys may is maintained
+			jazon, err := WriteJSON(target)
+			require.NoError(t, err)
+			fixtures.JSONEqualOrdered(t, input, string(jazon))
+		}
 	})
 
-	t.Run("UnmarshalEasyJSON with error cases", func(t *testing.T) {
+	t.Run("UnmarshalJSON with error cases", func(t *testing.T) {
 		// test directly this endpoint, as the json standard library
 		// performs a preventive early check for well-formed JSON.
-		t.Run("on invalid token (1)", func(t *testing.T) {
-			const sd = `{"a":|,"b":2,"c":3,"d":4}`
-			var data JSONMapSlice
-			require.Error(t, json.Unmarshal([]byte(sd), &data))
-		})
-		t.Run("on invalid token (2)", func(t *testing.T) {
-			const sd = `{"a":{ai+b,"b":2,"c":3,"d":4}`
-			var data JSONMapSlice
-			require.Error(t, json.Unmarshal([]byte(sd), &data))
-		})
-		t.Run("on invalid token (3)", func(t *testing.T) {
-			const sd = `{"a":[ai+b,"b":2,"c":3,"d":4}`
-			data := make(JSONMapSlice, 0)
-			l := jlexer.Lexer{Data: []byte(sd)}
-			data.UnmarshalEasyJSON(&l)
-			require.Error(t, l.Error())
-		})
-		t.Run("on invalid delimiter (1)", func(t *testing.T) {
-			const sd = `{"a":1`
-			data := make(JSONMapSlice, 0)
-			l := jlexer.Lexer{Data: []byte(sd)}
-			data.UnmarshalEasyJSON(&l)
-			require.Error(t, l.Error())
-		})
-		t.Run("on invalid delimiter (2)", func(t *testing.T) {
-			const sd = `{"a":[1}`
-			data := make(JSONMapSlice, 0)
-			l := jlexer.Lexer{Data: []byte(sd)}
-			data.UnmarshalEasyJSON(&l)
-			require.Error(t, l.Error())
-		})
-		t.Run("on invalid delimiter (3)", func(t *testing.T) {
-			const sd = `{"a":[1,]}`
-			data := make(JSONMapSlice, 0)
-			l := jlexer.Lexer{Data: []byte(sd)}
-			data.UnmarshalEasyJSON(&l)
-			require.Error(t, l.Error())
-		})
-		t.Run("on invalid delimiter (4)", func(t *testing.T) {
-			const sd = `{"a":[1],}`
-			data := make(JSONMapSlice, 0)
-			l := jlexer.Lexer{Data: []byte(sd)}
-			data.UnmarshalEasyJSON(&l)
-			require.Error(t, l.Error())
-		})
-		t.Run("on invalid delimiter (4)", func(t *testing.T) {
-			const sd = `{"a":{"b":1}`
-			data := make(JSONMapSlice, 0)
-			l := jlexer.Lexer{Data: []byte(sd)}
-			data.UnmarshalEasyJSON(&l)
-			require.Error(t, l.Error())
-		})
+		for name, test := range harness.AllTests(fixtures.WithError(true)) {
+			t.Run(name, func(t *testing.T) {
+				t.Run("should yield an error", func(t *testing.T) {
+					var data JSONMapSlice
+					require.Error(t, json.Unmarshal(test.JSONBytes(), &data))
+				})
+			})
+		}
 	})
+}
+
+func TestSetOrdered(t *testing.T) {
+	t.Parallel()
+	data := JSONMapSlice{} // can't be nil
+
+	t.Run("should insert keys", func(t *testing.T) {
+		kv := []struct {
+			k string
+			v any
+		}{
+			{k: "a", v: 1},
+			{k: "b", v: true},
+		}
+
+		data.SetOrderedItems(func(yield func(string, any) bool) {
+			for _, e := range kv {
+				if !yield(e.k, e.v) {
+					return
+				}
+			}
+		})
+
+		require.Len(t, data, len(kv))
+		require.Equal(t, JSONMapItem{Key: "a", Value: 1}, data[0])
+		require.Equal(t, JSONMapItem{Key: "b", Value: true}, data[1])
+	})
+
+	t.Run("should merge keys", func(t *testing.T) {
+		kv := []struct {
+			k string
+			v any
+		}{
+			{k: "a", v: 2},
+			{k: "c", v: "x"},
+		}
+
+		data.SetOrderedItems(func(yield func(string, any) bool) {
+			for _, e := range kv {
+				if !yield(e.k, e.v) {
+					return
+				}
+			}
+		})
+
+		require.Len(t, data, len(kv)+1)
+		require.Equal(t, JSONMapItem{Key: "a", Value: 2}, data[0])    // merged
+		require.Equal(t, JSONMapItem{Key: "b", Value: true}, data[1]) // unchanged
+		require.Equal(t, JSONMapItem{Key: "c", Value: "x"}, data[2])  // appended
+	})
+
+	t.Run("with nil items should yield nil", func(t *testing.T) {
+		data.SetOrderedItems(nil)
+		require.Nil(t, data)
+
+	})
+}
+
+// customOrdered implements ifaces.Ordered and ifaces.SetOrdered: ReadJSON and WriteJSON
+// should recognize this and honor the ordering of keys.
+//
+// Technically, this illustrates an alternate implementation to JSONMapSlice, with which
+// retrieving keys is a constant-time operation.
+type customOrdered struct {
+	elems []JSONMapItem
+	idx   map[string]int
+}
+
+var (
+	_ ifaces.Ordered    = customOrdered{}
+	_ ifaces.SetOrdered = &customOrdered{}
+)
+
+func makeCustomOrdered(items ...JSONMapItem) customOrdered {
+	o := customOrdered{
+		elems: make([]JSONMapItem, len(items)),
+		idx:   make(map[string]int, len(items)),
+	}
+
+	for i, item := range items {
+		o.elems[i] = item
+		o.idx[item.Key] = i
+	}
+
+	return o
+}
+
+func (o customOrdered) Get(key string) (any, bool) {
+	idx, ok := o.idx[key]
+	if !ok {
+		return nil, false
+	}
+
+	return o.elems[idx].Value, true
+}
+
+func (o *customOrdered) Set(key string, value any) bool {
+	idx, ok := o.idx[key]
+	if !ok {
+		o.elems = append(o.elems, JSONMapItem{Key: key, Value: value})
+		o.idx[key] = len(o.elems)
+
+		return false
+	}
+
+	o.elems[idx].Value = value
+
+	return true
+}
+
+func (o customOrdered) OrderedItems() iter.Seq2[string, any] {
+	return func(yield func(string, any) bool) {
+		for _, item := range o.elems {
+			if !yield(item.Key, item.Value) {
+				return
+			}
+		}
+	}
+}
+
+func (o *customOrdered) SetOrderedItems(items iter.Seq2[string, any]) {
+	if items == nil {
+		o.elems = nil
+		clear(o.idx)
+
+		return
+	}
+	if o.idx == nil {
+		o.idx = make(map[string]int, 0)
+	}
+
+	for k, v := range items {
+		_ = o.Set(k, v)
+	}
 }

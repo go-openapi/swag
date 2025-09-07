@@ -1,0 +1,165 @@
+#
+# Common test cases used by JSON and YAML utilities.
+#
+# For each test case, we provide both JSON and YAML versions.
+testcases:
+  - name: with JSON object
+    comments: |
+      Test string values.
+      Test that a key can hold a numerical value.
+    json_payload: |      # <- test cases with JSON messages
+      {"1":"the int key value","name":"a string value","y":"some value"}
+    yaml_payload: |      # <- test cases with YAML messages
+      "1": the int key value
+      name: a string value
+      y: some value
+  - name: with JSON object inside
+    comments:
+    json_payload: |
+      {"1":"the int key value","name":"a string value","y":"some value","tag":{"name":"tag_name"}}
+    yaml_payload: |
+      "1": the int key value
+      name: a string value
+      y: some value
+      tag:
+          name: tag_name
+  - name: with nested JSON object
+    comments: |
+      Test nested object with values as arrays of objects
+      Test string and integer values.
+    json_payload: |
+      {
+        "1":"the int key value",
+        "name":"a string value",
+        "y":{
+          "a":"some value",
+          "b":[
+            {"x":1,"y":2},
+            {"z":4,"w":5}
+          ]
+        }
+      }
+    yaml_payload: |
+      "1": the int key value
+      name: a string value
+      y:
+          a: some value
+          b:
+              - x: 1
+                y: 2
+              - z: 4
+                w: 5
+  - name: with nested array
+    comments: |
+      Test array with object elements, nested objects and arrays.
+      Test string, integer, bool and null values.
+    json_payload: |
+      {"x":
+        [
+          {
+            "1":"the int key value",
+            "name":"a string value"
+          },
+          {
+            "y":{
+              "a":"some value",
+              "b": [
+                 {"x":1,"y":2},
+                 {"z":4,"w":5}
+              ],
+              "c": false,
+              "d": null
+            },
+            "z": true
+          },
+          {
+            "v": [true, "string", 10.35]
+          }
+        ]
+      }
+    yaml_payload: |
+      x:
+          - "1": the int key value
+            name: a string value
+          - y:
+              a: some value
+              b:
+                  - x: 1
+                    y: 2
+                  - z: 4
+                    w: 5
+              c: false
+              d: null
+            z: true
+          - v:
+              - true
+              - string
+              - 10.35
+  - name: with a null value
+    json_payload: '{"1":"the int key value","name":null,"y":"some value"}'
+    yaml_payload: |
+      "1": the int key value
+      name: null
+      y: some value
+  - name: with empty array
+    json_payload: '{"a":[]}'
+    yaml_payload: |
+      a: []
+  - name: with empty object
+    comments: |
+    json_payload: '{}'
+    yaml_payload: |
+      {}
+  - name: with null value
+    json_payload: 'null'
+    yaml_payload: |
+      null
+  - name: with ordered keys
+    json_payload: '{"d":1,"c":2,"b":3,"a":4}'
+    yaml_payload: |
+      d: 1
+      c: 2
+      b: 3
+      a: 4
+  - name: with numbers
+    json_payload: '{"1":"x","2":null,"3":{"a":1.1,"b":2.2,"c":3.3}}'
+    yaml_payload: |
+      "1": x
+      "2": null
+      "3":
+          a: 1.1
+          b: 2.2
+          c: 3.3
+  - name: with invalid token
+    json_payload: '{"a":|,"b":2,"c":3,"d":4}'
+    yaml_payload: |
+      a: '|'
+      b: 2
+      c: 3
+      d: 4
+    error: true
+  - name: with invalid delimiter (1)
+    json_payload: '{"a":1'
+    yaml_payload: |
+      null
+    error: true
+  - name: with invalid delimiter (2)
+    json_payload: '"a":{ai+b,"b":2,"c":3,"d":4}'
+    yaml_payload: |
+      null
+    error: true
+  - name: with invalid delimiter (3)
+    json_payload: '{"a":[1,]}'
+    yaml_payload: |
+      null
+    error: true
+  - name: with invalid delimiter (4)
+    json_payload: '{"a":[1],}'
+    yaml_payload: |
+      null
+    error: true
+  - name: with invalid delimiter (5)
+    json_payload: '{"a":{"b":1}'
+    yaml_payload: |
+      null
+    error: true
