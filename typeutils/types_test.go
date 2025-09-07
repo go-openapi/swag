@@ -17,14 +17,17 @@ package typeutils
 import (
 	"testing"
 	"time"
+	"unsafe"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type SimpleZeroes struct {
 	ID   string
 	Name string
 }
+
 type ZeroesWithTime struct {
 	Time time.Time
 }
@@ -51,7 +54,7 @@ func TestIsZero(t *testing.T) {
 	var i uint32
 	var j uint64
 	var k map[string]string
-	var l interface{}
+	var l any
 	var m *SimpleZeroes
 	var n string
 	var o SimpleZeroes
@@ -59,7 +62,7 @@ func TestIsZero(t *testing.T) {
 	var q time.Time
 	var z bool
 	data := []struct {
-		Data     interface{}
+		Data     any
 		Expected bool
 	}{
 		{a, true},
@@ -122,4 +125,40 @@ func TestIsZero(t *testing.T) {
 	for _, it := range data {
 		assert.Equalf(t, it.Expected, IsZero(it.Data), "expected %#v, but got %#v", it.Expected, it.Data)
 	}
+}
+
+func TestIsNil(t *testing.T) {
+	var (
+		c     chan<- int
+		f     func() bool
+		s     []int
+		m     map[string]any
+		struc struct{}
+	)
+
+	for _, value := range []any{
+		nil,
+		[]string(nil),
+		zeroable(nil),
+		s,
+		m,
+		unsafe.Pointer(nil),
+		c,
+		f,
+	} {
+		require.True(t, IsNil(value))
+	}
+
+	for _, value := range []any{
+		[]string{},
+		map[string]string{},
+		struc,
+		0,
+		0.00,
+		"",
+		false,
+	} {
+		require.False(t, IsNil(value))
+	}
+
 }

@@ -49,7 +49,7 @@ jobs:
             printf " \"${base_dir}\"" >> "$GITHUB_OUTPUT"
             all_mods+=("${base_dir}")
             ((index++)) || true
-          done < <(find . -name \*.mod | grep -v "\.git" | sort | uniq)
+          done < <(find . -name go.mod | grep -v "\.git" | sort | uniq)
           printf "]" >> "$GITHUB_OUTPUT"
 
           echo "::notice title=Modules found::${all_mods[@]}"
@@ -71,6 +71,7 @@ jobs:
           go-version: stable
           check-latest: true
           cache: true
+          cache-dependency-path: '**/go.sum'
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
@@ -105,15 +106,20 @@ jobs:
         go-version: '${{ matrix.go_version }}'
         check-latest: true
         cache: true
+        cache-dependency-path: '**/go.sum'
 
     - uses: actions/checkout@v5
     - name: Run unit tests on a single module in this repo
       shell: bash
       working-directory: '${{ matrix.module }}'
-      env:
-        # *.coverage.* pattern is automatically detected by codecov
-        COVER_PROFILE: "${{ matrix.module }}.coverage.${{ matrix.os }}.${{ matrix.go_version }}.out"
       run: |
+        # *.coverage.* pattern is automatically detected by codecov
+        COVER_PROFILE="$(basename ${{ matrix.module }}).coverage.${{ matrix.os }}.${{ matrix.go_version }}.out"
+        if [[ "${{ matrix.module }}" == "jsonutils/adapters/testintegration" ]] ; then
+          # integration tests capture coverage elsewhere
+          go test -v -race -coverprofile="${COVER_PROFILE}" -covermode=atomic -coverpkg=../../../... ./...
+          exit 0
+        fi
         go test -v -race -coverprofile="${COVER_PROFILE}" -covermode=atomic -coverpkg=$(go list)/... ./...
 
     - name: Upload coverage to codecov

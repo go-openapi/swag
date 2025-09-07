@@ -145,10 +145,10 @@ func TestReadWriteJSON(t *testing.T) {
 		})
 		t.Run("using FromDynamicJSON", func(t *testing.T) {
 			const epsilon = 1e-6
-			var obj2 interface{}
+			var obj2 any
 
 			require.NoError(t, FromDynamicJSON(obj, &obj2))
-			asMap, ok := obj2.(map[string]interface{})
+			asMap, ok := obj2.(map[string]any)
 			require.True(t, ok)
 			assert.Len(t, asMap, 3) // 3 fields in struct
 			c1, ok := asMap["counter1"]
@@ -164,19 +164,33 @@ func TestReadWriteJSON(t *testing.T) {
 			assert.InDelta(t, float64(290), c, epsilon)
 		})
 
-		t.Run("error in FromDynamicJSON (1)", func(t *testing.T) {
-			var obj2 interface{}
+		t.Run("with error edge cases", func(t *testing.T) {
+			t.Run("should not unmarshal non pointer, nil interface", func(t *testing.T) {
+				var obj2 any
 
-			require.Error(t, FromDynamicJSON(obj, obj2)) // target is not a pointer
-		})
+				err := FromDynamicJSON(obj, obj2)
+				require.Error(t, err)
+				require.ErrorContains(t, err, "Unmarshal(nil)")
+			})
 
-		t.Run("error in FromDynamicJSON (2)", func(t *testing.T) {
-			var obj2 interface{}
-			var source struct {
-				A int `json:"a"`
-				B func()
-			}
-			require.Error(t, FromDynamicJSON(source, obj2))
+			t.Run("should not unmarshal non pointer struct", func(t *testing.T) {
+				var obj2 struct{}
+
+				err := FromDynamicJSON(obj, obj2)
+				require.Error(t, err)
+				require.ErrorContains(t, err, "Unmarshal(non-pointer struct {})")
+			})
+
+			t.Run("should not unmarshal non-serializable exported field", func(t *testing.T) {
+				var obj2 any
+				var source struct {
+					A int `json:"a"`
+					B func()
+				}
+				err := FromDynamicJSON(source, obj2)
+				require.Error(t, err)
+				require.ErrorContains(t, err, "unsupported type: func()")
+			})
 		})
 	})
 }

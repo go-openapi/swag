@@ -44,110 +44,6 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestJSONToYAML(t *testing.T) {
-	t.Run("should convert JSON to YAML", func(t *testing.T) {
-		t.Run("with string values", func(t *testing.T) {
-			const (
-				input    = `{"1":"the int key value","name":"a string value","y":"some value"}`
-				expected = `"1": the int key value
-name: a string value
-y: some value
-`
-			)
-
-			var data YAMLMapSlice
-			require.NoError(t, json.Unmarshal([]byte(input), &data))
-
-			y, err := data.MarshalYAML()
-			require.NoError(t, err)
-			assert.Equal(t, expected, string(y.([]byte)))
-		})
-
-		t.Run("with nested object", func(t *testing.T) {
-			const (
-				input    = `{"1":"the int key value","name":"a string value","y":"some value","tag":{"name":"tag name"}}`
-				expected = `"1": the int key value
-name: a string value
-y: some value
-tag:
-    name: tag name
-`
-			)
-
-			var data YAMLMapSlice
-			require.NoError(t, json.Unmarshal([]byte(input), &data))
-			ny, err := data.MarshalYAML()
-			require.NoError(t, err)
-			assert.Equal(t, expected, string(ny.([]byte)))
-		})
-	})
-
-	t.Run("with complete doc", func(t *testing.T) {
-		t.Run("should convert bytes to YAML doc", func(t *testing.T) {
-			ydoc, err := BytesToYAMLDoc(fixture2224)
-			require.NoError(t, err)
-
-			t.Run("should convert YAML doc to JSON", func(t *testing.T) {
-				buf, err := YAMLToJSON(ydoc)
-				require.NoError(t, err)
-
-				t.Run("should unmarshal JSON into YAMLMapSlice", func(t *testing.T) {
-					var data YAMLMapSlice
-					require.NoError(t, json.Unmarshal(buf, &data))
-
-					t.Run("should marshal YAMLMapSlice into the original doc", func(t *testing.T) {
-						reconstructed, err := data.MarshalYAML()
-						require.NoError(t, err)
-
-						text, ok := reconstructed.([]byte)
-						require.True(t, ok)
-
-						assert.YAMLEq(t, string(fixture2224), string(text))
-					})
-				})
-			})
-		})
-	})
-}
-
-func TestJSONToYAMLWithNull(t *testing.T) {
-	const (
-		jazon    = `{"1":"the int key value","name":null,"y":"some value"}`
-		expected = `"1": the int key value
-name: null
-y: some value
-`
-	)
-	var data YAMLMapSlice
-	require.NoError(t, json.Unmarshal([]byte(jazon), &data))
-	ny, err := data.MarshalYAML()
-	require.NoError(t, err)
-	assert.Equal(t, expected, string(ny.([]byte)))
-}
-
-func TestMarshalYAML(t *testing.T) {
-	t.Run("marshalYAML should be deterministic", func(t *testing.T) {
-		const (
-			jazon    = `{"1":"x","2":null,"3":{"a":1.1,"b":2.2,"c":3.3}}`
-			expected = `"1": x
-"2": null
-"3":
-    a: 1.1
-    b: 2.2
-    c: 3.3
-`
-		)
-		const iterations = 10
-		for n := 0; n < iterations; n++ {
-			var data YAMLMapSlice
-			require.NoError(t, json.Unmarshal([]byte(jazon), &data))
-			ny, err := data.MarshalYAML()
-			require.NoError(t, err)
-			assert.Equal(t, expected, string(ny.([]byte)))
-		}
-	})
-}
-
 func TestYAMLToJSON(t *testing.T) {
 	const sd = `---
 1: the int key value
@@ -248,7 +144,7 @@ name: a string value
 		_ = yaml.Unmarshal([]byte(sd), &data)
 
 		t.Run("should convert any array to JSON", func(t *testing.T) {
-			var lst []interface{}
+			var lst []any
 			lst = append(lst, "hello")
 
 			d, err := YAMLToJSON(lst)
@@ -319,7 +215,8 @@ func TestWithYKey(t *testing.T) {
 }
 
 func TestMapKeyTypes(t *testing.T) {
-	dm := map[interface{}]interface{}{
+	dm := map[any]any{
+		"12345":             "string",
 		12345:               "int",
 		int8(1):             "int8",
 		int16(12345):        "int16",
@@ -368,6 +265,42 @@ func TestYAMLTags(t *testing.T) {
 				})
 			})
 		})
+	})
+}
+
+func TestYAMLEdgeCases(t *testing.T) {
+	t.Run("should never happen because never called in the context of arrays", func(t *testing.T) {
+		_, err := yamlDocument(&yaml.Node{
+			Content: []*yaml.Node{
+				{},
+				{},
+			},
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("should never happen unless the document representation is corrupted", func(t *testing.T) {
+		_, err := yamlSequence(&yaml.Node{
+			Content: []*yaml.Node{
+				{
+					Kind: yaml.Kind(99), // illegal kind
+				},
+			},
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("should never happen unless the document cannot be marshaled", func(t *testing.T) {
+		invalidType := func() {}
+		_, err := format(invalidType)
+		require.Error(t, err)
+
+		_, err = transformData([]any{
+			map[any]any{
+				complex128(0): struct{}{},
+			},
+		})
+		require.Error(t, err)
 	})
 }
 

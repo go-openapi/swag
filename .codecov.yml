@@ -1,0 +1,3 @@
+ignore:
+  - jsonutils/fixtures_test
+  - jsonutils/adapters/ifaces/mocks

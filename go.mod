@@ -19,8 +19,6 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/josharian/intern v1.0.0 // indirect
-	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
@@ -31,6 +29,7 @@ replace (
 	github.com/go-openapi/swag/fileutils => ./fileutils
 	github.com/go-openapi/swag/jsonname => ./jsonname
 	github.com/go-openapi/swag/jsonutils => ./jsonutils
+	github.com/go-openapi/swag/jsonutils/fixtures_test => ./jsonutils/fixtures_test
 	github.com/go-openapi/swag/loading => ./loading
 	github.com/go-openapi/swag/mangling => ./mangling
 	github.com/go-openapi/swag/netutils => ./netutils
@@ -39,4 +38,4 @@ replace (
 	github.com/go-openapi/swag/yamlutils => ./yamlutils
 )
 
-go 1.20.0
+go 1.24.0
