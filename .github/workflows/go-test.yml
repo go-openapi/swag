@@ -1,5 +1,9 @@
 name: go test
 
+permissions:
+  contents: read
+  pull-requests: read
+
 on:
   push:
     tags:
@@ -99,6 +103,8 @@ jobs:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
         go_version: ['oldstable', 'stable' ]
+    env:
+      TEST_REPORT: 'all_modules.report.${{ matrix.os }}.${{ matrix.go_version }}.json'
 
     steps:
     - uses: actions/checkout@v5
@@ -113,7 +119,7 @@ jobs:
       shell: bash
       env:
         # *.coverage.* pattern is automatically detected by codecov
-        COVER_PROFILE:  'all_modules.coverage.${{ matrix.os }}.${{ matrix.go_version }}.out'
+        COVER_PROFILE: 'all_modules.coverage.${{ matrix.os }}.${{ matrix.go_version }}.out'
       run: |
         # when go1.25 becomes the oldstable, we may replace this bash with "go work test"
         declare -a ALL_MODULES
@@ -130,15 +136,23 @@ jobs:
 
         # with go.work file enabled, go test recognizes sub-modules and collects all packages to be covered
         # without specifying -coverpkg.
-        go test -v -race -coverprofile="${COVER_PROFILE}" -covermode=atomic ${ALL_MODULES[@]}
+        go test -race -coverprofile="${COVER_PROFILE}" -covermode=atomic -json ${ALL_MODULES[@]}|tee -a "${TEST_REPORT}"
 
     - name: Upload coverage to codecov
+      if: ${{ !cancelled() }}  # we do this only if tests have not failed
       uses: codecov/codecov-action@v5
       with:
         name: Multi modules aggregated coverage
         flags: '${{ matrix.go_version }}-${{ matrix.os }}'
         fail_ci_if_error: false
-        verbose: true
+        verbose: false
+
+    - name: Upload JSON test Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: 'JSON test report for ${{ matrix.os }} and go ${{ matrix.go_version }} version'
+        path: {{ env.TEST_REPORT }}
 
   test:
     needs: [ module-test ]
@@ -148,3 +162,66 @@ jobs:
       - name: Tests complete
         run: |
           echo "All tests completed"
+
+  collect-reports:
+    if: '${{ always() }}'
+    needs: [ module-test ]
+    name: Collect and merge test reports
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all JSON artifacts
+        uses: actions/download-artifact@v5
+        with:
+          run-id: "${{ github.run_id }}"
+          pattern: "JSON test report*"
+          path: reports/
+
+      - name: Convert test reports to a merged JUnit XML
+        # NOTE: as a contemplated alternative, we could use gotestsum above to produce the JUnit XML directly.
+        shell: bash
+        run: |
+          go install github.com/jstemmer/go-junit-report/v2@latest
+          cat reports/*.json | go-junit-report -parser gojson -out=reports/junit_report.xml
+
+      - name: Upload test results to Codecov
+        if: always()
+        uses: codecov/test-results-action@v1
+        with:
+          file: '**/junit_report.xml'
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Convert test reports to CTRF JSON
+        run: |
+          go install github.com/ctrf-io/go-ctrf-json-reporter/cmd/go-ctrf-json-reporter@latest
+
+          appName="swag"
+          buildNumber="{{ github.run_id }}"
+          appVersion="${{ github.event.pull_request.head.sha }}"
+
+          while read report ; do
+            osPlatform=$(echo "${report}"|cut -d'.' -f2)
+            osRelease=$(echo "${report}"|cut -d'.' -f3)
+
+            go-ctrf-json-reporter \
+              -appName "${appName}" \
+              -appVersion "${appVersion}" \
+              -buildNumber "${buildNumber}" \
+              -osPlatform "${osPlatform}" \
+              -osRelease "${osRelease}" \
+              -output ./ctrf_report.json \
+              -quiet < "${report}"
+          done < <(find reports -name \*.json)
+
+      - name: Publish Test Summary Results
+        # the report is too verbose -> summary
+        # can do: pull request comment, but not available on forks
+        # -> usual stuff: pass artifacts, invoke workflow wih pull_request_from_master
+        uses: ctrf-io/github-test-reporter@v1
+        with:
+          report-path: 'reports/ctrf_report.json'
+          use-suite-name: true
+          summary-report: true             # post a report to the github actions summary
+          github-report: true
+          failed-folded-report: true
+
