@@ -28,9 +28,9 @@ jobs:
           # NOTES:
           #
           # > * git bash on a windows runner should support GNU find. find flags should be supported by find on macos.
-          # > * We don't attempt any tricks with the go work command. Perhaps this will be the official way in future go releases.
-          # > * There is no simple way to get the expected result with go list, unless all submodules are dependencies of the
-          #     root module (which is not a requirement).
+          # > * with go.work file enabled, we may now collect all submodules with go list -m
+          # >
+          # > The outcome is currently only used for linting. Tests may now skip that part.
           set -euxo pipefail
 
           root="$(git rev-parse --show-toplevel)"
@@ -49,7 +49,7 @@ jobs:
             printf " \"${base_dir}\"" >> "$GITHUB_OUTPUT"
             all_mods+=("${base_dir}")
             ((index++)) || true
-          done < <(find . -name go.mod | grep -v "\.git" | sort | uniq)
+          done < <(go list -f '{{.Dir}}' -m)
           printf "]" >> "$GITHUB_OUTPUT"
 
           echo "::notice title=Modules found::${all_mods[@]}"
@@ -78,6 +78,7 @@ jobs:
           version: latest
           only-new-issues: true
           skip-cache: true
+          # golangci-lint doesn't support go.work to lint multiple modules in one single pass
           working-directory: '${{ matrix.module }}'
 
   lint:
@@ -98,9 +99,13 @@ jobs:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
         go_version: ['oldstable', 'stable' ]
-        module: ${{ fromJSON(needs.module-matrix.outputs.modules) }}
 
     steps:
+    - uses: actions/checkout@v5
+    #- name: Ensure cache is available
+    # run: |
+    #   mkdir -p /home/runner/go/pkg/mod
+    #   mkdir -p /home/runner/.cache/go.build
     - uses: actions/setup-go@v6
       with:
         go-version: '${{ matrix.go_version }}'
@@ -108,19 +113,27 @@ jobs:
         cache: true
         cache-dependency-path: '**/go.sum'
 
-    - uses: actions/checkout@v5
-    - name: Run unit tests on a single module in this repo
+    - name: Run unit tests on all modules in this repo
       shell: bash
-      working-directory: '${{ matrix.module }}'
-      run: |
+      env:
         # *.coverage.* pattern is automatically detected by codecov
-        COVER_PROFILE="$(basename ${{ matrix.module }}).coverage.${{ matrix.os }}.${{ matrix.go_version }}.out"
-        if [[ "${{ matrix.module }}" == "jsonutils/adapters/testintegration" ]] ; then
-          # integration tests capture coverage elsewhere
-          go test -v -race -coverprofile="${COVER_PROFILE}" -covermode=atomic -coverpkg=../../../... ./...
-          exit 0
+        COVER_PROFILE:  'all_modules.coverage.${{ matrix.os }}.${{ matrix.go_version }}.out'
+      run: |
+        declare -a ALL_MODULES
+        BASH_MAJOR=$(echo $BASH_VERSION|cut -d'.' -f1)
+        if [[ "${BASH_MAJOR}" -ge 4 ]] ; then
+          mapfile ALL_MODULES < <(go list -f '{{.Dir}}/...' -m)
+        else
+          # for older bash versions, e.g. on macOS runner. This fallback will eventually disappear.
+          while read line ; do
+            ALL_MODULES+=("${line}")
+          done < <(go list -f '{{.Dir}}/...' -m)
         fi
-        go test -v -race -coverprofile="${COVER_PROFILE}" -covermode=atomic -coverpkg=$(go list)/... ./...
+        echo "::notice title=Modules found::${ALL_MODULES[@]}"
+
+        # with go.work file enabled, go test recognizes sub-modules and collects all packages to be covered
+        # without specifying -coverpkg.
+        go test -v -race -coverprofile="${COVER_PROFILE}" -covermode=atomic ${ALL_MODULES[@]}
 
     - name: Upload coverage to codecov
       uses: codecov/codecov-action@v5
