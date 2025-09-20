@@ -1,0 +1,36 @@
+go 1.24.0
+
+use (
+	.
+	./cmdutils
+	./conv
+	./fileutils
+	./jsonname
+	./jsonutils
+	./jsonutils/adapters/easyjson
+	./jsonutils/adapters/testintegration
+	./jsonutils/fixtures_test
+	./loading
+	./mangling
+	./netutils
+	./stringutils
+	./typeutils
+	./yamlutils
+)
+
+// replace (
+//   github.com/go-openapi/swag/cmdutils => ./cmdutils
+//   github.com/go-openapi/swag/conv =>	./conv
+//   github.com/go-openapi/swag/fileutils =>	./fileutils
+//   github.com/go-openapi/swag/jsonname =>	./jsonname
+//   github.com/go-openapi/swag/jsonutils =>	./jsonutils
+//   github.com/go-openapi/swag/jsonutils/adapters/easyjson =>	./jsonutils/adapters/easyjson
+//   github.com/go-openapi/swag/jsonutils/adapters/testintegration =>	./jsonutils/adapters/testintegration
+//   github.com/go-openapi/swag/jsonutils/fixtures_test =>	./jsonutils/fixtures_test
+//   github.com/go-openapi/swag/loading =>	./loading
+//   github.com/go-openapi/swag/mangling =>	./mangling
+//   github.com/go-openapi/swag/netutils =>	./netutils
+//   github.com/go-openapi/swag/stringutils =>	./stringutils
+//   github.com/go-openapi/swag/typeutils =>	./typeutils
+//   github.com/go-openapi/swag/yamlutils =>	./yamlutils
+// )

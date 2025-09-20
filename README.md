@@ -166,6 +166,7 @@ All kinds of contributions are welcome.
 A few ideas:
 
 * [x] Complete the split of dependencies to isolate easyjson from the rest
+* [x] Improve CI to reduce needed tests
 * [ ] Improve mangling utilities (improve readability, support for capitalized words,
       better word substitution for non-letter symbols...)
 * [ ] Move back to this common shared pot a few of the technical features introduced by go-swagger independently
@@ -173,7 +174,6 @@ A few ideas:
 * [ ] Apply a similar mono-repo approach to go-openapi/strfmt which suffer from similar woes: bloated API,
       imposed dependency to some database driver.
 * [ ] Adapt `go-swagger` (incl. generated code) to the new `swag` API.
-* [ ] Improve CI to reduce needed tests
 * [ ] Replace dependency to `gopkg.in/yaml.v3` (`yamlutil`)
 * [ ] Factorize some tests, as there is a lot of redundant testing code in `jsonutils`
 

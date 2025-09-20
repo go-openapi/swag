@@ -27,7 +27,7 @@ while read module_location ; do
   fi
   all_tags+=("${module_tag}")
   git tag "${module_tag}"
-done < <(find . -name \*.mod | grep -v "\.git" | sort | uniq)
+done < <(go list -f '{{.Dir}}' -m)
 
 echo "Pushing tags to ${remote}: ${all_tags[@]}"
 git push "${remote}" ${all_tags[@]}
