@@ -5,6 +5,7 @@ import (
 	"embed"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"iter"
@@ -12,8 +13,9 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
+	yaml "go.yaml.in/yaml/v3"
 )
 
 // embedded test files
@@ -261,7 +263,7 @@ var (
 func YAMLEqualOrdered(t testing.TB, expected, actual string) {
 	t.Helper()
 
-	require.YAMLEq(t, expected, actual) // necessary but not sufficient condition
+	RequireYAMLEq(t, expected, actual) // necessary but not sufficient condition
 
 	// strip all indentation and comments (anchors not supported)
 	strippedExpected := rexStripIndent.ReplaceAllString(expected, "")
@@ -275,4 +277,39 @@ func YAMLEqualOrdered(t testing.TB, expected, actual string) {
 	strippedActual = rexStripEmpty.ReplaceAllString(strippedActual, "")
 
 	require.Equal(t, strippedExpected, strippedActual)
+}
+
+// RequireYAMLEq is the same as [require.YAMLEq] but without the dependency to go.pkg.in/yaml.v3.
+//
+// NOTE: this could be reverted once https://github.com/stretchr/testify/pull/1772 is merged.
+func RequireYAMLEq(t testing.TB, expected string, actual string, msgAndArgs ...any) {
+	t.Helper()
+
+	if AssertYAMLEq(t, expected, actual, msgAndArgs...) {
+		return
+	}
+	t.FailNow()
+}
+
+// AssertYAMLEq is the same as [assert.YAMLEq] but without the dependency to go.pkg.in/yaml.v3.
+//
+// NOTE: this could be reverted once https://github.com/stretchr/testify/pull/1772 is merged.
+func AssertYAMLEq(t testing.TB, expected string, actual string, msgAndArgs ...any) bool {
+	t.Helper()
+	var expectedYAMLAsInterface, actualYAMLAsInterface any
+
+	if err := yaml.Unmarshal([]byte(expected), &expectedYAMLAsInterface); err != nil {
+		return assert.Fail(t, fmt.Sprintf("Expected value ('%s') is not valid yaml.\nYAML parsing error: '%s'", expected, err.Error()), msgAndArgs...)
+	}
+
+	// Shortcut if same bytes
+	if actual == expected {
+		return true
+	}
+
+	if err := yaml.Unmarshal([]byte(actual), &actualYAMLAsInterface); err != nil {
+		return assert.Fail(t, fmt.Sprintf("Input ('%s') needs to be valid yaml.\nYAML error: '%s'", actual, err.Error()), msgAndArgs...)
+	}
+
+	return assert.Equal(t, expectedYAMLAsInterface, actualYAMLAsInterface, msgAndArgs...)
 }

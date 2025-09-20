@@ -42,7 +42,7 @@ Child modules will continue to evolve or some new ones may be added in the futur
 | `netutils`    | networking utilities | host, port from address<br /> |
 | `stringutils` | `string` utilities | search in slice (with case-insensitive)<br />split/join query parameters as arrays<br /> |
 | `typeutils`   | `go` types utilities | check the zero value for any type<br />safe check for a nil value<br /> |
-| `yamlutils`   | YAML utilities | converting YAML to JSON<br />loading YAML into a dynamic YAML document<br />maintaining the original order of keys in YAML objects<br />require `./jsonutils`<br />~require `github.com/mailru/easyjson`~<br />require `gopkg.in/yaml.v3`<br /> |
+| `yamlutils`   | YAML utilities | converting YAML to JSON<br />loading YAML into a dynamic YAML document<br />maintaining the original order of keys in YAML objects<br />require `./jsonutils`<br />~require `github.com/mailru/easyjson`~<br />require `go.yaml.in/yaml/v3`<br /> |
 
 ---
 
@@ -51,7 +51,7 @@ Child modules will continue to evolve or some new ones may be added in the futur
 The root module `github.com/go-openapi/swag` at the repo level maintains a few 
 dependencies outside of the standard library.
 
-* YAML utilities depend on `gopkg.in/yaml.v3`
+* YAML utilities depend on `go.yaml.in/yaml/v3`
 * JSON utilities depend on their registered adapter module:
    * by default, only the standard library is used
    * `github.com/mailru/easyjson` is now only a dependency for module
@@ -167,6 +167,7 @@ A few ideas:
 
 * [x] Complete the split of dependencies to isolate easyjson from the rest
 * [x] Improve CI to reduce needed tests
+* [x] Replace dependency to `gopkg.in/yaml.v3` (`yamlutil`)
 * [ ] Improve mangling utilities (improve readability, support for capitalized words,
       better word substitution for non-letter symbols...)
 * [ ] Move back to this common shared pot a few of the technical features introduced by go-swagger independently
@@ -174,6 +175,5 @@ A few ideas:
 * [ ] Apply a similar mono-repo approach to go-openapi/strfmt which suffer from similar woes: bloated API,
       imposed dependency to some database driver.
 * [ ] Adapt `go-swagger` (incl. generated code) to the new `swag` API.
-* [ ] Replace dependency to `gopkg.in/yaml.v3` (`yamlutil`)
 * [ ] Factorize some tests, as there is a lot of redundant testing code in `jsonutils`
 
