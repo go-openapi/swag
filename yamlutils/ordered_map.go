@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/jsonutils/adapters/ifaces"
 	"github.com/go-openapi/swag/typeutils"
-	yaml "gopkg.in/yaml.v3"
+	yaml "go.yaml.in/yaml/v3"
 )
 
 var (

@@ -11,6 +11,7 @@ require (
 	github.com/go-openapi/swag/jsonutils v0.0.0-00010101000000-000000000000 // indirect
 	github.com/go-openapi/swag/typeutils v0.0.0-00010101000000-000000000000 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 

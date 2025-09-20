@@ -52,7 +52,7 @@
 //
 // This repo has a few dependencies outside of the standard library:
 //
-//   - YAML utilities depend on [gopkg.in/yaml.v3]
+//   - YAML utilities depend on [go.yaml.in/yaml/v3]
 package swag
 
 //go:generate mockery

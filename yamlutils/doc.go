@@ -20,5 +20,5 @@
 package yamlutils
 
 import (
-	_ "gopkg.in/yaml.v3" // for documentation purpose only
+	_ "go.yaml.in/yaml/v3" // for documentation purpose only
 )
