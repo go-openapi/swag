@@ -110,3 +110,8 @@ func (a *Adapter) NewOrderedMap(capacity int) ifaces.OrderedMap {
 
 	return &m
 }
+
+func (a *Adapter) redeem() {
+	// a becomes immediately unusable once redeemed
+	RedeemAdapter(a)
+}

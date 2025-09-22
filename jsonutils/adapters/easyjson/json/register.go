@@ -39,15 +39,11 @@ func Register(dispatcher ifaces.Registrar, opts ...Option) {
 		ifaces.RegistryEntry{
 			Who:  fmt.Sprintf("%s.%s", t.PkgPath(), t.Name()),
 			What: ifaces.AllCapabilities,
-			Constructor: func() ifaces.Adapter {
+			Constructor: func() (ifaces.Adapter, func()) {
 				a := BorrowAdapter()
 				a.options = o
 
-				return a
-			},
-			Redeemer: func(a ifaces.Adapter) {
-				adapter := a.(*Adapter)
-				RedeemAdapter(adapter)
+				return a, a.redeem // since we return an interface, we have an extra allocation here. There is not much we can do about it.
 			},
 			Support: support,
 		})

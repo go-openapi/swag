@@ -104,3 +104,5 @@ For example, to enable `easyjson` to be used in `ReadJSON` and `WriteJSON`, you 
 
 You may register several adapters. In this case, capability matching is evaluated from the last registered
 adapters (LIFO).
+
+## [Benchmarks](./adapters/testintegration/benchmarks/README.md)
