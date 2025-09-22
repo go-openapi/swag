@@ -5,7 +5,7 @@ require (
 	github.com/go-openapi/swag/jsonutils v0.0.0-00010101000000-000000000000
 	github.com/go-openapi/swag/jsonutils/fixtures_test v0.0.0-00010101000000-000000000000
 	github.com/go-openapi/swag/typeutils v0.0.0-00010101000000-000000000000
-	github.com/mailru/easyjson v0.9.0
+	github.com/mailru/easyjson v0.9.1
 	github.com/stretchr/testify v1.11.1
 )
 

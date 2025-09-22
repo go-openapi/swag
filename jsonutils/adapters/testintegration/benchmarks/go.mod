@@ -1,4 +1,4 @@
-module github.com/go-openapi/swag/jsonutils/adapters/testintegration
+module github.com/go-openapi/swag/jsonutils/adapters/testintegration/benchmarks
 
 require (
 	github.com/go-openapi/swag/jsonutils v0.0.0-00010101000000-000000000000
@@ -19,11 +19,11 @@ require (
 )
 
 replace (
-	github.com/go-openapi/swag/conv => ../../../conv
-	github.com/go-openapi/swag/jsonutils => ../../../jsonutils
-	github.com/go-openapi/swag/jsonutils/adapters/easyjson => ../easyjson
-	github.com/go-openapi/swag/jsonutils/fixtures_test => ../../fixtures_test
-	github.com/go-openapi/swag/typeutils => ../../../typeutils
+	github.com/go-openapi/swag/conv => ../../../../conv
+	github.com/go-openapi/swag/jsonutils => ../../../../jsonutils
+	github.com/go-openapi/swag/jsonutils/adapters/easyjson => ../../easyjson
+	github.com/go-openapi/swag/jsonutils/fixtures_test => ../../../fixtures_test
+	github.com/go-openapi/swag/typeutils => ../../../../typeutils
 )
 
 go 1.24.0

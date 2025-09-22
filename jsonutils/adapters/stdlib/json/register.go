@@ -27,13 +27,9 @@ func Register(dispatcher ifaces.Registrar) {
 		ifaces.RegistryEntry{
 			Who:  fmt.Sprintf("%s.%s", t.PkgPath(), t.Name()),
 			What: ifaces.AllCapabilities,
-			Constructor: func() ifaces.Adapter {
+			Constructor: func() (ifaces.Adapter, func()) {
 				a := BorrowAdapter()
-				return a
-			},
-			Redeemer: func(a ifaces.Adapter) {
-				adapter := a.(*Adapter)
-				RedeemAdapter(adapter)
+				return a, a.redeem
 			},
 			Support: support,
 		})

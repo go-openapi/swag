@@ -78,8 +78,7 @@ const (
 type RegistryEntry struct {
 	Who         string
 	What        Capabilities
-	Constructor func() Adapter
-	Redeemer    func(Adapter)
+	Constructor func() (Adapter, func())
 	Support     func(what Capability, value any) bool
 }
 

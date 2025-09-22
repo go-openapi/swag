@@ -571,11 +571,10 @@ func register1(dispatcher ifaces.Registrar) {
 		ifaces.RegistryEntry{
 			Who:  fmt.Sprintf("%s.%s", t.PkgPath(), t.Name()),
 			What: ifaces.AllCapabilities,
-			Constructor: func() ifaces.Adapter {
-				return newMockAdapter1()
+			Constructor: func() (ifaces.Adapter, func()) {
+				return newMockAdapter1(), noopRedeemer
 			},
-			Redeemer: func(_ ifaces.Adapter) {},
-			Support:  support1,
+			Support: support1,
 		})
 }
 
@@ -586,11 +585,10 @@ func register2(dispatcher ifaces.Registrar) {
 		ifaces.RegistryEntry{
 			Who:  fmt.Sprintf("%s.%s", t.PkgPath(), t.Name()),
 			What: ifaces.AllCapabilities,
-			Constructor: func() ifaces.Adapter {
-				return newMockAdapter2()
+			Constructor: func() (ifaces.Adapter, func()) {
+				return newMockAdapter2(), noopRedeemer
 			},
-			Redeemer: func(_ ifaces.Adapter) {},
-			Support:  support2,
+			Support: support2,
 		})
 }
 

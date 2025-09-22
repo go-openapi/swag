@@ -65,13 +65,14 @@ dependencies outside of the standard library.
 **New with this release**:
 
 * requires `go1.24`, as iterators are being introduced
-* removes the dependency to `mailru/easyjson` by default
+* removes the dependency to `mailru/easyjson` by default (#68)
 * functionality remains the same, but performance may somewhat degrade for applications
   that relied on `easyjson`
 * users of the JSON or YAML utilities who want to use `easyjson` as their prefered JSON seriliazer library
   will be able to do so by registering this the corresponding JSON adapter at runtime. See below.
 * ordered keys in JSON and YAML objects: this feature used to rely solely on `easyjson`.
   With this release, an implementation relying on the standard `encoding/json` is provided.
+* improved float is integer check (`conv.IsFloat64AJSONInteger`) (#59)
 
 **What coming next?**
 

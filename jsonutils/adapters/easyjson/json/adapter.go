@@ -144,6 +144,10 @@ func (a *Adapter) NewOrderedMap(capacity int) ifaces.OrderedMap {
 	return &m
 }
 
+func (a *Adapter) redeem() {
+	RedeemAdapter(a)
+}
+
 func newJWriter() *jwriter.Writer {
 	return &jwriter.Writer{
 		Flags: jwriter.NilMapAsEmpty | jwriter.NilSliceAsEmpty,
