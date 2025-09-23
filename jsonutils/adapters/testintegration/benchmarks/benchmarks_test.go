@@ -108,7 +108,7 @@ func benchFromDynamic[T any](constructor func() *T) func(*testing.B) {
 	source := constructor()
 	return func(b *testing.B) {
 		for b.Loop() {
-			var target any
+			var target T
 
 			if err := jsonutils.FromDynamicJSON(source, &target); err != nil {
 				b.Logf("unexpected error: %v", err)

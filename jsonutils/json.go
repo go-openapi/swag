@@ -34,24 +34,21 @@ import (
 // you now need to register the adapter for easyjson at runtime.
 func WriteJSON(value any) ([]byte, error) {
 	if orderedMap, isOrdered := value.(ifaces.Ordered); isOrdered {
-		orderedMarshaler, redeem := adapters.OrderedMarshalAdapterFor(orderedMap)
-		if redeem != nil { // safeguard: don't try to relinquish to pool if the adapter has omitted to provide a redeemer
-			defer redeem()
-		}
+		orderedMarshaler := adapters.OrderedMarshalAdapterFor(orderedMap)
 
 		if orderedMarshaler != nil {
+			defer orderedMarshaler.Redeem()
+
 			return orderedMarshaler.OrderedMarshal(orderedMap)
 		}
 
 		// no support found in registered adapters, fallback to the default (unordered) case
 	}
 
-	marshaler, redeem := adapters.MarshalAdapterFor(value)
-	if redeem != nil { // safeguard: don't try to relinquish to pool if the adapter has omitted to provide a redeemer
-		defer redeem()
-	}
-
+	marshaler := adapters.MarshalAdapterFor(value)
 	if marshaler != nil {
+		defer marshaler.Redeem()
+
 		return marshaler.Marshal(value)
 	}
 
@@ -83,24 +80,21 @@ func ReadJSON(data []byte, value any) error {
 	if orderedMap, isOrdered := value.(ifaces.SetOrdered); isOrdered {
 		// if the value is an ordered map, favors support for OrderedUnmarshal.
 
-		orderedUnmarshaler, redeem := adapters.OrderedUnmarshalAdapterFor(orderedMap)
-		if redeem != nil { // safeguard: don't try to relinquish to pool if the adapter has omitted to provide a redeemer
-			defer redeem()
-		}
+		orderedUnmarshaler := adapters.OrderedUnmarshalAdapterFor(orderedMap)
 
 		if orderedUnmarshaler != nil {
+			defer orderedUnmarshaler.Redeem()
+
 			return orderedUnmarshaler.OrderedUnmarshal(trimmedData, orderedMap)
 		}
 
 		// no support found in registered adapters, fallback to the default (unordered) case
 	}
 
-	unmarshaler, redeem := adapters.UnmarshalAdapterFor(value)
-	if redeem != nil {
-		defer redeem()
-	}
-
+	unmarshaler := adapters.UnmarshalAdapterFor(value)
 	if unmarshaler != nil {
+		defer unmarshaler.Redeem()
+
 		return unmarshaler.Unmarshal(trimmedData, value)
 	}
 

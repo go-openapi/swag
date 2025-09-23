@@ -101,6 +101,8 @@ func (r *Registrar) Reset() {
 	r.orderedUnmarshalerRegistry = r.orderedUnmarshalerRegistry[:0]
 	r.orderedMapRegistry = r.orderedMapRegistry[:0]
 	r.gmx.Unlock()
+
+	defaultRegistered(r)
 }
 
 // RegisterFor registers an adapter for some JSON capabilities.
@@ -136,20 +138,15 @@ func (r *Registrar) RegisterFor(entry ifaces.RegistryEntry) {
 
 // AdapterFor returns an [ifaces.Adapter] that supports this capability for this type of value.
 //
-// The function returned is used to redeem the adapter to a pool, for adapters that support global
+// The [ifaces.Adapter] may be redeemed to its pool using its Redeem() method, for adapters that support global
 // pooling. When this is not the case, the redeem function is just a no-operation.
-func (r *Registrar) AdapterFor(capability ifaces.Capability, value any) (ifaces.Adapter, func()) {
+func (r *Registrar) AdapterFor(capability ifaces.Capability, value any) ifaces.Adapter {
 	entry := r.findFirstFor(capability, value)
 	if entry == nil {
-		return nil, noopRedeemer
+		return nil
 	}
 
-	adapter, redeem := entry.Constructor()
-	if redeem != nil {
-		return adapter, redeem
-	}
-
-	return adapter, noopRedeemer
+	return entry.Constructor()
 }
 
 func (r *Registrar) clearCache() {
@@ -209,37 +206,34 @@ func (r *Registrar) findFirstInRegistryFor(reg registry, cache map[reflect.Type]
 }
 
 // MarshalAdapterFor returns the first adapter that knows how to Marshal this type of value.
-func MarshalAdapterFor(value any) (ifaces.MarshalAdapter, func()) {
+func MarshalAdapterFor(value any) ifaces.MarshalAdapter {
 	return Registry.AdapterFor(ifaces.CapabilityMarshalJSON, value)
 }
 
 // OrderedMarshalAdapterFor returns the first adapter that knows how to OrderedMarshal this type of value.
-func OrderedMarshalAdapterFor(value ifaces.Ordered) (ifaces.OrderedMarshalAdapter, func()) {
+func OrderedMarshalAdapterFor(value ifaces.Ordered) ifaces.OrderedMarshalAdapter {
 	return Registry.AdapterFor(ifaces.CapabilityOrderedMarshalJSON, value)
 }
 
 // UnmarshalAdapterFor returns the first adapter that knows how to Unmarshal this type of value.
-func UnmarshalAdapterFor(value any) (ifaces.UnmarshalAdapter, func()) {
+func UnmarshalAdapterFor(value any) ifaces.UnmarshalAdapter {
 	return Registry.AdapterFor(ifaces.CapabilityUnmarshalJSON, value)
 }
 
 // OrderedUnmarshalAdapterFor provides the first adapter that knows how to OrderedUnmarshal this type of value.
-func OrderedUnmarshalAdapterFor(value ifaces.SetOrdered) (ifaces.OrderedUnmarshalAdapter, func()) {
+func OrderedUnmarshalAdapterFor(value ifaces.SetOrdered) ifaces.OrderedUnmarshalAdapter {
 	return Registry.AdapterFor(ifaces.CapabilityOrderedUnmarshalJSON, value)
 }
 
 // NewOrderedMap provides the "ordered map" implementation provided by the registry.
 func NewOrderedMap(capacity int) ifaces.OrderedMap {
 	var v any
-	adapter, redeem := Registry.AdapterFor(ifaces.CapabilityOrderedUnmarshalJSON, v)
-	if redeem != nil {
-		defer redeem()
-	}
-
+	adapter := Registry.AdapterFor(ifaces.CapabilityOrderedUnmarshalJSON, v)
 	if adapter == nil {
 		return nil
 	}
 
+	defer adapter.Redeem()
 	return adapter.NewOrderedMap(capacity)
 }
 

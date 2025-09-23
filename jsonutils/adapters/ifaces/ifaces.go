@@ -23,27 +23,36 @@ type SetOrdered interface {
 type OrderedMap interface {
 	Ordered
 	SetOrdered
+
 	OrderedMarshalJSON() ([]byte, error)
 	OrderedUnmarshalJSON([]byte) error
 }
 
 // MarshalAdapter behaves likes the standard library [json.Marshal].
 type MarshalAdapter interface {
+	Poolable
+
 	Marshal(any) ([]byte, error)
 }
 
 // OrderedMarshalAdapter behaves likes the standard library [json.Marshal], preserving the order of keys in objects.
 type OrderedMarshalAdapter interface {
+	Poolable
+
 	OrderedMarshal(Ordered) ([]byte, error)
 }
 
 // UnmarshalAdapter behaves likes the standard library [json.Unmarshal].
 type UnmarshalAdapter interface {
+	Poolable
+
 	Unmarshal([]byte, any) error
 }
 
 // OrderedUnmarshalAdapter behaves likes the standard library [json.Unmarshal], preserving the order of keys in objects.
 type OrderedUnmarshalAdapter interface {
+	Poolable
+
 	OrderedUnmarshal([]byte, SetOrdered) error
 }
 
@@ -60,4 +69,13 @@ type OrderedAdapter interface {
 	OrderedMarshalAdapter
 	OrderedUnmarshalAdapter
 	NewOrderedMap(capacity int) OrderedMap
+}
+
+type Poolable interface {
+	// Self-redeem: for [Adapter] s that are allocated from a pool.
+	// The [Adapter] must not be used after calling [Redeem].
+	Redeem()
+
+	// Reset the state of the [Adapter], if any.
+	Reset()
 }

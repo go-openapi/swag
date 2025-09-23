@@ -91,8 +91,8 @@ func (s *JSONMapSlice) SetOrderedItems(items iter.Seq2[string, any]) {
 //
 // It will pick the JSON library currently configured by the [adapters.Registry] (defaults to the standard library).
 func (s JSONMapSlice) MarshalJSON() ([]byte, error) {
-	orderedMarshaler, redeem := adapters.OrderedMarshalAdapterFor(s)
-	defer redeem()
+	orderedMarshaler := adapters.OrderedMarshalAdapterFor(s)
+	defer orderedMarshaler.Redeem()
 
 	return orderedMarshaler.OrderedMarshal(s)
 }
@@ -108,8 +108,8 @@ func (s *JSONMapSlice) UnmarshalJSON(data []byte) error {
 		*s = JSONMapSlice{}
 	}
 
-	orderedUnmarshaler, redeem := adapters.OrderedUnmarshalAdapterFor(s)
-	defer redeem()
+	orderedUnmarshaler := adapters.OrderedUnmarshalAdapterFor(s)
+	defer orderedUnmarshaler.Redeem()
 
 	return orderedUnmarshaler.OrderedUnmarshal(data, s)
 }
