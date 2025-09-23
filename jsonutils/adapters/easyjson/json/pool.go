@@ -17,6 +17,7 @@ package json
 import (
 	"sync"
 
+	"github.com/go-openapi/swag/jsonutils/adapters/ifaces"
 	"github.com/mailru/easyjson/buffer"
 	"github.com/mailru/easyjson/jlexer"
 	"github.com/mailru/easyjson/jwriter"
@@ -27,9 +28,11 @@ type adaptersPool struct {
 }
 
 func (p *adaptersPool) Borrow() *Adapter {
-	ptr := p.Get()
+	return p.Get().(*Adapter)
+}
 
-	return ptr.(*Adapter)
+func (p *adaptersPool) BorrowIface() ifaces.Adapter {
+	return p.Get().(*Adapter)
 }
 
 func (p *adaptersPool) Redeem(a *Adapter) {
@@ -107,9 +110,20 @@ func BorrowAdapter() *Adapter {
 	return poolOfAdapters.Borrow()
 }
 
+func BorrowAdapterIface() ifaces.Adapter {
+	return poolOfAdapters.BorrowIface()
+}
+
 // RedeemAdapter redeems an [Adapter] to the pool, so it may be recycled.
 func RedeemAdapter(a *Adapter) {
 	poolOfAdapters.Redeem(a)
+}
+
+func RedeemAdapterIface(a ifaces.Adapter) {
+	concrete, ok := a.(*Adapter)
+	if ok {
+		poolOfAdapters.Redeem(concrete)
+	}
 }
 
 // BorrowWriter borrows a [jwriter.Writer] from the pool, recycling already allocated instances.

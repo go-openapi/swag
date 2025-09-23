@@ -40,10 +40,9 @@ func TestRegistryUnmarshal(t *testing.T) {
 
 		t.Run("should retrieve route from cache when calling Unmarshal", func(t *testing.T) {
 			var value any
-			adapter, redeem := reg.AdapterFor(ifaces.CapabilityUnmarshalJSON, value)
+			adapter := reg.AdapterFor(ifaces.CapabilityUnmarshalJSON, value)
 			require.NotNil(t, adapter)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adapter.Redeem()
 			jazon := []byte("null")
 			err := adapter.Unmarshal(jazon, &value)
 			require.NoError(t, err)
@@ -57,10 +56,9 @@ func TestRegistryUnmarshal(t *testing.T) {
 
 		t.Run("should serve adapter for capability OrderedUnmarshalJSON", func(t *testing.T) {
 			value := newMockOrdered()
-			adapter, redeem := reg.AdapterFor(ifaces.CapabilityOrderedUnmarshalJSON, value)
+			adapter := reg.AdapterFor(ifaces.CapabilityOrderedUnmarshalJSON, value)
 			require.NotNil(t, adapter)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adapter.Redeem()
 			var expectedAdapter *MockAdapter1
 			require.IsType(t, expectedAdapter, adapter)
 
@@ -88,10 +86,9 @@ func TestRegistryUnmarshal(t *testing.T) {
 
 		t.Run("should retrieve route from cache when calling OrderedUnmarshal", func(t *testing.T) {
 			value := newMockOrdered()
-			adapter, redeem := reg.AdapterFor(ifaces.CapabilityOrderedUnmarshalJSON, value)
+			adapter := reg.AdapterFor(ifaces.CapabilityOrderedUnmarshalJSON, value)
 			require.NotNil(t, adapter)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adapter.Redeem()
 			jazon := []byte("null")
 			err := adapter.OrderedUnmarshal(jazon, value)
 			require.NoError(t, err)
@@ -120,10 +117,9 @@ func TestRegistryMarshal(t *testing.T) {
 
 		t.Run("should retrieve route from cache when calling Marshal", func(t *testing.T) {
 			var value any
-			adapter, redeem := reg.AdapterFor(ifaces.CapabilityMarshalJSON, value)
+			adapter := reg.AdapterFor(ifaces.CapabilityMarshalJSON, value)
 			require.NotNil(t, adapter)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adapter.Redeem()
 
 			jazon, err := adapter.Marshal(value)
 			require.NoError(t, err)
@@ -137,10 +133,9 @@ func TestRegistryMarshal(t *testing.T) {
 
 		t.Run("should serve adapter for capability OrderedMarshalJSON", func(t *testing.T) {
 			value := newMockOrdered()
-			adapter, redeem := reg.AdapterFor(ifaces.CapabilityOrderedMarshalJSON, value)
+			adapter := reg.AdapterFor(ifaces.CapabilityOrderedMarshalJSON, value)
 			require.NotNil(t, adapter)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adapter.Redeem()
 			var expectedAdapter *MockAdapter1
 			require.IsType(t, expectedAdapter, adapter)
 
@@ -167,10 +162,9 @@ func TestRegistryMarshal(t *testing.T) {
 
 		t.Run("should retrieve route from cache when calling OrderedMarshal", func(t *testing.T) {
 			value := newMockOrdered()
-			adapter, redeem := reg.AdapterFor(ifaces.CapabilityOrderedMarshalJSON, value)
+			adapter := reg.AdapterFor(ifaces.CapabilityOrderedMarshalJSON, value)
 			require.NotNil(t, adapter)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adapter.Redeem()
 			jazon, err := adapter.OrderedMarshal(value)
 			require.NoError(t, err)
 			require.NotEmpty(t, jazon)
@@ -184,7 +178,7 @@ func TestRegistryMarshal(t *testing.T) {
 		t.Run("should panic on unsupported capability", func(t *testing.T) {
 			require.Panics(t, func() {
 				var value any
-				_, _ = reg.AdapterFor(ifaces.Capability(99), value)
+				_ = reg.AdapterFor(ifaces.Capability(99), value)
 			})
 		})
 	})
@@ -198,10 +192,9 @@ func TestRegistryMarshal(t *testing.T) {
 
 		t.Run("should serve new adapter for capability MarshalJSON when type is supported", func(t *testing.T) {
 			var value supportedType
-			adapter, redeem := reg.AdapterFor(ifaces.CapabilityMarshalJSON, value)
+			adapter := reg.AdapterFor(ifaces.CapabilityMarshalJSON, value)
 			require.NotNil(t, adapter)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adapter.Redeem()
 			var expectedAdapter *MockAdapter2
 			require.IsType(t, expectedAdapter, adapter)
 
@@ -228,10 +221,8 @@ func TestRegistryMarshal(t *testing.T) {
 
 		t.Run("should serve previous adapter for capability MarshalJSON when type is NOT supported", func(t *testing.T) {
 			var value struct{}
-			adapter, redeem := reg.AdapterFor(ifaces.CapabilityMarshalJSON, value)
-			require.NotNil(t, adapter)
-			require.NotNil(t, redeem)
-			defer redeem()
+			adapter := reg.AdapterFor(ifaces.CapabilityMarshalJSON, value)
+			defer adapter.Redeem()
 			var expectedAdapter *MockAdapter1
 			require.IsType(t, expectedAdapter, adapter)
 
@@ -258,10 +249,9 @@ func TestRegistryMarshal(t *testing.T) {
 
 		t.Run("should serve previous adapter for capability Unmarshal", func(t *testing.T) {
 			var value supportedType
-			adapter, redeem := reg.AdapterFor(ifaces.CapabilityUnmarshalJSON, value)
+			adapter := reg.AdapterFor(ifaces.CapabilityUnmarshalJSON, value)
 			require.NotNil(t, adapter)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adapter.Redeem()
 			var expectedAdapter *MockAdapter1
 			require.IsType(t, expectedAdapter, adapter)
 
@@ -301,10 +291,9 @@ func TestRegistryOrderedMap(t *testing.T) {
 		require.Len(t, reg.orderedUnmarshalerRegistry, 2)
 
 		t.Run("should serve adapter for capability OrderedMap", func(t *testing.T) {
-			adapter, redeem := reg.AdapterFor(ifaces.CapabilityOrderedMap, nil)
+			adapter := reg.AdapterFor(ifaces.CapabilityOrderedMap, nil)
 			require.NotNil(t, adapter)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adapter.Redeem()
 			var expectedAdapter *MockAdapter1
 			require.IsType(t, expectedAdapter, adapter)
 
@@ -340,10 +329,8 @@ func TestEmptyRegistry(t *testing.T) {
 
 	t.Run("should not find an adapter for capability MarshalJSON", func(t *testing.T) {
 		var value any
-		adapter, redeem := reg.AdapterFor(ifaces.CapabilityMarshalJSON, value)
+		adapter := reg.AdapterFor(ifaces.CapabilityMarshalJSON, value)
 		require.Nil(t, adapter)
-		require.NotNil(t, redeem)
-		defer redeem()
 	})
 }
 
@@ -353,10 +340,9 @@ func TestGlobalRegistry(t *testing.T) {
 	t.Run("with default global registry", func(t *testing.T) {
 		t.Run("should resolve to the stdlib adapter for MarshalJSON", func(t *testing.T) {
 			var value any
-			adp, redeem := MarshalAdapterFor(value)
+			adp := MarshalAdapterFor(value)
 			require.NotNil(t, adp)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adp.Redeem()
 
 			_, isStdLib := adp.(*stdlib.Adapter)
 			require.True(t, isStdLib)
@@ -364,10 +350,9 @@ func TestGlobalRegistry(t *testing.T) {
 
 		t.Run("should resolve to the stdlib adapter for UnmarshalJSON", func(t *testing.T) {
 			var value any
-			adp, redeem := UnmarshalAdapterFor(value)
+			adp := UnmarshalAdapterFor(value)
 			require.NotNil(t, adp)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adp.Redeem()
 
 			_, isStdLib := adp.(*stdlib.Adapter)
 			require.True(t, isStdLib)
@@ -375,10 +360,9 @@ func TestGlobalRegistry(t *testing.T) {
 
 		t.Run("should resolve to the stdlib adapter for OrderedMarshalJSON", func(t *testing.T) {
 			value := newMockOrdered()
-			adp, redeem := OrderedMarshalAdapterFor(value)
+			adp := OrderedMarshalAdapterFor(value)
 			require.NotNil(t, adp)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adp.Redeem()
 
 			_, isStdLib := adp.(*stdlib.Adapter)
 			require.True(t, isStdLib)
@@ -386,10 +370,9 @@ func TestGlobalRegistry(t *testing.T) {
 
 		t.Run("should resolve to the stdlib adapter for OrderedUnmarshalJSON", func(t *testing.T) {
 			value := newMockOrdered()
-			adp, redeem := OrderedUnmarshalAdapterFor(value)
+			adp := OrderedUnmarshalAdapterFor(value)
 			require.NotNil(t, adp)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adp.Redeem()
 
 			_, isStdLib := adp.(*stdlib.Adapter)
 			require.True(t, isStdLib)
@@ -411,10 +394,9 @@ func testUnmarshal[ValueType any, AdapterType ifaces.UnmarshalAdapter](reg *Regi
 	return func(t *testing.T) {
 		t.Run("should serve adapter for capability Unmarshal", func(t *testing.T) {
 			var value ValueType
-			adapter, redeem := reg.AdapterFor(ifaces.CapabilityUnmarshalJSON, value)
+			adapter := reg.AdapterFor(ifaces.CapabilityUnmarshalJSON, value)
 			require.NotNil(t, adapter)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adapter.Redeem()
 			var expectedAdapter AdapterType
 			require.IsType(t, expectedAdapter, adapter)
 
@@ -454,10 +436,9 @@ func testMarshal[ValueType any, AdapterType ifaces.MarshalAdapter](reg *Registra
 	return func(t *testing.T) {
 		t.Run("should serve adapter for capability MarshalJSON", func(t *testing.T) {
 			var value ValueType
-			adapter, redeem := reg.AdapterFor(ifaces.CapabilityMarshalJSON, value)
+			adapter := reg.AdapterFor(ifaces.CapabilityMarshalJSON, value)
 			require.NotNil(t, adapter)
-			require.NotNil(t, redeem)
-			defer redeem()
+			defer adapter.Redeem()
 			var expectedAdapter AdapterType
 			require.IsType(t, expectedAdapter, adapter)
 
@@ -544,6 +525,7 @@ func newMockAdapter() *mocks.MockAdapter {
 		UnmarshalFunc: func(_ []byte, _ any) error {
 			return nil
 		},
+		RedeemFunc: noopRedeemer,
 	}
 }
 
@@ -571,8 +553,8 @@ func register1(dispatcher ifaces.Registrar) {
 		ifaces.RegistryEntry{
 			Who:  fmt.Sprintf("%s.%s", t.PkgPath(), t.Name()),
 			What: ifaces.AllCapabilities,
-			Constructor: func() (ifaces.Adapter, func()) {
-				return newMockAdapter1(), noopRedeemer
+			Constructor: func() ifaces.Adapter {
+				return newMockAdapter1()
 			},
 			Support: support1,
 		})
@@ -585,8 +567,8 @@ func register2(dispatcher ifaces.Registrar) {
 		ifaces.RegistryEntry{
 			Who:  fmt.Sprintf("%s.%s", t.PkgPath(), t.Name()),
 			What: ifaces.AllCapabilities,
-			Constructor: func() (ifaces.Adapter, func()) {
-				return newMockAdapter2(), noopRedeemer
+			Constructor: func() ifaces.Adapter {
+				return newMockAdapter2()
 			},
 			Support: support2,
 		})

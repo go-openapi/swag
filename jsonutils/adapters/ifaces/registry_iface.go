@@ -78,7 +78,7 @@ const (
 type RegistryEntry struct {
 	Who         string
 	What        Capabilities
-	Constructor func() (Adapter, func())
+	Constructor func() Adapter
 	Support     func(what Capability, value any) bool
 }
 

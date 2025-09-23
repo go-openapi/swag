@@ -144,8 +144,15 @@ func (a *Adapter) NewOrderedMap(capacity int) ifaces.OrderedMap {
 	return &m
 }
 
-func (a *Adapter) redeem() {
+func (a *Adapter) Redeem() {
+	if a == nil {
+		return
+	}
 	RedeemAdapter(a)
+}
+
+func (a *Adapter) Reset() {
+	a.options = options{}
 }
 
 func newJWriter() *jwriter.Writer {

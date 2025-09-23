@@ -333,6 +333,12 @@ var _ ifaces.MarshalAdapter = &MockMarshalAdapter{}
 //			MarshalFunc: func(v any) ([]byte, error) {
 //				panic("mock out the Marshal method")
 //			},
+//			RedeemFunc: func()  {
+//				panic("mock out the Redeem method")
+//			},
+//			ResetFunc: func()  {
+//				panic("mock out the Reset method")
+//			},
 //		}
 //
 //		// use mockedMarshalAdapter in code that requires ifaces.MarshalAdapter
@@ -343,6 +349,12 @@ type MockMarshalAdapter struct {
 	// MarshalFunc mocks the Marshal method.
 	MarshalFunc func(v any) ([]byte, error)
 
+	// RedeemFunc mocks the Redeem method.
+	RedeemFunc func()
+
+	// ResetFunc mocks the Reset method.
+	ResetFunc func()
+
 	// calls tracks calls to the methods.
 	calls struct {
 		// Marshal holds details about calls to the Marshal method.
@@ -350,8 +362,16 @@ type MockMarshalAdapter struct {
 			// V is the v argument value.
 			V any
 		}
+		// Redeem holds details about calls to the Redeem method.
+		Redeem []struct {
+		}
+		// Reset holds details about calls to the Reset method.
+		Reset []struct {
+		}
 	}
 	lockMarshal sync.RWMutex
+	lockRedeem  sync.RWMutex
+	lockReset   sync.RWMutex
 }
 
 // Marshal calls MarshalFunc.
@@ -386,6 +406,60 @@ func (mock *MockMarshalAdapter) MarshalCalls() []struct {
 	return calls
 }
 
+// Redeem calls RedeemFunc.
+func (mock *MockMarshalAdapter) Redeem() {
+	if mock.RedeemFunc == nil {
+		panic("MockMarshalAdapter.RedeemFunc: method is nil but MarshalAdapter.Redeem was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockRedeem.Lock()
+	mock.calls.Redeem = append(mock.calls.Redeem, callInfo)
+	mock.lockRedeem.Unlock()
+	mock.RedeemFunc()
+}
+
+// RedeemCalls gets all the calls that were made to Redeem.
+// Check the length with:
+//
+//	len(mockedMarshalAdapter.RedeemCalls())
+func (mock *MockMarshalAdapter) RedeemCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockRedeem.RLock()
+	calls = mock.calls.Redeem
+	mock.lockRedeem.RUnlock()
+	return calls
+}
+
+// Reset calls ResetFunc.
+func (mock *MockMarshalAdapter) Reset() {
+	if mock.ResetFunc == nil {
+		panic("MockMarshalAdapter.ResetFunc: method is nil but MarshalAdapter.Reset was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockReset.Lock()
+	mock.calls.Reset = append(mock.calls.Reset, callInfo)
+	mock.lockReset.Unlock()
+	mock.ResetFunc()
+}
+
+// ResetCalls gets all the calls that were made to Reset.
+// Check the length with:
+//
+//	len(mockedMarshalAdapter.ResetCalls())
+func (mock *MockMarshalAdapter) ResetCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockReset.RLock()
+	calls = mock.calls.Reset
+	mock.lockReset.RUnlock()
+	return calls
+}
+
 // Ensure that MockOrderedMarshalAdapter does implement ifaces.OrderedMarshalAdapter.
 // If this is not the case, regenerate this file with mockery.
 var _ ifaces.OrderedMarshalAdapter = &MockOrderedMarshalAdapter{}
@@ -399,6 +473,12 @@ var _ ifaces.OrderedMarshalAdapter = &MockOrderedMarshalAdapter{}
 //			OrderedMarshalFunc: func(ordered ifaces.Ordered) ([]byte, error) {
 //				panic("mock out the OrderedMarshal method")
 //			},
+//			RedeemFunc: func()  {
+//				panic("mock out the Redeem method")
+//			},
+//			ResetFunc: func()  {
+//				panic("mock out the Reset method")
+//			},
 //		}
 //
 //		// use mockedOrderedMarshalAdapter in code that requires ifaces.OrderedMarshalAdapter
@@ -409,6 +489,12 @@ type MockOrderedMarshalAdapter struct {
 	// OrderedMarshalFunc mocks the OrderedMarshal method.
 	OrderedMarshalFunc func(ordered ifaces.Ordered) ([]byte, error)
 
+	// RedeemFunc mocks the Redeem method.
+	RedeemFunc func()
+
+	// ResetFunc mocks the Reset method.
+	ResetFunc func()
+
 	// calls tracks calls to the methods.
 	calls struct {
 		// OrderedMarshal holds details about calls to the OrderedMarshal method.
@@ -416,8 +502,16 @@ type MockOrderedMarshalAdapter struct {
 			// Ordered is the ordered argument value.
 			Ordered ifaces.Ordered
 		}
+		// Redeem holds details about calls to the Redeem method.
+		Redeem []struct {
+		}
+		// Reset holds details about calls to the Reset method.
+		Reset []struct {
+		}
 	}
 	lockOrderedMarshal sync.RWMutex
+	lockRedeem         sync.RWMutex
+	lockReset          sync.RWMutex
 }
 
 // OrderedMarshal calls OrderedMarshalFunc.
@@ -452,6 +546,60 @@ func (mock *MockOrderedMarshalAdapter) OrderedMarshalCalls() []struct {
 	return calls
 }
 
+// Redeem calls RedeemFunc.
+func (mock *MockOrderedMarshalAdapter) Redeem() {
+	if mock.RedeemFunc == nil {
+		panic("MockOrderedMarshalAdapter.RedeemFunc: method is nil but OrderedMarshalAdapter.Redeem was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockRedeem.Lock()
+	mock.calls.Redeem = append(mock.calls.Redeem, callInfo)
+	mock.lockRedeem.Unlock()
+	mock.RedeemFunc()
+}
+
+// RedeemCalls gets all the calls that were made to Redeem.
+// Check the length with:
+//
+//	len(mockedOrderedMarshalAdapter.RedeemCalls())
+func (mock *MockOrderedMarshalAdapter) RedeemCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockRedeem.RLock()
+	calls = mock.calls.Redeem
+	mock.lockRedeem.RUnlock()
+	return calls
+}
+
+// Reset calls ResetFunc.
+func (mock *MockOrderedMarshalAdapter) Reset() {
+	if mock.ResetFunc == nil {
+		panic("MockOrderedMarshalAdapter.ResetFunc: method is nil but OrderedMarshalAdapter.Reset was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockReset.Lock()
+	mock.calls.Reset = append(mock.calls.Reset, callInfo)
+	mock.lockReset.Unlock()
+	mock.ResetFunc()
+}
+
+// ResetCalls gets all the calls that were made to Reset.
+// Check the length with:
+//
+//	len(mockedOrderedMarshalAdapter.ResetCalls())
+func (mock *MockOrderedMarshalAdapter) ResetCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockReset.RLock()
+	calls = mock.calls.Reset
+	mock.lockReset.RUnlock()
+	return calls
+}
+
 // Ensure that MockUnmarshalAdapter does implement ifaces.UnmarshalAdapter.
 // If this is not the case, regenerate this file with mockery.
 var _ ifaces.UnmarshalAdapter = &MockUnmarshalAdapter{}
@@ -462,6 +610,12 @@ var _ ifaces.UnmarshalAdapter = &MockUnmarshalAdapter{}
 //
 //		// make and configure a mocked ifaces.UnmarshalAdapter
 //		mockedUnmarshalAdapter := &MockUnmarshalAdapter{
+//			RedeemFunc: func()  {
+//				panic("mock out the Redeem method")
+//			},
+//			ResetFunc: func()  {
+//				panic("mock out the Reset method")
+//			},
 //			UnmarshalFunc: func(bytes []byte, v any) error {
 //				panic("mock out the Unmarshal method")
 //			},
@@ -472,11 +626,23 @@ var _ ifaces.UnmarshalAdapter = &MockUnmarshalAdapter{}
 //
 //	}
 type MockUnmarshalAdapter struct {
+	// RedeemFunc mocks the Redeem method.
+	RedeemFunc func()
+
+	// ResetFunc mocks the Reset method.
+	ResetFunc func()
+
 	// UnmarshalFunc mocks the Unmarshal method.
 	UnmarshalFunc func(bytes []byte, v any) error
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// Redeem holds details about calls to the Redeem method.
+		Redeem []struct {
+		}
+		// Reset holds details about calls to the Reset method.
+		Reset []struct {
+		}
 		// Unmarshal holds details about calls to the Unmarshal method.
 		Unmarshal []struct {
 			// Bytes is the bytes argument value.
@@ -485,7 +651,63 @@ type MockUnmarshalAdapter struct {
 			V any
 		}
 	}
+	lockRedeem    sync.RWMutex
+	lockReset     sync.RWMutex
 	lockUnmarshal sync.RWMutex
+}
+
+// Redeem calls RedeemFunc.
+func (mock *MockUnmarshalAdapter) Redeem() {
+	if mock.RedeemFunc == nil {
+		panic("MockUnmarshalAdapter.RedeemFunc: method is nil but UnmarshalAdapter.Redeem was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockRedeem.Lock()
+	mock.calls.Redeem = append(mock.calls.Redeem, callInfo)
+	mock.lockRedeem.Unlock()
+	mock.RedeemFunc()
+}
+
+// RedeemCalls gets all the calls that were made to Redeem.
+// Check the length with:
+//
+//	len(mockedUnmarshalAdapter.RedeemCalls())
+func (mock *MockUnmarshalAdapter) RedeemCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockRedeem.RLock()
+	calls = mock.calls.Redeem
+	mock.lockRedeem.RUnlock()
+	return calls
+}
+
+// Reset calls ResetFunc.
+func (mock *MockUnmarshalAdapter) Reset() {
+	if mock.ResetFunc == nil {
+		panic("MockUnmarshalAdapter.ResetFunc: method is nil but UnmarshalAdapter.Reset was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockReset.Lock()
+	mock.calls.Reset = append(mock.calls.Reset, callInfo)
+	mock.lockReset.Unlock()
+	mock.ResetFunc()
+}
+
+// ResetCalls gets all the calls that were made to Reset.
+// Check the length with:
+//
+//	len(mockedUnmarshalAdapter.ResetCalls())
+func (mock *MockUnmarshalAdapter) ResetCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockReset.RLock()
+	calls = mock.calls.Reset
+	mock.lockReset.RUnlock()
+	return calls
 }
 
 // Unmarshal calls UnmarshalFunc.
@@ -537,6 +759,12 @@ var _ ifaces.OrderedUnmarshalAdapter = &MockOrderedUnmarshalAdapter{}
 //			OrderedUnmarshalFunc: func(bytes []byte, setOrdered ifaces.SetOrdered) error {
 //				panic("mock out the OrderedUnmarshal method")
 //			},
+//			RedeemFunc: func()  {
+//				panic("mock out the Redeem method")
+//			},
+//			ResetFunc: func()  {
+//				panic("mock out the Reset method")
+//			},
 //		}
 //
 //		// use mockedOrderedUnmarshalAdapter in code that requires ifaces.OrderedUnmarshalAdapter
@@ -547,6 +775,12 @@ type MockOrderedUnmarshalAdapter struct {
 	// OrderedUnmarshalFunc mocks the OrderedUnmarshal method.
 	OrderedUnmarshalFunc func(bytes []byte, setOrdered ifaces.SetOrdered) error
 
+	// RedeemFunc mocks the Redeem method.
+	RedeemFunc func()
+
+	// ResetFunc mocks the Reset method.
+	ResetFunc func()
+
 	// calls tracks calls to the methods.
 	calls struct {
 		// OrderedUnmarshal holds details about calls to the OrderedUnmarshal method.
@@ -556,8 +790,16 @@ type MockOrderedUnmarshalAdapter struct {
 			// SetOrdered is the setOrdered argument value.
 			SetOrdered ifaces.SetOrdered
 		}
+		// Redeem holds details about calls to the Redeem method.
+		Redeem []struct {
+		}
+		// Reset holds details about calls to the Reset method.
+		Reset []struct {
+		}
 	}
 	lockOrderedUnmarshal sync.RWMutex
+	lockRedeem           sync.RWMutex
+	lockReset            sync.RWMutex
 }
 
 // OrderedUnmarshal calls OrderedUnmarshalFunc.
@@ -596,6 +838,60 @@ func (mock *MockOrderedUnmarshalAdapter) OrderedUnmarshalCalls() []struct {
 	return calls
 }
 
+// Redeem calls RedeemFunc.
+func (mock *MockOrderedUnmarshalAdapter) Redeem() {
+	if mock.RedeemFunc == nil {
+		panic("MockOrderedUnmarshalAdapter.RedeemFunc: method is nil but OrderedUnmarshalAdapter.Redeem was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockRedeem.Lock()
+	mock.calls.Redeem = append(mock.calls.Redeem, callInfo)
+	mock.lockRedeem.Unlock()
+	mock.RedeemFunc()
+}
+
+// RedeemCalls gets all the calls that were made to Redeem.
+// Check the length with:
+//
+//	len(mockedOrderedUnmarshalAdapter.RedeemCalls())
+func (mock *MockOrderedUnmarshalAdapter) RedeemCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockRedeem.RLock()
+	calls = mock.calls.Redeem
+	mock.lockRedeem.RUnlock()
+	return calls
+}
+
+// Reset calls ResetFunc.
+func (mock *MockOrderedUnmarshalAdapter) Reset() {
+	if mock.ResetFunc == nil {
+		panic("MockOrderedUnmarshalAdapter.ResetFunc: method is nil but OrderedUnmarshalAdapter.Reset was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockReset.Lock()
+	mock.calls.Reset = append(mock.calls.Reset, callInfo)
+	mock.lockReset.Unlock()
+	mock.ResetFunc()
+}
+
+// ResetCalls gets all the calls that were made to Reset.
+// Check the length with:
+//
+//	len(mockedOrderedUnmarshalAdapter.ResetCalls())
+func (mock *MockOrderedUnmarshalAdapter) ResetCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockReset.RLock()
+	calls = mock.calls.Reset
+	mock.lockReset.RUnlock()
+	return calls
+}
+
 // Ensure that MockAdapter does implement ifaces.Adapter.
 // If this is not the case, regenerate this file with mockery.
 var _ ifaces.Adapter = &MockAdapter{}
@@ -618,6 +914,12 @@ var _ ifaces.Adapter = &MockAdapter{}
 //			OrderedUnmarshalFunc: func(bytes []byte, setOrdered ifaces.SetOrdered) error {
 //				panic("mock out the OrderedUnmarshal method")
 //			},
+//			RedeemFunc: func()  {
+//				panic("mock out the Redeem method")
+//			},
+//			ResetFunc: func()  {
+//				panic("mock out the Reset method")
+//			},
 //			UnmarshalFunc: func(bytes []byte, v any) error {
 //				panic("mock out the Unmarshal method")
 //			},
@@ -639,6 +941,12 @@ type MockAdapter struct {
 
 	// OrderedUnmarshalFunc mocks the OrderedUnmarshal method.
 	OrderedUnmarshalFunc func(bytes []byte, setOrdered ifaces.SetOrdered) error
+
+	// RedeemFunc mocks the Redeem method.
+	RedeemFunc func()
+
+	// ResetFunc mocks the Reset method.
+	ResetFunc func()
 
 	// UnmarshalFunc mocks the Unmarshal method.
 	UnmarshalFunc func(bytes []byte, v any) error
@@ -667,6 +975,12 @@ type MockAdapter struct {
 			// SetOrdered is the setOrdered argument value.
 			SetOrdered ifaces.SetOrdered
 		}
+		// Redeem holds details about calls to the Redeem method.
+		Redeem []struct {
+		}
+		// Reset holds details about calls to the Reset method.
+		Reset []struct {
+		}
 		// Unmarshal holds details about calls to the Unmarshal method.
 		Unmarshal []struct {
 			// Bytes is the bytes argument value.
@@ -679,6 +993,8 @@ type MockAdapter struct {
 	lockNewOrderedMap    sync.RWMutex
 	lockOrderedMarshal   sync.RWMutex
 	lockOrderedUnmarshal sync.RWMutex
+	lockRedeem           sync.RWMutex
+	lockReset            sync.RWMutex
 	lockUnmarshal        sync.RWMutex
 }
 
@@ -814,6 +1130,60 @@ func (mock *MockAdapter) OrderedUnmarshalCalls() []struct {
 	return calls
 }
 
+// Redeem calls RedeemFunc.
+func (mock *MockAdapter) Redeem() {
+	if mock.RedeemFunc == nil {
+		panic("MockAdapter.RedeemFunc: method is nil but Adapter.Redeem was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockRedeem.Lock()
+	mock.calls.Redeem = append(mock.calls.Redeem, callInfo)
+	mock.lockRedeem.Unlock()
+	mock.RedeemFunc()
+}
+
+// RedeemCalls gets all the calls that were made to Redeem.
+// Check the length with:
+//
+//	len(mockedAdapter.RedeemCalls())
+func (mock *MockAdapter) RedeemCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockRedeem.RLock()
+	calls = mock.calls.Redeem
+	mock.lockRedeem.RUnlock()
+	return calls
+}
+
+// Reset calls ResetFunc.
+func (mock *MockAdapter) Reset() {
+	if mock.ResetFunc == nil {
+		panic("MockAdapter.ResetFunc: method is nil but Adapter.Reset was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockReset.Lock()
+	mock.calls.Reset = append(mock.calls.Reset, callInfo)
+	mock.lockReset.Unlock()
+	mock.ResetFunc()
+}
+
+// ResetCalls gets all the calls that were made to Reset.
+// Check the length with:
+//
+//	len(mockedAdapter.ResetCalls())
+func (mock *MockAdapter) ResetCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockReset.RLock()
+	calls = mock.calls.Reset
+	mock.lockReset.RUnlock()
+	return calls
+}
+
 // Unmarshal calls UnmarshalFunc.
 func (mock *MockAdapter) Unmarshal(bytes []byte, v any) error {
 	if mock.UnmarshalFunc == nil {
@@ -869,6 +1239,12 @@ var _ ifaces.OrderedAdapter = &MockOrderedAdapter{}
 //			OrderedUnmarshalFunc: func(bytes []byte, setOrdered ifaces.SetOrdered) error {
 //				panic("mock out the OrderedUnmarshal method")
 //			},
+//			RedeemFunc: func()  {
+//				panic("mock out the Redeem method")
+//			},
+//			ResetFunc: func()  {
+//				panic("mock out the Reset method")
+//			},
 //		}
 //
 //		// use mockedOrderedAdapter in code that requires ifaces.OrderedAdapter
@@ -884,6 +1260,12 @@ type MockOrderedAdapter struct {
 
 	// OrderedUnmarshalFunc mocks the OrderedUnmarshal method.
 	OrderedUnmarshalFunc func(bytes []byte, setOrdered ifaces.SetOrdered) error
+
+	// RedeemFunc mocks the Redeem method.
+	RedeemFunc func()
+
+	// ResetFunc mocks the Reset method.
+	ResetFunc func()
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -904,10 +1286,18 @@ type MockOrderedAdapter struct {
 			// SetOrdered is the setOrdered argument value.
 			SetOrdered ifaces.SetOrdered
 		}
+		// Redeem holds details about calls to the Redeem method.
+		Redeem []struct {
+		}
+		// Reset holds details about calls to the Reset method.
+		Reset []struct {
+		}
 	}
 	lockNewOrderedMap    sync.RWMutex
 	lockOrderedMarshal   sync.RWMutex
 	lockOrderedUnmarshal sync.RWMutex
+	lockRedeem           sync.RWMutex
+	lockReset            sync.RWMutex
 }
 
 // NewOrderedMap calls NewOrderedMapFunc.
@@ -1007,6 +1397,156 @@ func (mock *MockOrderedAdapter) OrderedUnmarshalCalls() []struct {
 	mock.lockOrderedUnmarshal.RLock()
 	calls = mock.calls.OrderedUnmarshal
 	mock.lockOrderedUnmarshal.RUnlock()
+	return calls
+}
+
+// Redeem calls RedeemFunc.
+func (mock *MockOrderedAdapter) Redeem() {
+	if mock.RedeemFunc == nil {
+		panic("MockOrderedAdapter.RedeemFunc: method is nil but OrderedAdapter.Redeem was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockRedeem.Lock()
+	mock.calls.Redeem = append(mock.calls.Redeem, callInfo)
+	mock.lockRedeem.Unlock()
+	mock.RedeemFunc()
+}
+
+// RedeemCalls gets all the calls that were made to Redeem.
+// Check the length with:
+//
+//	len(mockedOrderedAdapter.RedeemCalls())
+func (mock *MockOrderedAdapter) RedeemCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockRedeem.RLock()
+	calls = mock.calls.Redeem
+	mock.lockRedeem.RUnlock()
+	return calls
+}
+
+// Reset calls ResetFunc.
+func (mock *MockOrderedAdapter) Reset() {
+	if mock.ResetFunc == nil {
+		panic("MockOrderedAdapter.ResetFunc: method is nil but OrderedAdapter.Reset was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockReset.Lock()
+	mock.calls.Reset = append(mock.calls.Reset, callInfo)
+	mock.lockReset.Unlock()
+	mock.ResetFunc()
+}
+
+// ResetCalls gets all the calls that were made to Reset.
+// Check the length with:
+//
+//	len(mockedOrderedAdapter.ResetCalls())
+func (mock *MockOrderedAdapter) ResetCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockReset.RLock()
+	calls = mock.calls.Reset
+	mock.lockReset.RUnlock()
+	return calls
+}
+
+// Ensure that MockPoolable does implement ifaces.Poolable.
+// If this is not the case, regenerate this file with mockery.
+var _ ifaces.Poolable = &MockPoolable{}
+
+// MockPoolable is a mock implementation of ifaces.Poolable.
+//
+//	func TestSomethingThatUsesPoolable(t *testing.T) {
+//
+//		// make and configure a mocked ifaces.Poolable
+//		mockedPoolable := &MockPoolable{
+//			RedeemFunc: func()  {
+//				panic("mock out the Redeem method")
+//			},
+//			ResetFunc: func()  {
+//				panic("mock out the Reset method")
+//			},
+//		}
+//
+//		// use mockedPoolable in code that requires ifaces.Poolable
+//		// and then make assertions.
+//
+//	}
+type MockPoolable struct {
+	// RedeemFunc mocks the Redeem method.
+	RedeemFunc func()
+
+	// ResetFunc mocks the Reset method.
+	ResetFunc func()
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// Redeem holds details about calls to the Redeem method.
+		Redeem []struct {
+		}
+		// Reset holds details about calls to the Reset method.
+		Reset []struct {
+		}
+	}
+	lockRedeem sync.RWMutex
+	lockReset  sync.RWMutex
+}
+
+// Redeem calls RedeemFunc.
+func (mock *MockPoolable) Redeem() {
+	if mock.RedeemFunc == nil {
+		panic("MockPoolable.RedeemFunc: method is nil but Poolable.Redeem was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockRedeem.Lock()
+	mock.calls.Redeem = append(mock.calls.Redeem, callInfo)
+	mock.lockRedeem.Unlock()
+	mock.RedeemFunc()
+}
+
+// RedeemCalls gets all the calls that were made to Redeem.
+// Check the length with:
+//
+//	len(mockedPoolable.RedeemCalls())
+func (mock *MockPoolable) RedeemCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockRedeem.RLock()
+	calls = mock.calls.Redeem
+	mock.lockRedeem.RUnlock()
+	return calls
+}
+
+// Reset calls ResetFunc.
+func (mock *MockPoolable) Reset() {
+	if mock.ResetFunc == nil {
+		panic("MockPoolable.ResetFunc: method is nil but Poolable.Reset was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockReset.Lock()
+	mock.calls.Reset = append(mock.calls.Reset, callInfo)
+	mock.lockReset.Unlock()
+	mock.ResetFunc()
+}
+
+// ResetCalls gets all the calls that were made to Reset.
+// Check the length with:
+//
+//	len(mockedPoolable.ResetCalls())
+func (mock *MockPoolable) ResetCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockReset.RLock()
+	calls = mock.calls.Reset
+	mock.lockReset.RUnlock()
 	return calls
 }
 
