@@ -28,7 +28,7 @@ You may also use it standalone for your projects.
 Moving forward, no additional feature will be added to the `swag` API directly at the root package level,
 which remains there for backward-compatibility purposes. All exported top-level features are now deprecated.
 
-Child modules will continue to evolve or some new ones may be added in the future.
+Child modules will continue to evolve and some new ones may be added in the future.
 
 | Module        | Content | Main features |
 |---------------|---------|---------------|
@@ -57,22 +57,27 @@ dependencies outside of the standard library.
    * `github.com/mailru/easyjson` is now only a dependency for module
      `github.com/go-openapi/swag/jsonutils/adapters/easyjson/json`,
      for users willing to import that module.
+   * integration tests and benchmarks use all the dependencies are published as their own module
+* other dependencies are test dependencies drawn from `github.com/stretchr/testify`
 
 ## Release notes
 
-### v0.25.0 [draft, unreleased]
+### v0.25.0
 
 **New with this release**:
 
 * requires `go1.24`, as iterators are being introduced
 * removes the dependency to `mailru/easyjson` by default (#68)
-* functionality remains the same, but performance may somewhat degrade for applications
-  that relied on `easyjson`
-* users of the JSON or YAML utilities who want to use `easyjson` as their prefered JSON seriliazer library
-  will be able to do so by registering this the corresponding JSON adapter at runtime. See below.
-* ordered keys in JSON and YAML objects: this feature used to rely solely on `easyjson`.
-  With this release, an implementation relying on the standard `encoding/json` is provided.
-* improved float is integer check (`conv.IsFloat64AJSONInteger`) (#59)
+  * functionality remains the same, but performance may somewhat degrade for applications
+    that relied on `easyjson`
+  * users of the JSON or YAML utilities who want to use `easyjson` as their prefered JSON serializer library
+    will be able to do so by registering this the corresponding JSON adapter at runtime. See below.
+  * ordered keys in JSON and YAML objects: this feature used to rely solely on `easyjson`.
+    With this release, an implementation relying on the standard `encoding/json` is provided.
+  * an independent [benchmark](./jsonutils/adapters/testintegration/benchmarks/README.md) to compare the different adapters
+* improves the "float is integer" check (`conv.IsFloat64AJSONInteger`) (#59)
+* removes the _direct_ dependency to `gopkg.in/yaml.v3` (indirect dependency is still incurred through `stretchr/testify`) (#127)
+* exposed `conv.IsNil()` (previously kept private): a safe nil check (accounting for the "non-nil interface with nil value" nonsensical go trick)
 
 **What coming next?**
 
@@ -177,4 +182,7 @@ A few ideas:
       imposed dependency to some database driver.
 * [ ] Adapt `go-swagger` (incl. generated code) to the new `swag` API.
 * [ ] Factorize some tests, as there is a lot of redundant testing code in `jsonutils`
-
+* [ ] Benchmark & profiling: publish independently the tool built to analyze and chart benchmarks (e.g. similar to `benchvisual`)
+* [ ] more thorough testing for nil / null case
+* [ ] ci pipeline to manage releases
+* [ ] cleaner mockery generation (doesn't work out of the box for all sub-modules)
