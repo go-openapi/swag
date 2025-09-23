@@ -1,7 +1,7 @@
 module github.com/go-openapi/swag/conv
 
 require (
-	github.com/go-openapi/swag/typeutils v0.0.0-00010101000000-000000000000
+	github.com/go-openapi/swag/typeutils v0.25.0
 	github.com/stretchr/testify v1.11.1
 )
 
@@ -12,6 +12,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-go 1.24.0
-
 replace github.com/go-openapi/swag/typeutils => ../typeutils
+
+go 1.24.0
