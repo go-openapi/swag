@@ -151,7 +151,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: 'JSON test report for ${{ matrix.os }} and go ${{ matrix.go_version }} version'
+        name: ${{ env.TEST_REPORT }}
         path: ${{ env.TEST_REPORT }}
 
   test:
@@ -173,7 +173,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           run-id: "${{ github.run_id }}"
-          pattern: "JSON test report*"
+          pattern: "all_modules.report.*.json"
           path: reports/
 
       - name: Convert test reports to a merged JUnit XML
