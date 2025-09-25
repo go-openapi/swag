@@ -16,8 +16,12 @@ package json
 
 import (
 	stdjson "encoding/json"
+	"fmt"
+	"io"
+	"sync"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	fixtures "github.com/go-openapi/swag/jsonutils/fixtures_test"
@@ -126,4 +130,36 @@ func TestLexerErrors(t *testing.T) {
 			})
 		})
 	}
+}
+
+func TestReproDataRace(t *testing.T) {
+	t.Parallel()
+	const parallelRoutines = 1000
+
+	// NOTE: with go1.25, use synctest.Test
+	var wg sync.WaitGroup
+
+	for range parallelRoutines {
+		wg.Add(1)
+		go func() {
+			defer func() {
+				wg.Done()
+			}()
+
+			toks := make([]token, 0, 4)
+			buf := []byte(`{"test":"data"}`)
+			l := poolOfLexers.Borrow(buf)
+
+			for tok := l.NextToken(); tok != eofToken; tok = l.NextToken() {
+				toks = append(toks, tok)
+			}
+			assert.Len(t, toks, 4)
+			fmt.Fprintf(io.Discard, "%d", len(toks))
+			defer func() {
+				poolOfLexers.Redeem(l)
+			}()
+		}()
+	}
+
+	wg.Wait()
 }
