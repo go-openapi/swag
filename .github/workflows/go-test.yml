@@ -121,7 +121,7 @@ jobs:
         # *.coverage.* pattern is automatically detected by codecov
         COVER_PROFILE: 'all_modules.coverage.${{ matrix.os }}.${{ matrix.go_version }}.out'
       run: |
-        # when go1.25 becomes the oldstable, we may replace this bash with "go work test"
+        # when go1.25 becomes the oldstable, we may replace this bash with "go test work"
         declare -a ALL_MODULES
         BASH_MAJOR=$(echo $BASH_VERSION|cut -d'.' -f1)
         if [[ "${BASH_MAJOR}" -ge 4 ]] ; then
@@ -152,7 +152,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.TEST_REPORT }}
-        path: .
+        path: ./${{ env.TEST_REPORT }}
 
   test:
     needs: [ module-test ]
