@@ -102,10 +102,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v5
-    #- name: Ensure cache is available
-    # run: |
-    #   mkdir -p /home/runner/go/pkg/mod
-    #   mkdir -p /home/runner/.cache/go.build
     - uses: actions/setup-go@v6
       with:
         go-version: '${{ matrix.go_version }}'
@@ -119,6 +115,7 @@ jobs:
         # *.coverage.* pattern is automatically detected by codecov
         COVER_PROFILE:  'all_modules.coverage.${{ matrix.os }}.${{ matrix.go_version }}.out'
       run: |
+        # when go1.25 becomes the oldstable, we may replace this bash with "go work test"
         declare -a ALL_MODULES
         BASH_MAJOR=$(echo $BASH_VERSION|cut -d'.' -f1)
         if [[ "${BASH_MAJOR}" -ge 4 ]] ; then
