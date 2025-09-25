@@ -152,7 +152,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: 'JSON test report for ${{ matrix.os }} and go ${{ matrix.go_version }} version'
-        path: {{ env.TEST_REPORT }}
+        path: ${{ env.TEST_REPORT }}
 
   test:
     needs: [ module-test ]
@@ -214,9 +214,6 @@ jobs:
           done < <(find reports -name \*.json)
 
       - name: Publish Test Summary Results
-        # the report is too verbose -> summary
-        # can do: pull request comment, but not available on forks
-        # -> usual stuff: pass artifacts, invoke workflow wih pull_request_from_master
         uses: ctrf-io/github-test-reporter@v1
         with:
           report-path: 'reports/ctrf_report.json'
