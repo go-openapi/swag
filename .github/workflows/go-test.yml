@@ -152,7 +152,6 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.TEST_REPORT }}
-        path: ${{ env.TEST_REPORT }}
 
   test:
     needs: [ module-test ]
