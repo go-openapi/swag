@@ -62,6 +62,10 @@ dependencies outside of the standard library.
 
 ## Release notes
 
+### v0.25.1
+
+* fixes a data race that could occur when using the standard library implementation of a JSON ordered map
+
 ### v0.25.0
 
 **New with this release**:
