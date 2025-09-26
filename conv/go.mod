@@ -1,7 +1,7 @@
 module github.com/go-openapi/swag/conv
 
 require (
-	github.com/go-openapi/swag/typeutils v0.25.0
+	github.com/go-openapi/swag/typeutils v0.25.1
 	github.com/stretchr/testify v1.11.1
 )
 
