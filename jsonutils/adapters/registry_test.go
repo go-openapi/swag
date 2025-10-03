@@ -22,7 +22,7 @@ import (
 	"github.com/go-openapi/swag/jsonutils/adapters/ifaces"
 	"github.com/go-openapi/swag/jsonutils/adapters/ifaces/mocks"
 	stdlib "github.com/go-openapi/swag/jsonutils/adapters/stdlib/json"
-	"github.com/stretchr/testify/require"
+	"github.com/go-openapi/testify/v2/require"
 )
 
 func TestRegistryUnmarshal(t *testing.T) {

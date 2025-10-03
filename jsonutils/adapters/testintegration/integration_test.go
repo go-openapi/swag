@@ -19,7 +19,7 @@ import (
 
 	stdlib "github.com/go-openapi/swag/jsonutils/adapters/stdlib/json"
 
-	"github.com/stretchr/testify/require"
+	"github.com/go-openapi/testify/v2/require"
 )
 
 func TestIntegration(t *testing.T) {

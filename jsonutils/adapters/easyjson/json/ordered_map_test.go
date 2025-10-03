@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	fixtures "github.com/go-openapi/swag/jsonutils/fixtures_test"
-	"github.com/stretchr/testify/require"
+	"github.com/go-openapi/testify/v2/require"
 )
 
 func TestSetOrdered(t *testing.T) {
