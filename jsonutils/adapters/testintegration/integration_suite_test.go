@@ -11,9 +11,9 @@ import (
 	easyjson "github.com/go-openapi/swag/jsonutils/adapters/easyjson/json"
 	"github.com/go-openapi/swag/jsonutils/adapters/ifaces"
 	fixtures "github.com/go-openapi/swag/jsonutils/fixtures_test"
+	"github.com/go-openapi/testify/v2/require"
 	"github.com/mailru/easyjson/jlexer"
 	"github.com/mailru/easyjson/jwriter"
-	"github.com/stretchr/testify/require"
 )
 
 var (

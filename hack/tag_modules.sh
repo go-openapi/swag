@@ -27,6 +27,7 @@ while read module_location ; do
     module_tag="${base_tag}/${tag}" # e.g. "mangling/v0.24.0"
   fi
   all_tags+=("${module_tag}")
+  echo "Tag: ${module_tag}"
   git tag "${module_tag}"
 done < <(go list -f '{{.Dir}}' -m)
 

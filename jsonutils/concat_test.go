@@ -17,10 +17,11 @@ package jsonutils
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/go-openapi/testify/v2/assert"
 )
 
-//nolint:testifylint
+// NOTE: the nolint:testifylint directives no longer apply on our fork.
+
 func TestJSONConcatenation(t *testing.T) {
 	t.Run("should concat nothing", func(t *testing.T) {
 		assert.Nil(t, ConcatJSON())

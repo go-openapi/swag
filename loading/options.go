@@ -81,7 +81,7 @@ func WithCustomHeaders(headers map[string]string) Option {
 	}
 }
 
-// WithHTTClient overrides the default HTTP client used to fetch a remote file.
+// WithHTTPClient overrides the default HTTP client used to fetch a remote file.
 //
 // By default, [http.DefaultClient] is used.
 func WithHTTPClient(client *http.Client) Option {
@@ -90,7 +90,7 @@ func WithHTTPClient(client *http.Client) Option {
 	}
 }
 
-// WithFileFS sets a file system for the local file loader.
+// WithFS sets a file system for the local file loader.
 //
 // If the provided file system is a [fs.ReadFileFS], the ReadFile function is used.
 // Otherwise, ReadFile is wrapped using [fs.ReadFile].

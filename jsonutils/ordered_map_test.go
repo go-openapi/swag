@@ -22,8 +22,8 @@ import (
 	"github.com/go-openapi/swag/jsonutils/adapters/ifaces"
 	fixtures "github.com/go-openapi/swag/jsonutils/fixtures_test"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/go-openapi/testify/v2/assert"
+	"github.com/go-openapi/testify/v2/require"
 )
 
 func TestJSONMapSlice(t *testing.T) {

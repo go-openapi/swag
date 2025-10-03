@@ -23,8 +23,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	_ "github.com/go-openapi/testify/enable/yaml/v2" // enable YAMLEq in testify
+	"github.com/go-openapi/testify/v2/assert"
+	"github.com/go-openapi/testify/v2/require"
 	yaml "go.yaml.in/yaml/v3"
 )
 

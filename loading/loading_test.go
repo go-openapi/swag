@@ -26,8 +26,8 @@ import (
 	"testing/fstest"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/go-openapi/testify/v2/assert"
+	"github.com/go-openapi/testify/v2/require"
 )
 
 func TestLoadFromHTTP(t *testing.T) {

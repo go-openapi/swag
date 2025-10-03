@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	fixtures "github.com/go-openapi/swag/jsonutils/fixtures_test"
+	"github.com/go-openapi/testify/v2/require"
 	"github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
-	"github.com/stretchr/testify/require"
 )
 
 func TestPayloads(t *testing.T) {

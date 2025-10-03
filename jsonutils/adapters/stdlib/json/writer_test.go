@@ -3,7 +3,7 @@ package json
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/go-openapi/testify/v2/require"
 )
 
 func TestWriter(t *testing.T) {
