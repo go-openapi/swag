@@ -139,7 +139,7 @@ jobs:
         go test -race -coverprofile="${COVER_PROFILE}" -covermode=atomic -json ${ALL_MODULES[@]}|tee -a "${TEST_REPORT}"
 
     - name: Upload coverage to codecov
-      if: ${{ !cancelled() }}  # we do this only if tests have not failed
+      if: ${{ success() }}  # we do this only if all previous steps succeeded
       uses: codecov/codecov-action@v5
       with:
         name: Multi modules aggregated coverage
