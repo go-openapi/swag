@@ -41,7 +41,7 @@ func TestAdapter(t *testing.T) {
 					jazon, err := a.Marshal(value)
 					require.NoError(t, err)
 
-					require.JSONEq(t, test.JSONPayload, string(jazon))
+					require.JSONEqBytes(t, test.JSONBytes(), jazon)
 				})
 			})
 
@@ -60,7 +60,7 @@ func TestAdapter(t *testing.T) {
 					jazon, err := a.OrderedMarshal(value)
 					require.NoError(t, err)
 
-					fixtures.JSONEqualOrdered(t, test.JSONPayload, string(jazon))
+					fixtures.JSONEqualOrderedBytes(t, test.JSONBytes(), jazon)
 				})
 			})
 		})

@@ -42,7 +42,7 @@ func TestSetOrdered(t *testing.T) {
 		jazon, err := m.MarshalJSON()
 		require.NoError(t, err)
 
-		fixtures.JSONEqualOrdered(t, `{"a":1,"c":"y","b":2}`, string(jazon))
+		fixtures.JSONEqualOrderedBytes(t, []byte(`{"a":1,"c":"y","b":2}`), jazon)
 	})
 
 	t.Run("should reset keys", func(t *testing.T) {
@@ -79,21 +79,21 @@ func TestMapSlice(t *testing.T) {
 				jazon, err := stdjson.Marshal(data)
 				require.NoError(t, err)
 
-				fixtures.JSONEqualOrdered(t, test.JSONPayload, string(jazon))
+				fixtures.JSONEqualOrderedBytes(t, test.JSONBytes(), jazon)
 			})
 
 			t.Run("should keep the order of keys", func(t *testing.T) {
 				fixture := harness.ShouldGet("with numbers")
-				input := fixture.JSONPayload
+				input := fixture.JSONBytes()
 
 				const iterations = 10
 				for range iterations {
 					var data MapSlice
-					require.NoError(t, stdjson.Unmarshal([]byte(input), &data))
+					require.NoError(t, stdjson.Unmarshal(input, &data))
 					jazon, err := stdjson.Marshal(data)
 					require.NoError(t, err)
 
-					fixtures.JSONEqualOrdered(t, input, string(jazon)) // specifically check the same order, not require.JSONEq()
+					fixtures.JSONEqualOrderedBytes(t, input, jazon) // specifically check the same order, not require.JSONEq()
 				}
 			})
 		})

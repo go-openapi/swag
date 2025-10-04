@@ -230,9 +230,9 @@ func testJSONTransforms[V any, T any](test fixtures.Fixture, valueConstructor fu
 
 			switch assertAs {
 			case assertionTypeOrdered:
-				fixtures.JSONEqualOrdered(t, test.JSONPayload, string(jazon))
+				fixtures.JSONEqualOrderedBytes(t, test.JSONBytes(), jazon)
 			case assertionTypeUnordered:
-				require.JSONEq(t, test.JSONPayload, string(jazon))
+				require.JSONEqBytes(t, test.JSONBytes(), jazon)
 			}
 
 			t.Run(fmt.Sprintf("FromDynamicJSON then WriteJSON should produce %s JSON", expectation), func(t *testing.T) {
@@ -253,9 +253,9 @@ func testJSONTransforms[V any, T any](test fixtures.Fixture, valueConstructor fu
 
 				switch assertAs {
 				case assertionTypeOrdered:
-					fixtures.JSONEqualOrdered(t, test.JSONPayload, string(jazon))
+					fixtures.JSONEqualOrderedBytes(t, test.JSONBytes(), jazon)
 				case assertionTypeUnordered:
-					require.JSONEq(t, test.JSONPayload, string(jazon))
+					require.JSONEqBytes(t, test.JSONBytes(), jazon)
 				}
 			})
 		})

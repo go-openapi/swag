@@ -15,17 +15,17 @@ func TestJSONUtilsIface(t *testing.T) {
 		t.Run("ReadJSON and WriteJSON back", func(t *testing.T) {
 			var b any
 
-			const jazon = `{"a": 1}`
-			require.NoError(t, ReadJSON([]byte(jazon), &b))
+			jazon := []byte(`{"a": 1}`)
+			require.NoError(t, ReadJSON(jazon, &b))
 
 			buf, err := WriteJSON(b)
 			require.NoError(t, err)
-			require.JSONEq(t, jazon, string(buf))
+			require.JSONEqBytes(t, jazon, buf)
 		})
 
 		t.Run("ConcatJSON merge 2 objects", func(t *testing.T) {
 			buf := ConcatJSON([]byte(`{"a": 1}`), []byte(`{"b": 2}`))
-			require.JSONEq(t, `{"a": 1, "b": 2}`, string(buf))
+			require.JSONEqBytes(t, []byte(`{"a": 1, "b": 2}`), buf)
 		})
 
 		t.Run("with go struct", func(t *testing.T) {

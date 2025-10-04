@@ -49,7 +49,8 @@ name: a string value
 			d, err := YAMLToJSON(data)
 			require.NoError(t, err)
 			require.NotNil(t, d)
-			assert.JSONEq(t, `{"1":"the int key value","name":"a string value","y":"some value"}`, string(d))
+			expected := []byte(`{"1":"the int key value","name":"a string value","y":"some value"}`)
+			assert.JSONEqBytes(t, expected, d)
 		})
 
 		t.Run("should NOT convert appended YAML doc to JSON", func(t *testing.T) {
@@ -105,7 +106,8 @@ name: a string value
 		t.Run("should convert appended YAML doc to JSON", func(t *testing.T) {
 			d, err := YAMLToJSON(data)
 			require.NoError(t, err)
-			assert.JSONEq(t, `{"1":"the int key value","name":"a string value","y":"some value","tag":{"name":"tag name"}}`, string(d))
+			expected := []byte(`{"1":"the int key value","name":"a string value","y":"some value","tag":{"name":"tag name"}}`)
+			assert.JSONEqBytes(t, expected, d)
 		})
 
 		t.Run("should NOT convert appended YAML doc to JSON: key cannot be a bool", func(t *testing.T) {
@@ -140,7 +142,7 @@ name: a string value
 			d, err := YAMLToJSON(lst)
 			require.NoError(t, err)
 			require.NotNil(t, d)
-			assert.JSONEq(t, `["hello"]`, string(d))
+			assert.JSONEqBytes(t, []byte(`["hello"]`), d)
 
 			t.Run("should convert object appended to array to JSON", func(t *testing.T) {
 				lst = append(lst, data)
@@ -148,7 +150,7 @@ name: a string value
 				d, err = YAMLToJSON(lst)
 				require.NoError(t, err)
 				require.NotEmpty(t, d)
-				assert.JSONEq(t, `["hello",{"1":"the int key value","name":"a string value","y":"some value"}]`, string(d))
+				assert.JSONEqBytes(t, []byte(`["hello",{"1":"the int key value","name":"a string value","y":"some value"}]`), d)
 			})
 		})
 	})
@@ -171,7 +173,7 @@ name: a string value
 			t.Run("should convert YAML object to JSON", func(t *testing.T) {
 				d, err := YAMLToJSON(dd)
 				require.NoError(t, err)
-				assert.JSONEq(t, `{"description":"object created"}`, string(d))
+				assert.JSONEqBytes(t, []byte(`{"description":"object created"}`), d)
 			})
 		})
 	})

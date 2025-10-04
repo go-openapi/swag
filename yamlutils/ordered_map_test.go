@@ -55,7 +55,7 @@ func TestOrderedMap(t *testing.T) {
 						require.NotEmpty(t, jazon) // "null" token
 					}
 					// check an exact match of JSON tokens, so this is stricter than require.JSONEq
-					fixtures.JSONEqualOrdered(t, test.JSONPayload, string(jazon))
+					fixtures.JSONEqualOrderedBytes(t, test.JSONBytes(), jazon)
 				})
 			})
 
@@ -67,7 +67,7 @@ func TestOrderedMap(t *testing.T) {
 					j, err := data.MarshalJSON()
 					require.NoError(t, err)
 
-					fixtures.JSONEqualOrdered(t, test.JSONPayload, string(j))
+					fixtures.JSONEqualOrderedBytes(t, test.JSONBytes(), j)
 				})
 
 				t.Run("should marshal back to YAML", func(t *testing.T) {
@@ -107,7 +107,7 @@ func TestOrderedMap(t *testing.T) {
 						jazon, err := json.Marshal(data)
 						require.NoError(t, err)
 						// check an exact match of JSON tokens, so this is stricter than require.JSONEqual
-						fixtures.JSONEqualOrdered(t, string(jazon), string(jazon))
+						fixtures.JSONEqualOrderedBytes(t, jazon, jazon)
 					})
 				})
 			})
@@ -152,12 +152,12 @@ func TestMarshalYAML(t *testing.T) {
 		// the "null" token is reflected in this context as a "nil" go value, but as a non nil, empty slice.
 		// The marshaling resorts to a "null" token and not to an empty string.
 		fixture := harness.ShouldGet("with null value")
-		input := fixture.JSONPayload
+		input := fixture.JSONBytes()
 		expected := fixture.YAMLPayload // "null\n"
 
 		t.Run("should unmarshal JSON", func(t *testing.T) {
 			var data YAMLMapSlice
-			require.NoError(t, json.Unmarshal([]byte(input), &data))
+			require.NoError(t, json.Unmarshal(input, &data))
 			require.Nil(t, data) // mutated by UnmarshalYAML
 
 			t.Run("should convert JSON to YAML as an empty object", func(t *testing.T) {
@@ -174,7 +174,7 @@ func TestMarshalYAML(t *testing.T) {
 				jazon, err := json.Marshal(data)
 				require.NoError(t, err)
 				// check an exact match of JSON tokens, so this is stricter than require.JSONEqual
-				fixtures.JSONEqualOrdered(t, input, string(jazon))
+				fixtures.JSONEqualOrderedBytes(t, input, jazon)
 			})
 		})
 	})

@@ -19,7 +19,7 @@ func TestYAMLUtilsIface(t *testing.T) {
 			buf, err := YAMLToJSON(doc)
 			require.NoError(t, err)
 
-			require.JSONEq(t, `{"x":{"a":"one","b":"two"}}`, string(buf))
+			require.JSONEqBytes(t, []byte(`{"x":{"a":"one","b":"two"}}`), buf)
 		})
 	})
 }
