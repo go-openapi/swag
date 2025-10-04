@@ -62,6 +62,22 @@ dependencies outside of the standard library.
 
 ## Release notes
 
+### v0.25.2 (draft, unpublished)
+
+Minor changes due to internal maintainance that don't affect the behavior of the library.
+
+* removed indirect test dependencies by switching all tests to `go-openapi/testify`,
+  a fork of `stretch/testify` with zero-dependencies.
+* improvements to CI to catch test reports.
+* modernized licensing annotations in source code, using the more compact SPDX annotations
+  rather than the full license terms.
+* simplified a bit JSON & YAML testing by using newly available assertions
+* started the journey to an OpenSSF score card badge:
+  * explicited permissions in CI workflows
+  * published security policy
+  * pinned dependencies to github actions
+  * introduced fuzzing in tests
+
 ### v0.25.1
 
 * fixes a data race that could occur when using the standard library implementation of a JSON ordered map
@@ -96,16 +112,22 @@ Moving forward, we want to :
 The following would maintain how JSON utilities proposed by `swag` used work, up to `v0.24.1`.
 
   ```go
-  import "github.com/go-openapi/swag/jsonutils/adapters/easyjson/json"
+  import (
+    "github.com/go-openapi/swag/jsonutils/adapters"
+    easyjson "github.com/go-openapi/swag/jsonutils/adapters/easyjson/json"
+  )
 
   func init() {
-    json.Register()
+	  easyjson.Register(adapters.Registry)
   }
   ```
 
 Subsequent calls to `jsonutils.ReadJSON()` or `jsonutils.WriteJSON()` will switch to `easyjson`
 whenever the passed data structures implement the `easyjson.Unmarshaler` or `easyjson.Marshaler` respectively,
 or fallback to the standard library.
+
+For more details, you may also look at our
+[integration tests](jsonutils/adapters/testintegration/integration_suite_test.go#29).
 
 ### v0.24.0
 
@@ -132,6 +154,10 @@ With this release, we have largely modernized the API of `swag`:
 * [x] performance: name mangling utilities run ~ 10% faster (PR #115)
 
 ---
+
+## Licensing
+
+This library ships under the [SPDX-License-Identifier: Apache-2.0](./LICENSE).
 
 ## Note to contributors
 
