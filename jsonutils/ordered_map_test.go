@@ -22,16 +22,16 @@ func TestJSONMapSlice(t *testing.T) {
 	for name, test := range harness.AllTests(fixtures.WithoutError(true)) {
 		t.Run(name, func(t *testing.T) {
 			t.Run("should unmarshal JSON", func(t *testing.T) {
-				input := test.JSONPayload
+				input := test.JSONBytes()
 
 				var data JSONMapSlice
-				require.NoError(t, json.Unmarshal([]byte(input), &data))
+				require.NoError(t, json.Unmarshal(input, &data))
 
 				t.Run("should marshal JSON", func(t *testing.T) {
 					jazon, err := json.Marshal(data)
 					require.NoError(t, err)
 
-					fixtures.JSONEqualOrdered(t, input, string(jazon))
+					fixtures.JSONEqualOrderedBytes(t, input, jazon)
 				})
 			})
 		})
@@ -39,25 +39,25 @@ func TestJSONMapSlice(t *testing.T) {
 
 	t.Run("should keep the order of keys", func(t *testing.T) {
 		fixture := harness.ShouldGet("with numbers")
-		input := fixture.JSONPayload
+		input := fixture.JSONBytes()
 
 		const iterations = 10
 		for range iterations {
 			var data JSONMapSlice
-			require.NoError(t, json.Unmarshal([]byte(input), &data))
+			require.NoError(t, json.Unmarshal(input, &data))
 			jazon, err := json.Marshal(data)
 			require.NoError(t, err)
 
-			fixtures.JSONEqualOrdered(t, input, string(jazon)) // specifically check the same order, not require.JSONEq()
+			fixtures.JSONEqualOrderedBytes(t, input, jazon) // specifically check the same order, not require.JSONEq()
 		}
 	})
 
 	t.Run("key ordering doesn't have to be stable with Read/Write JSON", func(t *testing.T) {
 		fixture := harness.ShouldGet("with numbers")
-		input := fixture.JSONPayload
+		input := fixture.JSONBytes()
 
 		var data JSONMapSlice
-		require.NoError(t, json.Unmarshal([]byte(input), &data))
+		require.NoError(t, json.Unmarshal(input, &data))
 
 		var obj any
 		require.NoError(t, FromDynamicJSON(data, &obj))
@@ -72,15 +72,15 @@ func TestJSONMapSlice(t *testing.T) {
 		// the order of keys may be altered, since the intermediary representation is a map[string]any
 		jazon, err := WriteJSON(target)
 		require.NoError(t, err)
-		require.JSONEq(t, input, string(jazon))
+		require.JSONEqBytes(t, input, jazon)
 	})
 
 	t.Run("key ordering is maintained with nested ifaces.Ordered types", func(t *testing.T) {
 		fixture := harness.ShouldGet("with numbers")
-		input := fixture.JSONPayload
+		input := fixture.JSONBytes()
 
 		var data JSONMapSlice
-		require.NoError(t, json.Unmarshal([]byte(input), &data))
+		require.NoError(t, json.Unmarshal(input, &data))
 		require.Len(t, data, 3) // 3 fields
 
 		custom := makeCustomOrdered(
@@ -98,7 +98,7 @@ func TestJSONMapSlice(t *testing.T) {
 			// the order of keys may is maintained
 			jazon, err := WriteJSON(target)
 			require.NoError(t, err)
-			fixtures.JSONEqualOrdered(t, input, string(jazon))
+			fixtures.JSONEqualOrderedBytes(t, input, jazon)
 		}
 	})
 

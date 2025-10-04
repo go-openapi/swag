@@ -8,7 +8,6 @@ import (
 	"embed"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/fs"
 	"iter"
@@ -16,7 +15,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/go-openapi/testify/v2/assert"
+	_ "github.com/go-openapi/testify/enable/yaml/v2" // enable yaml in testify
 	"github.com/go-openapi/testify/v2/require"
 	yaml "go.yaml.in/yaml/v3"
 )
@@ -199,11 +198,19 @@ func loadFixture(fsys fs.FS, pth string) ([]byte, error) {
 func JSONEqualOrdered(t testing.TB, expected, actual string) {
 	t.Helper()
 
-	bufExpected := bytes.NewBufferString(expected)
+	JSONEqualOrderedBytes(t, []byte(expected), []byte(actual))
+}
+
+// JSONEqualOrderedBytes is a replacement for [require.JSONEqBytes] that checks further that
+// two JSONs are exactly equal. See [JSONEqualOrdered].
+func JSONEqualOrderedBytes(t testing.TB, expected, actual []byte) {
+	t.Helper()
+
+	bufExpected := bytes.NewBuffer(expected)
 	decExpected := json.NewDecoder(bufExpected)
 	expectedTokens := make([]json.Token, 0)
 
-	bufActual := bytes.NewBufferString(actual)
+	bufActual := bytes.NewBuffer(actual)
 	decActual := json.NewDecoder(bufActual)
 
 	for {
@@ -266,53 +273,25 @@ var (
 func YAMLEqualOrdered(t testing.TB, expected, actual string) {
 	t.Helper()
 
-	RequireYAMLEq(t, expected, actual) // necessary but not sufficient condition
+	YAMLEqualOrderedBytes(t, []byte(expected), []byte(actual))
+}
+
+func YAMLEqualOrderedBytes(t testing.TB, expected, actual []byte) {
+	t.Helper()
+
+	// TODO: add YAMLEqBytes to testify
+	require.YAMLEq(t, string(expected), string(actual)) // necessary but not sufficient condition
 
 	// strip all indentation and comments (anchors not supported)
-	strippedExpected := rexStripIndent.ReplaceAllString(expected, "")
-	strippedExpected = rexStripComment.ReplaceAllString(strippedExpected, "")
-	strippedExpected = rexStripInlineComment.ReplaceAllString(strippedExpected, "$1")
-	strippedExpected = rexStripEmpty.ReplaceAllString(strippedExpected, "")
+	strippedExpected := rexStripIndent.ReplaceAll(expected, []byte(""))
+	strippedExpected = rexStripComment.ReplaceAll(strippedExpected, []byte(""))
+	strippedExpected = rexStripInlineComment.ReplaceAll(strippedExpected, []byte("$1"))
+	strippedExpected = rexStripEmpty.ReplaceAll(strippedExpected, []byte(""))
 
-	strippedActual := rexStripIndent.ReplaceAllString(expected, "")
-	strippedActual = rexStripComment.ReplaceAllString(strippedActual, "")
-	strippedActual = rexStripInlineComment.ReplaceAllString(strippedActual, "$1")
-	strippedActual = rexStripEmpty.ReplaceAllString(strippedActual, "")
+	strippedActual := rexStripIndent.ReplaceAll(expected, []byte(""))
+	strippedActual = rexStripComment.ReplaceAll(strippedActual, []byte(""))
+	strippedActual = rexStripInlineComment.ReplaceAll(strippedActual, []byte("$1"))
+	strippedActual = rexStripEmpty.ReplaceAll(strippedActual, []byte(""))
 
 	require.Equal(t, strippedExpected, strippedActual)
-}
-
-// RequireYAMLEq is the same as [require.YAMLEq] but without the dependency to go.pkg.in/yaml.v3.
-//
-// NOTE: this could be reverted once https://github.com/stretchr/testify/pull/1772 is merged.
-func RequireYAMLEq(t testing.TB, expected string, actual string, msgAndArgs ...any) {
-	t.Helper()
-
-	if AssertYAMLEq(t, expected, actual, msgAndArgs...) {
-		return
-	}
-	t.FailNow()
-}
-
-// AssertYAMLEq is the same as [assert.YAMLEq] but without the dependency to go.pkg.in/yaml.v3.
-//
-// NOTE: this could be reverted once https://github.com/stretchr/testify/pull/1772 is merged.
-func AssertYAMLEq(t testing.TB, expected string, actual string, msgAndArgs ...any) bool {
-	t.Helper()
-	var expectedYAMLAsInterface, actualYAMLAsInterface any
-
-	if err := yaml.Unmarshal([]byte(expected), &expectedYAMLAsInterface); err != nil {
-		return assert.Fail(t, fmt.Sprintf("Expected value ('%s') is not valid yaml.\nYAML parsing error: '%s'", expected, err.Error()), msgAndArgs...)
-	}
-
-	// Shortcut if same bytes
-	if actual == expected {
-		return true
-	}
-
-	if err := yaml.Unmarshal([]byte(actual), &actualYAMLAsInterface); err != nil {
-		return assert.Fail(t, fmt.Sprintf("Input ('%s') needs to be valid yaml.\nYAML error: '%s'", actual, err.Error()), msgAndArgs...)
-	}
-
-	return assert.Equal(t, expectedYAMLAsInterface, actualYAMLAsInterface, msgAndArgs...)
 }

@@ -82,7 +82,7 @@ func TestReadWriteJSON(t *testing.T) {
 				require.NoError(t, err)
 
 				t.Run("both marshaling methods should be equivalent", func(t *testing.T) {
-					require.JSONEq(t, string(rtjson), string(otjson))
+					require.JSONEqBytes(t, rtjson, otjson)
 				})
 			})
 
@@ -91,7 +91,7 @@ func TestReadWriteJSON(t *testing.T) {
 				require.NoError(t, err)
 
 				t.Run("both marshaling methods should be equivalent", func(t *testing.T) {
-					require.JSONEq(t, string(rtjson), string(otjson))
+					require.JSONEqBytes(t, rtjson, otjson)
 				})
 			})
 

@@ -52,7 +52,7 @@ func verifyPayload[T any](constructor func() *T) func(*testing.T) {
 				data, err := jw.BuildBytes()
 				require.NoError(t, err)
 				require.NotEmpty(t, data)
-				require.JSONEq(t, string(jazon), string(data))
+				require.JSONEqBytes(t, jazon, data)
 
 				t.Run(fmt.Sprintf("value of type %T should UnmarshalEasyJSON", value), func(t *testing.T) {
 					target := new(T)

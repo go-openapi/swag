@@ -18,6 +18,7 @@ You may also use it standalone for your projects.
 * [Contents](#contents)
 * [Dependencies](#dependencies)
 * [Release Notes](#release-notes)
+* [Licensing](#licensing)
 * [Note to contributors](#note-to-contributors)
 * [TODOs, suggestions and plans](#todos-suggestions-and-plans)
 
@@ -64,17 +65,17 @@ dependencies outside of the standard library.
 
 ### v0.25.2 (draft, unpublished)
 
-Minor changes due to internal maintainance that don't affect the behavior of the library.
+Minor changes due to internal maintenance that don't affect the behavior of the library.
 
-* removed indirect test dependencies by switching all tests to `go-openapi/testify`,
+* [x] removed indirect test dependencies by switching all tests to `go-openapi/testify`,
   a fork of `stretch/testify` with zero-dependencies.
-* improvements to CI to catch test reports.
-* modernized licensing annotations in source code, using the more compact SPDX annotations
+* [x] improvements to CI to catch test reports.
+* [x] modernized licensing annotations in source code, using the more compact SPDX annotations
   rather than the full license terms.
-* simplified a bit JSON & YAML testing by using newly available assertions
+* [x] simplified a bit JSON & YAML testing by using newly available assertions
 * started the journey to an OpenSSF score card badge:
-  * explicited permissions in CI workflows
-  * published security policy
+  * [x] explicited permissions in CI workflows
+  * [x] published security policy
   * pinned dependencies to github actions
   * introduced fuzzing in tests
 

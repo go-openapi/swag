@@ -30,7 +30,7 @@ func TestJSONDoc(t *testing.T) {
 		s, err := JSONDoc(serv.URL)
 		require.NoError(t, err)
 		require.NotNil(t, s)
-		require.JSONEq(t, string(jsonPetStore), string(s))
+		require.JSONEqBytes(t, jsonPetStore, s)
 	})
 
 	t.Run("should not retrieve any doc", func(t *testing.T) {
