@@ -1,4 +1,6 @@
 version: 2
+assignees:
+  - fredbi
 updates:
   - package-ecosystem: "github-actions"
     directories:
@@ -30,7 +32,8 @@ updates:
     # 2. golang.org-dependencies are auto-merged
     # 3. go-openapi patch updates are auto-merged. Minor/major version updates require a manual merge.
     # 4. other dependencies require a manual merge
-    directory: "/"
+    directories:
+      - "**/*"
     schedule:
       interval: "weekly"
       day: "friday"
@@ -39,6 +42,7 @@ updates:
       development-dependencies:
         patterns:
           - "github.com/stretchr/testify"
+          - "github.com/go-openapi/testify"
 
       golang-org-dependencies:
         patterns:
@@ -47,9 +51,14 @@ updates:
       go-openapi-dependencies:
         patterns:
           - "github.com/go-openapi/*"
+        exclude-patterns:
+          - "github.com/go-openapi/testify"
 
       other-dependencies:
         exclude-patterns:
           - "github.com/go-openapi/*"
           - "github.com/stretchr/testify"
+          - "github.com/go-openapi/testify"
           - "golang.org/*"
+    allow:
+      - dependency-type: all
