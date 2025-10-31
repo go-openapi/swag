@@ -149,7 +149,7 @@ jobs:
 
     - name: Upload JSON test Results
       if: always()
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
       with:
         name: 'all_modules.report.${{ matrix.os }}.${{ matrix.go_version }}'
         path: ${{ env.TEST_REPORT }}
@@ -176,7 +176,7 @@ jobs:
           cache: true
 
       - name: Download all JSON artifacts
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           run-id: "${{ github.run_id }}"
           pattern: "all_modules.report.*"
@@ -244,7 +244,7 @@ jobs:
       #
       # They also handle the storage of past test reports, so as to assess flaky tests.
       - name: Publish Test Summary Results
-        uses: ctrf-io/github-test-reporter@9bd31188517cfb3ff683f135041cc3bfbb0c78b3 # v1.0.25
+        uses: ctrf-io/github-test-reporter@024bc4b64d997ca9da86833c6b9548c55c620e40 # v1.0.26
         with:
           report-path: 'reports/ctrf_report_*.json'
           use-suite-name: true
