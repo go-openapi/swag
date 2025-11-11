@@ -91,7 +91,7 @@ Minor changes due to internal maintenance that don't affect the behavior of the 
 * removes the dependency to `mailru/easyjson` by default (#68)
   * functionality remains the same, but performance may somewhat degrade for applications
     that relied on `easyjson`
-  * users of the JSON or YAML utilities who want to use `easyjson` as their prefered JSON serializer library
+  * users of the JSON or YAML utilities who want to use `easyjson` as their preferred JSON serializer library
     will be able to do so by registering this the corresponding JSON adapter at runtime. See below.
   * ordered keys in JSON and YAML objects: this feature used to rely solely on `easyjson`.
     With this release, an implementation relying on the standard `encoding/json` is provided.

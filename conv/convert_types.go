@@ -7,7 +7,7 @@ package conv
 //
 // The idea to convert values to pointers and the other way around, was inspired, eons ago, by the aws go sdk.
 //
-// Nowadays, all sensible API sdk's expose a similar functinality.
+// Nowadays, all sensible API sdk's expose a similar functionality.
 
 // Pointer returns a pointer to the value passed in.
 func Pointer[T any](v T) *T {
