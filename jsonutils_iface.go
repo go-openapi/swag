@@ -22,17 +22,17 @@ type JSONMapItem = jsonutils.JSONMapItem
 // WriteJSON writes json data.
 //
 // Deprecated: use [jsonutils.WriteJSON] instead.
-func WriteJSON(data interface{}) ([]byte, error) { return jsonutils.WriteJSON(data) }
+func WriteJSON(data any) ([]byte, error) { return jsonutils.WriteJSON(data) }
 
 // ReadJSON reads json data.
 //
 // Deprecated: use [jsonutils.ReadJSON] instead.
-func ReadJSON(data []byte, value interface{}) error { return jsonutils.ReadJSON(data, value) }
+func ReadJSON(data []byte, value any) error { return jsonutils.ReadJSON(data, value) }
 
 // DynamicJSONToStruct converts an untyped JSON structure into a target data type.
 //
 // Deprecated: use [jsonutils.FromDynamicJSON] instead.
-func DynamicJSONToStruct(data interface{}, target interface{}) error {
+func DynamicJSONToStruct(data any, target any) error {
 	return jsonutils.FromDynamicJSON(data, target)
 }
 
@@ -46,8 +46,8 @@ func ConcatJSON(blobs ...[]byte) []byte { return jsonutils.ConcatJSON(blobs...) 
 // It is the same as [FromDynamicJSON], but doesn't check for errors.
 //
 // Deprecated: this function is a misnomer and is unsafe. Use [jsonutils.FromDynamicJSON] instead.
-func ToDynamicJSON(value interface{}) interface{} {
-	var res interface{}
+func ToDynamicJSON(value any) any {
+	var res any
 	if err := FromDynamicJSON(value, &res); err != nil {
 		log.Println(err)
 	}
@@ -57,9 +57,9 @@ func ToDynamicJSON(value interface{}) interface{} {
 
 // FromDynamicJSON turns a go value into a properly JSON typed structure.
 //
-// "Dynamic JSON" refers to what you get when unmarshaling JSON into an untyped interface{},
-// i.e. objects are represented by map[string]interface{}, arrays by []interface{}, and all
-// scalar values are interface{}.
+// "Dynamic JSON" refers to what you get when unmarshaling JSON into an untyped any,
+// i.e. objects are represented by map[string]any, arrays by []any, and all
+// scalar values are any.
 //
 // Deprecated: use [jsonutils.FromDynamicJSON] instead.
-func FromDynamicJSON(data, target interface{}) error { return jsonutils.FromDynamicJSON(data, target) }
+func FromDynamicJSON(data, target any) error { return jsonutils.FromDynamicJSON(data, target) }
