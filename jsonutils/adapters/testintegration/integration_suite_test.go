@@ -125,7 +125,7 @@ func (o *EasyOrderedTarget) MarshalEasyJSON(w *jwriter.Writer) {
 	o.MockEJMarshaler.MarshalEasyJSON(w)
 }
 
-func (o *EasyOrderedTarget) UnmrshalEasyJSON(l *jlexer.Lexer) {
+func (o *EasyOrderedTarget) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	o.MockEJUnmarshaler.UnmarshalEasyJSON(l)
 }
 

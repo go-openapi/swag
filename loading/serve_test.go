@@ -30,14 +30,14 @@ func TestMain(m *testing.M) {
 
 // test handlers
 
-// serveYAMLPestore is a http handler to serve the YAMLPestore doc.
-func serveYAMLPestore(rw http.ResponseWriter, _ *http.Request) {
+// serveYAMLPetStore is a http handler to serve the yamlPetStore doc.
+func serveYAMLPetStore(rw http.ResponseWriter, _ *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 	_, _ = rw.Write(yamlPetStore)
 }
 
-// serveJSONPestore is a http handler to serve the jsonPestore doc.
-func serveJSONPestore(rw http.ResponseWriter, _ *http.Request) {
+// serveJSONPetStore is a http handler to serve the jsonPetStore doc.
+func serveJSONPetStore(rw http.ResponseWriter, _ *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 	_, _ = rw.Write(jsonPetStore)
 }

@@ -23,7 +23,7 @@ func TestJSONMatcher(t *testing.T) {
 
 func TestJSONDoc(t *testing.T) {
 	t.Run("should retrieve pet store API as JSON", func(t *testing.T) {
-		serv := httptest.NewServer(http.HandlerFunc(serveJSONPestore))
+		serv := httptest.NewServer(http.HandlerFunc(serveJSONPetStore))
 
 		defer serv.Close()
 

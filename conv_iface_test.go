@@ -15,7 +15,7 @@ func TestConvIface(t *testing.T) {
 	const epsilon = 1e-6
 
 	t.Run("deprecated Convert functions should work", func(t *testing.T) {
-		// only check happy path - more comprehensive testing is carried out inside the called packag
+		// only check happy path - more comprehensive testing is carried out inside the called package
 		assert.True(t, IsFloat64AJSONInteger(1.00))
 
 		b, err := ConvertBool("true")

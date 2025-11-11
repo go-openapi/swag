@@ -23,7 +23,7 @@ func TestYAMLMatcher(t *testing.T) {
 
 func TestYAMLDoc(t *testing.T) {
 	t.Run("should retrieve pet store API as YAML", func(t *testing.T) {
-		serv := httptest.NewServer(http.HandlerFunc(serveYAMLPestore))
+		serv := httptest.NewServer(http.HandlerFunc(serveYAMLPetStore))
 		defer serv.Close()
 
 		s, err := YAMLDoc(serv.URL)

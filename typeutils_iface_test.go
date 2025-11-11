@@ -11,7 +11,7 @@ import (
 
 func TestTypeUtilsIface(t *testing.T) {
 	t.Run("deprecated type utility functions should work", func(t *testing.T) {
-		// only check happy path - more comprehensive testing is carried out inside the called packag
+		// only check happy path - more comprehensive testing is carried out inside the called package
 		require.True(t, IsZero(0))
 	})
 }

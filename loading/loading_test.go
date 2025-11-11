@@ -21,7 +21,7 @@ import (
 
 func TestLoadFromHTTP(t *testing.T) {
 	t.Run("should load pet store API doc", func(t *testing.T) {
-		ts := httptest.NewServer(http.HandlerFunc(serveYAMLPestore))
+		ts := httptest.NewServer(http.HandlerFunc(serveYAMLPetStore))
 		defer ts.Close()
 
 		content, err := LoadFromFileOrHTTP(ts.URL)
