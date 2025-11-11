@@ -7,6 +7,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"testing"
 	"time"
 
@@ -62,14 +63,7 @@ func TestLoadFromHTTP(t *testing.T) {
 
 		ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 			myHeaders := r.Header[sharedHeaderKey]
-			ok := false
-			for _, v := range myHeaders {
-				if v == sharedHeaderValue {
-					ok = true
-					break
-				}
-			}
-			if ok {
+			if slices.Contains(myHeaders, sharedHeaderValue) {
 				rw.WriteHeader(http.StatusOK)
 			} else {
 				rw.WriteHeader(http.StatusForbidden)
