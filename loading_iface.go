@@ -73,7 +73,7 @@ func YAMLDoc(path string) (json.RawMessage, error) {
 // YAMLData loads a yaml document from either http or a file.
 //
 // Deprecated: use [loading.YAMLData] instead.
-func YAMLData(path string) (interface{}, error) {
+func YAMLData(path string) (any, error) {
 	return loading.YAMLData(path)
 }
 

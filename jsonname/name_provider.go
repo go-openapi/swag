@@ -79,7 +79,7 @@ func newNameIndex(tpe reflect.Type) nameIndex {
 }
 
 // GetJSONNames gets all the json property names for a type
-func (n *NameProvider) GetJSONNames(subject interface{}) []string {
+func (n *NameProvider) GetJSONNames(subject any) []string {
 	n.lock.Lock()
 	defer n.lock.Unlock()
 	tpe := reflect.Indirect(reflect.ValueOf(subject)).Type()
@@ -96,7 +96,7 @@ func (n *NameProvider) GetJSONNames(subject interface{}) []string {
 }
 
 // GetJSONName gets the json name for a go property name
-func (n *NameProvider) GetJSONName(subject interface{}, name string) (string, bool) {
+func (n *NameProvider) GetJSONName(subject any, name string) (string, bool) {
 	tpe := reflect.Indirect(reflect.ValueOf(subject)).Type()
 	return n.GetJSONNameForType(tpe, name)
 }
@@ -114,7 +114,7 @@ func (n *NameProvider) GetJSONNameForType(tpe reflect.Type, name string) (string
 }
 
 // GetGoName gets the go name for a json property name
-func (n *NameProvider) GetGoName(subject interface{}, name string) (string, bool) {
+func (n *NameProvider) GetGoName(subject any, name string) (string, bool) {
 	tpe := reflect.Indirect(reflect.ValueOf(subject)).Type()
 	return n.GetGoNameForType(tpe, name)
 }

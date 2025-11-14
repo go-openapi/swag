@@ -9,4 +9,4 @@ import "github.com/go-openapi/swag/typeutils"
 // This allows for safer checking of interface values.
 //
 // Deprecated: use [typeutils.IsZero] instead.
-func IsZero(data interface{}) bool { return typeutils.IsZero(data) }
+func IsZero(data any) bool { return typeutils.IsZero(data) }

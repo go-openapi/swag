@@ -12,9 +12,9 @@ import (
 // YAMLToJSON converts YAML unmarshaled data into json compatible data
 //
 // Deprecated: use [yamlutils.YAMLToJSON] instead.
-func YAMLToJSON(data interface{}) (json.RawMessage, error) { return yamlutils.YAMLToJSON(data) }
+func YAMLToJSON(data any) (json.RawMessage, error) { return yamlutils.YAMLToJSON(data) }
 
 // BytesToYAMLDoc converts a byte slice into a YAML document
 //
 // Deprecated: use [yamlutils.BytesToYAMLDoc] instead.
-func BytesToYAMLDoc(data []byte) (interface{}, error) { return yamlutils.BytesToYAMLDoc(data) }
+func BytesToYAMLDoc(data []byte) (any, error) { return yamlutils.BytesToYAMLDoc(data) }

@@ -11,13 +11,13 @@ import (
 )
 
 func TestFileImplementsIOReader(t *testing.T) {
-	var file interface{} = &File{}
+	var file any = &File{}
 	expected := "that File implements io.Reader"
 	assert.Implements(t, new(io.Reader), file, expected)
 }
 
 func TestFileImplementsIOReadCloser(t *testing.T) {
-	var file interface{} = &File{}
+	var file any = &File{}
 	expected := "that File implements io.ReadCloser"
 	assert.Implements(t, new(io.ReadCloser), file, expected)
 }

@@ -27,7 +27,7 @@ func YAMLDoc(path string, opts ...Option) (json.RawMessage, error) {
 }
 
 // YAMLData loads a yaml document from either http or a file.
-func YAMLData(path string, opts ...Option) (interface{}, error) {
+func YAMLData(path string, opts ...Option) (any, error) {
 	data, err := LoadFromFileOrHTTP(path, opts...)
 	if err != nil {
 		return nil, err

@@ -162,7 +162,7 @@ func assertSingleValue(t *testing.T, inElem, elem reflect.Value, expectPointer b
 }
 
 // assertValues checks equivalent representation pointer vs values for single var, slices and maps
-func assertValues(t *testing.T, in, out interface{}, expectPointer bool, idx int) {
+func assertValues(t *testing.T, in, out any, expectPointer bool, idx int) {
 	vin := reflect.ValueOf(in)
 	vout := reflect.ValueOf(out)
 

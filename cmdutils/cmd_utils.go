@@ -9,5 +9,5 @@ package cmdutils
 type CommandLineOptionsGroup struct {
 	ShortDescription string
 	LongDescription  string
-	Options          interface{}
+	Options          any
 }
