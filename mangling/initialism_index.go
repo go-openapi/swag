@@ -179,6 +179,19 @@ const (
 	simplePlural
 )
 
+func (f pluralForm) String() string {
+	switch f {
+	case notPlural:
+		return "notPlural"
+	case invariantPlural:
+		return "invariantPlural"
+	case simplePlural:
+		return "simplePlural"
+	default:
+		return "<unknown>"
+	}
+}
+
 // pluralForm indicates how we want to pluralize a given initialism.
 //
 // Besides configured invariant forms (like HTTP and HTTPS),
