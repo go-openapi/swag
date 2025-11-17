@@ -28,7 +28,7 @@ while read module_location ; do
   fi
   all_tags+=("${module_tag}")
   echo "Tag: ${module_tag}"
-  git tag "${module_tag}"
+  git tag -s "${module_tag}" -m "${module_tag}"
 done < <(go list -f '{{.Dir}}' -m)
 
 echo "Pushing tags to ${remote}: ${all_tags[@]}"
