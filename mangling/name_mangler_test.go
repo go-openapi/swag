@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/go-openapi/testify/v2/assert"
+	"github.com/go-openapi/testify/v2/require"
 )
 
 const (
@@ -23,6 +24,16 @@ const (
 	sampleDash   = "sample-"
 	sampleUscore = "sample_"
 )
+
+func TestManglerToGoName_Issue158(t *testing.T) {
+	m := NewNameMangler()
+
+	t.Run("should detect trailing pluralized initialisms", func(t *testing.T) {
+		require.Equal(t, "LinkLocalIPs", m.ToGoName("LinkLocalIPs"))
+		require.Equal(t, "NativeBaseURLs", m.ToGoName("nativeBaseURLs"))
+		require.Equal(t, "SiteURLs", m.ToGoName("siteURLs"))
+	})
+}
 
 func TestManglerToGoName(t *testing.T) {
 	m := NewNameMangler()

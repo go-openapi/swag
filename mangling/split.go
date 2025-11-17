@@ -90,6 +90,11 @@ func (s splitter) gatherInitialismMatches(nameRunes []rune) *initialismMatches {
 					continue
 				}
 
+				if currentRunePosition-match.start == len(match.body) {
+					// unmatched: skip
+					continue
+				}
+
 				currentMatchRune := match.body[currentRunePosition-match.start]
 				if currentMatchRune != currentRune {
 					// failed match, move on to next rune
@@ -160,7 +165,7 @@ func (s splitter) gatherInitialismMatches(nameRunes []rune) *initialismMatches {
 			}
 		}
 
-		// check for new initialism matches
+		// check for new initialism matches, based on the first character
 		for i, r := range s.initialismsRunes {
 			if r[0] == currentRune {
 				*newMatches = append(*newMatches, initialismMatch{
