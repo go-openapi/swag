@@ -35,6 +35,17 @@ func TestManglerToGoName_Issue158(t *testing.T) {
 	})
 }
 
+func TestManglerToGoName_Issue159(t *testing.T) {
+	m := NewNameMangler()
+	// overlapping initialisms
+	// TTLs
+	//  TLS
+
+	// require.Equal(t, "TTLs", m.ToGoName("TTLs"))
+	// require.Equal(t, "TTLsS", m.ToGoName("TTLsS"))
+	require.Equal(t, "TTLss", m.ToGoName("TTLss"))
+}
+
 func TestManglerToGoName(t *testing.T) {
 	m := NewNameMangler()
 
