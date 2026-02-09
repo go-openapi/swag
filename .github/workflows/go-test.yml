@@ -13,7 +13,7 @@ on:
 
 jobs:
   test:
-    uses: go-openapi/ci-workflows/.github/workflows/go-test-monorepo.yml@565504edebe3ab7f7b4cbafc8d6f401b82e91c4c # v0.2.8
+    uses: go-openapi/ci-workflows/.github/workflows/go-test-monorepo.yml@84f8f9c0759d5d1d0c32b18a7abaa0cba65ebcff # v0.2.9
     with:
       extra-flags: '-tags testcgo,testcolorized' # (1) this is to trigger extra tests in spew, (2) this is to enable integration test for colorized output
     secrets: inherit
