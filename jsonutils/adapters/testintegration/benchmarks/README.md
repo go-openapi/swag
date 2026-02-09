@@ -9,9 +9,9 @@ of our supported adapters.
 This benchmark is not a competitive benchmark, but merely a way for us to ensure that
 our "JSON adapter" feature runs with good performances and induces a reasonably low overhead.
 
-> Expected behaviour: the `Adapter` layer is relatively thin: it involves no extra allocation 
+Expected behavior: the `Adapter` layer is relatively thin: it involves no extra allocation
 > and its CPU impact is negligible when compared to the Marshal/Unmarshal tasks.
-
+>
 > NOTE: the `FromDynamicJSON` benchmark uses both source and target types supporting `easyjson`,
 > which equates more or less to a deep copy of the original payload.
 >
@@ -77,7 +77,6 @@ BenchmarkJSON/with_easyjson_library/easyjson_FromDynamicJSON_-_large-16  	  7174
 PASS
 ok  	github.com/go-openapi/swag/jsonutils/adapters/testintegration/benchmarks	643.940s
 ```
-
 
 ## go1.25.0 greenteagc
 
