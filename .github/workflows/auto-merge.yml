@@ -1,43 +1,15 @@
 name: Dependabot auto-merge
-on: pull_request
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+
+on:
+  pull_request:
 
 jobs:
   dependabot:
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login == 'dependabot[bot]'
-    steps:
-      - name: Dependabot metadata
-        id: metadata
-        uses: dependabot/fetch-metadata@21025c705c08248db411dc16f3619e6b5f9ea21a # v2.5.0
-
-      - name: Auto-approve all dependabot PRs
-        run: gh pr review --approve "$PR_URL"
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-      - name: Auto-merge dependabot PRs for development dependencies
-        if: contains(steps.metadata.outputs.dependency-group, 'development-dependencies')
-        run: gh pr merge --auto --rebase "$PR_URL"
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-      - name: Auto-merge dependabot PRs for go-openapi patches
-        if: contains(steps.metadata.outputs.dependency-group, 'go-openapi-dependencies') && (steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch')
-        run: gh pr merge --auto --rebase "$PR_URL"
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-      - name: Auto-merge dependabot PRs for golang.org updates
-        if: contains(steps.metadata.outputs.dependency-group, 'golang-org-dependencies')
-        run: gh pr merge --auto --rebase "$PR_URL"
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: go-openapi/ci-workflows/.github/workflows/auto-merge.yml@565504edebe3ab7f7b4cbafc8d6f401b82e91c4c # v0.2.8
+    secrets: inherit
