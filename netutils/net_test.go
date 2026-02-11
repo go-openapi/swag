@@ -32,7 +32,7 @@ func TestSplitHostPort(t *testing.T) {
 			require.Error(t, err)
 		}
 
-		assert.Equal(t, e.Host, h)
-		assert.Equal(t, e.Port, p)
+		assert.EqualT(t, e.Host, h)
+		assert.EqualT(t, e.Port, p)
 	}
 }

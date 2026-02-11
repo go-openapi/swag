@@ -70,13 +70,13 @@ func TestInitialismPlural(t *testing.T) {
 	idx.add("Series")
 	idx.add("Serie")
 
-	assert.Equal(t, simplePlural, idx.pluralForm("ID"))
-	assert.Equal(t, invariantPlural, idx.pluralForm("HTTP"))
-	assert.Equal(t, invariantPlural, idx.pluralForm("HTTPS"))
-	assert.Equal(t, invariantPlural, idx.pluralForm("DNS"))
-	assert.Equal(t, invariantPlural, idx.pluralForm("Serie"))
-	assert.Equal(t, invariantPlural, idx.pluralForm("Series"))
-	assert.Equal(t, notPlural, idx.pluralForm("xyz"))
+	assert.EqualT(t, simplePlural, idx.pluralForm("ID"))
+	assert.EqualT(t, invariantPlural, idx.pluralForm("HTTP"))
+	assert.EqualT(t, invariantPlural, idx.pluralForm("HTTPS"))
+	assert.EqualT(t, invariantPlural, idx.pluralForm("DNS"))
+	assert.EqualT(t, invariantPlural, idx.pluralForm("Serie"))
+	assert.EqualT(t, invariantPlural, idx.pluralForm("Series"))
+	assert.EqualT(t, notPlural, idx.pluralForm("xyz"))
 }
 
 func TestInitialismSanitize(t *testing.T) {
@@ -90,7 +90,7 @@ func TestInitialismSanitize(t *testing.T) {
 		for _, key := range ignoredKeys {
 			idx.add(key)
 			_, ok := idx.index[key]
-			assert.Falsef(t, ok,
+			assert.FalseTf(t, ok,
 				"expected key %q not to be indexed", key,
 			)
 		}
@@ -109,14 +109,14 @@ func TestInitialismSanitize(t *testing.T) {
 		for _, key := range trimmedKeys {
 			idx.add(key)
 			_, ok := idx.index[key]
-			assert.Falsef(t, ok,
+			assert.FalseTf(t, ok,
 				"expected key %q not to be indexed", key,
 			)
 
 			trimmedKey := strings.TrimSpace(key)
 			require.Len(t, trimmedKey, 3) // ensure trimmed
 			_, trimmedOk := idx.index[trimmedKey]
-			assert.Truef(t, trimmedOk,
+			assert.TrueTf(t, trimmedOk,
 				"expected %q (trimmed as %q) to be indexed", key, trimmedKey,
 			)
 		}
@@ -130,9 +130,9 @@ func TestInitialismSanitize(t *testing.T) {
 		idx.add(key)
 
 		_, ok := idx.index[key]
-		assert.False(t, ok)
+		assert.FalseT(t, ok)
 
 		_, capitalizedOk := idx.index[strings.ToUpper(key)]
-		assert.True(t, capitalizedOk)
+		assert.TrueT(t, capitalizedOk)
 	})
 }

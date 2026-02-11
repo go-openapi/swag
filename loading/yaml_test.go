@@ -15,9 +15,9 @@ import (
 
 func TestYAMLMatcher(t *testing.T) {
 	t.Run("should recognize a yaml file", func(t *testing.T) {
-		assert.True(t, YAMLMatcher("local.yml"))
-		assert.True(t, YAMLMatcher("local.yaml"))
-		assert.False(t, YAMLMatcher("local.json"))
+		assert.TrueT(t, YAMLMatcher("local.yml"))
+		assert.TrueT(t, YAMLMatcher("local.yaml"))
+		assert.FalseT(t, YAMLMatcher("local.json"))
 	})
 }
 

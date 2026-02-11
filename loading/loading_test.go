@@ -27,7 +27,7 @@ func TestLoadFromHTTP(t *testing.T) {
 		content, err := LoadFromFileOrHTTP(ts.URL)
 		require.NoError(t, err)
 
-		assert.YAMLEq(t, string(yamlPetStore), string(content))
+		assert.YAMLEqT(t, string(yamlPetStore), string(content))
 	})
 
 	t.Run("should not load from invalid URL", func(t *testing.T) {
@@ -170,7 +170,7 @@ func TestLoadFromHTTP(t *testing.T) {
 			WithFS(rooted),
 		)
 		require.NoError(t, err)
-		assert.YAMLEq(t, string(yamlPetStore), string(b))
+		assert.YAMLEqT(t, string(yamlPetStore), string(b))
 	})
 
 	t.Run("should load from memory file system (single file)", func(t *testing.T) {
@@ -181,7 +181,7 @@ func TestLoadFromHTTP(t *testing.T) {
 			WithFS(mapfs),
 		)
 		require.NoError(t, err)
-		assert.Equal(t, string("content"), string(b))
+		assert.EqualT(t, string("content"), string(b))
 	})
 
 	t.Run("should load from local embedded file system (path)", func(t *testing.T) {
@@ -191,7 +191,7 @@ func TestLoadFromHTTP(t *testing.T) {
 			WithFS(embeddedFixtures),
 		)
 		require.NoError(t, err)
-		assert.YAMLEq(t, string(yamlPetStore), string(b))
+		assert.YAMLEqT(t, string(yamlPetStore), string(b))
 	})
 }
 
@@ -207,19 +207,19 @@ func TestLoadStrategy(t *testing.T) {
 	t.Run("should serve local strategy", func(t *testing.T) {
 		ldr := LoadStrategy("blah", loader, remLoader)
 		b, _ := ldr("")
-		assert.YAMLEq(t, string(yamlPetStore), string(b))
+		assert.YAMLEqT(t, string(yamlPetStore), string(b))
 	})
 
 	t.Run("should serve remote strategy with http", func(t *testing.T) {
 		ldr := LoadStrategy("http://blah", loader, remLoader)
 		b, _ := ldr("")
-		assert.Equal(t, thisIsNotIt, string(b))
+		assert.EqualT(t, thisIsNotIt, string(b))
 	})
 
 	t.Run("should serve remote strategy with https", func(t *testing.T) {
 		ldr := LoadStrategy("https://blah", loader, remLoader)
 		b, _ := ldr("")
-		assert.Equal(t, thisIsNotIt, string(b))
+		assert.EqualT(t, thisIsNotIt, string(b))
 	})
 }
 
@@ -374,17 +374,17 @@ func TestLoadStrategyFile(t *testing.T) {
 				b, err := loader(tc.Path)
 				if tc.ExpectError {
 					require.Error(t, err)
-					assert.False(t, called)
+					assert.FalseT(t, called)
 
 					return
 				}
 
 				require.NoError(t, err)
-				assert.True(t, called)
+				assert.TrueT(t, called)
 				assert.Equal(t, []byte(thisIsIt), b)
 
 				if tc.ExpectedWindows != "" && runtime.GOOS == "windows" {
-					assert.Equalf(t, tc.ExpectedWindows, pth,
+					assert.EqualTf(t, tc.ExpectedWindows, pth,
 						"expected local LoadStrategy(%q) to open: %q (windows)",
 						tc.Path, tc.ExpectedWindows,
 					)
@@ -392,7 +392,7 @@ func TestLoadStrategyFile(t *testing.T) {
 					return
 				}
 
-				assert.Equalf(t, tc.Expected, pth,
+				assert.EqualTf(t, tc.Expected, pth,
 					"expected local LoadStrategy(%q) to open: %q (any OS)",
 					tc.Path, tc.Expected,
 				)

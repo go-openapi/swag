@@ -14,10 +14,10 @@ import (
 
 func TestJSONMatcher(t *testing.T) {
 	t.Run("should recognize a json file", func(t *testing.T) {
-		assert.True(t, JSONMatcher("local.json"))
-		assert.True(t, JSONMatcher("local.jso"))
-		assert.True(t, JSONMatcher("local.jsn"))
-		assert.False(t, JSONMatcher("local.yml"))
+		assert.TrueT(t, JSONMatcher("local.json"))
+		assert.TrueT(t, JSONMatcher("local.jso"))
+		assert.TrueT(t, JSONMatcher("local.jsn"))
+		assert.FalseT(t, JSONMatcher("local.yml"))
 	})
 }
 

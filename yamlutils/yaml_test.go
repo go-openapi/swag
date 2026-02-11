@@ -203,7 +203,7 @@ func TestWithYKey(t *testing.T) {
 		} `json:"definitions"`
 	}
 	require.NoError(t, json.Unmarshal(jsond, &yt))
-	assert.Equal(t, "integer", yt.Definitions.Viewbox.Properties.Y.Type)
+	assert.EqualT(t, "integer", yt.Definitions.Viewbox.Properties.Y.Type)
 }
 
 func TestMapKeyTypes(t *testing.T) {
@@ -232,7 +232,7 @@ func TestYAMLTags(t *testing.T) {
 		t.Run("doc should marshal as the original doc", func(t *testing.T) {
 			text, err := yaml.Marshal(doc)
 			require.NoError(t, err)
-			assert.YAMLEq(t, string(fixtureSpecTags), string(text))
+			assert.YAMLEqT(t, string(fixtureSpecTags), string(text))
 		})
 
 		t.Run("doc should marshal to JSON", func(t *testing.T) {
@@ -248,12 +248,12 @@ func TestYAMLTags(t *testing.T) {
 					require.NoError(t, err)
 
 					buf, ok := text.([]byte)
-					require.True(t, ok)
+					require.TrueT(t, ok)
 
 					// standard YAML used by [assert.YAMLEq] interprets YAML timestamp as [time.Time],
 					// but in our context, we use string
 					neutralizeTimestamp := strings.ReplaceAll(string(fixtureSpecTags), "default:", "default: !!str ")
-					assert.YAMLEq(t, neutralizeTimestamp, string(buf))
+					assert.YAMLEqT(t, neutralizeTimestamp, string(buf))
 				})
 			})
 		})

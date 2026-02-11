@@ -24,7 +24,7 @@ func TestIntegration(t *testing.T) {
 		m := a.NewOrderedMap(reasonableLength) // returns ifaces.OrderedMap
 		stdm, ok := m.(*stdlib.MapSlice)
 
-		require.True(t, ok)
+		require.TrueT(t, ok)
 
 		return stdm
 	}
@@ -36,14 +36,14 @@ func TestIntegration(t *testing.T) {
 		withAssertionsAfterRead(func(v any) func(*testing.T) {
 			return func(t *testing.T) {
 				value, ok := v.(EasyOrderedObject)
-				require.True(t, ok)
+				require.TrueT(t, ok)
 				require.Len(t, value.UnmarshalEasyJSONCalls(), 1)
 			}
 		}),
 		withAssertionsAfterWrite(func(v any) func(*testing.T) {
 			return func(t *testing.T) {
 				value, ok := v.(EasyOrderedObject)
-				require.True(t, ok)
+				require.TrueT(t, ok)
 				require.Len(t, value.MarshalEasyJSONCalls(), 1)
 			}
 		}),

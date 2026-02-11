@@ -15,7 +15,7 @@ func TestHarness(t *testing.T) {
 	h.Init()
 
 	f1, ok := h.Get("with JSON object")
-	require.True(t, ok)
+	require.TrueT(t, ok)
 	require.NotNil(t, f1)
 
 	f2 := h.ShouldGet("with JSON object inside")
@@ -28,7 +28,7 @@ func TestHarness(t *testing.T) {
 		require.NotEmptyf(t, test.JSONPayload, "JSON payload empty for %s", name)
 		require.NotEmptyf(t, test.YAMLPayload, "YAML payload empty for %s", name)
 		require.NotEmptyf(t, test.JSONBytes(), "JSON bytes payload empty for %s", name)
-		require.Equal(t, test.Error, test.ExpectError())
+		require.EqualT(t, test.Error, test.ExpectError())
 		if !test.ExpectError() {
 			require.NotEmptyf(t, test.YAMLBytes(), "YAML bytes payload empty for %s", name)
 		}
@@ -37,18 +37,18 @@ func TestHarness(t *testing.T) {
 
 	countWithoutError := 0
 	for name, test := range h.AllTests(WithoutError(true)) {
-		require.Falsef(t, test.ExpectError(), "test %s did not expect an error", name)
+		require.FalseTf(t, test.ExpectError(), "test %s did not expect an error", name)
 		countWithoutError++
 	}
 	require.NotZero(t, countWithoutError)
 
 	countWithError := 0
 	for name, test := range h.AllTests(WithError(true)) {
-		require.Truef(t, test.ExpectError(), "test %s expected an error", name)
+		require.TrueTf(t, test.ExpectError(), "test %s expected an error", name)
 		countWithError++
 	}
 	require.NotZero(t, countWithError)
-	require.Equal(t, count, countWithoutError+countWithError)
+	require.EqualT(t, count, countWithoutError+countWithError)
 }
 
 func TestLoadFixture(t *testing.T) {

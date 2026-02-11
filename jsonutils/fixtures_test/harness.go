@@ -101,7 +101,7 @@ func (h *Harness) Get(name string) (Fixture, bool) {
 
 func (h *Harness) ShouldGet(name string) Fixture {
 	fixture, ok := h.Get(name)
-	require.True(h.t, ok)
+	require.TrueT(h.t, ok)
 
 	return fixture
 }
@@ -236,7 +236,7 @@ func JSONEqualOrderedBytes(t testing.TB, expected, actual []byte) {
 			require.NoError(t, err)
 			return
 		}
-		require.Less(t, count, len(expectedTokens))
+		require.LessT(t, count, len(expectedTokens))
 		require.Equalf(t, expectedTokens[count], tok, "json token differs: %d", count)
 		count++
 	}
@@ -280,7 +280,7 @@ func YAMLEqualOrderedBytes(t testing.TB, expected, actual []byte) {
 	t.Helper()
 
 	// TODO: add YAMLEqBytes to testify
-	require.YAMLEq(t, string(expected), string(actual)) // necessary but not sufficient condition
+	require.YAMLEqT(t, string(expected), string(actual)) // necessary but not sufficient condition
 
 	// strip all indentation and comments (anchors not supported)
 	strippedExpected := rexStripIndent.ReplaceAll(expected, []byte(""))

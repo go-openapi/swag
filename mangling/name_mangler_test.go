@@ -29,9 +29,9 @@ func TestManglerToGoName_Issue158(t *testing.T) {
 	m := NewNameMangler()
 
 	t.Run("should detect trailing pluralized initialisms", func(t *testing.T) {
-		require.Equal(t, "LinkLocalIPs", m.ToGoName("LinkLocalIPs"))
-		require.Equal(t, "NativeBaseURLs", m.ToGoName("nativeBaseURLs"))
-		require.Equal(t, "SiteURLs", m.ToGoName("siteURLs"))
+		require.EqualT(t, "LinkLocalIPs", m.ToGoName("LinkLocalIPs"))
+		require.EqualT(t, "NativeBaseURLs", m.ToGoName("nativeBaseURLs"))
+		require.EqualT(t, "SiteURLs", m.ToGoName("siteURLs"))
 	})
 }
 
@@ -43,7 +43,7 @@ func TestManglerToGoName_Issue159(t *testing.T) {
 
 	// require.Equal(t, "TTLs", m.ToGoName("TTLs"))
 	// require.Equal(t, "TTLsS", m.ToGoName("TTLsS"))
-	require.Equal(t, "TTLss", m.ToGoName("TTLss"))
+	require.EqualT(t, "TTLss", m.ToGoName("TTLss"))
 }
 
 func TestManglerToGoName(t *testing.T) {
@@ -81,7 +81,7 @@ func TestManglerToGoName(t *testing.T) {
 		t.Run("ToGoName should convert names as expected", func(t *testing.T) {
 			for _, sample := range samples {
 				result := m.ToGoName(sample.str)
-				assert.Equal(t, sample.out, result,
+				assert.EqualT(t, sample.out, result,
 					"expected ToGoName(%q) == %q but got %q", sample.str, sample.out, result)
 			}
 		})
@@ -110,7 +110,7 @@ func TestManglerToGoName(t *testing.T) {
 
 			for _, sample := range samples {
 				result := m.ToGoName(sample.str)
-				assert.Equal(t, sample.out, result,
+				assert.EqualT(t, sample.out, result,
 					"with initialism %q, expected ToGoName(%q) == %q but got %q", k, sample.str, sample.out, result)
 			}
 		}
@@ -149,7 +149,7 @@ func TestManglerToGoName(t *testing.T) {
 			)
 
 			for _, sample := range samples {
-				assert.Equal(t, sample.out, m.ToGoName(sample.str))
+				assert.EqualT(t, sample.out, m.ToGoName(sample.str))
 			}
 		})
 
@@ -174,7 +174,7 @@ func TestManglerToGoName(t *testing.T) {
 			)
 
 			for _, sample := range samples {
-				assert.Equal(t, sample.out, m.ToGoName(sample.str))
+				assert.EqualT(t, sample.out, m.ToGoName(sample.str))
 			}
 		})
 	})
@@ -212,7 +212,7 @@ func TestManglerToGoName(t *testing.T) {
 		}
 
 		for _, sample := range samples {
-			assert.Equal(t, sample.out, m.ToGoName(sample.str))
+			assert.EqualT(t, sample.out, m.ToGoName(sample.str))
 		}
 	})
 
@@ -235,7 +235,7 @@ func TestManglerToGoName(t *testing.T) {
 			{"a€ b", "AEurob"},
 		}
 		for _, sample := range samples {
-			assert.Equal(t, sample.out, m.ToGoName(sample.str))
+			assert.EqualT(t, sample.out, m.ToGoName(sample.str))
 		}
 	})
 }
@@ -267,7 +267,7 @@ func TestManglerToFileName(t *testing.T) {
 
 	for _, sample := range samples {
 		result := m.ToFileName(sample.str)
-		assert.Equal(t, sample.out, m.ToFileName(sample.str),
+		assert.EqualT(t, sample.out, m.ToFileName(sample.str),
 			"ToFileName(%q) == %q but got %q", sample.str, sample.out, result)
 	}
 }
@@ -291,7 +291,7 @@ func TestManglerToCommandName(t *testing.T) {
 	}
 
 	for _, sample := range samples {
-		assert.Equal(t, sample.out, m.ToCommandName(sample.str))
+		assert.EqualT(t, sample.out, m.ToCommandName(sample.str))
 	}
 }
 
@@ -314,7 +314,7 @@ func TestManglerToHumanName(t *testing.T) {
 	}
 
 	for _, sample := range samples {
-		assert.Equal(t, sample.out, m.ToHumanNameLower(sample.str))
+		assert.EqualT(t, sample.out, m.ToHumanNameLower(sample.str))
 	}
 }
 
@@ -337,7 +337,7 @@ func TestManglerToJSONName(t *testing.T) {
 	}
 
 	for _, sample := range samples {
-		assert.Equal(t, sample.out, m.ToJSONName(sample.str))
+		assert.EqualT(t, sample.out, m.ToJSONName(sample.str))
 	}
 }
 
@@ -351,11 +351,11 @@ func TestManglerCamelize(t *testing.T) {
 	})
 
 	t.Run("with single byte", func(t *testing.T) {
-		assert.Equal(t, "A", m.Camelize("a"))
+		assert.EqualT(t, "A", m.Camelize("a"))
 	})
 
 	t.Run("with single multi-byte rune", func(t *testing.T) {
-		assert.Equal(t, "Ã", m.Camelize("ã"))
+		assert.EqualT(t, "Ã", m.Camelize("ã"))
 	})
 
 	samples := []translationSample{
@@ -377,7 +377,7 @@ func TestManglerCamelize(t *testing.T) {
 
 	for _, sample := range samples {
 		res := m.Camelize(sample.str)
-		assert.Equalf(t, sample.out, res, "expected Camelize(%q)=%q, got %q", sample.str, sample.out, res)
+		assert.EqualTf(t, sample.out, res, "expected Camelize(%q)=%q, got %q", sample.str, sample.out, res)
 	}
 }
 
@@ -403,7 +403,7 @@ func TestManglerToHumanNameTitle(t *testing.T) {
 
 	for _, sample := range samples {
 		res := m.ToHumanNameTitle(sample.str)
-		assert.Equalf(t, sample.out, res, "expected ToHumanNameTitle(%q)=%q, got %q", sample.str, sample.out, res)
+		assert.EqualTf(t, sample.out, res, "expected ToHumanNameTitle(%q)=%q, got %q", sample.str, sample.out, res)
 	}
 }
 
@@ -434,7 +434,7 @@ func TestManglerToVarName(t *testing.T) {
 
 	for _, sample := range samples {
 		res := m.ToVarName(sample.str)
-		assert.Equalf(t, sample.out, res, "expected ToVarName(%q)=%q, got %q", sample.str, sample.out, res)
+		assert.EqualTf(t, sample.out, res, "expected ToVarName(%q)=%q, got %q", sample.str, sample.out, res)
 	}
 
 	t.Run("with Unicode edge cases", func(t *testing.T) {
@@ -470,7 +470,7 @@ func TestManglerToVarName(t *testing.T) {
 		}
 
 		for _, sample := range samples {
-			assert.Equal(t, sample.out, m.ToVarName(sample.str))
+			assert.EqualT(t, sample.out, m.ToVarName(sample.str))
 		}
 	})
 }
@@ -480,9 +480,9 @@ func TestManglerInitialisms(t *testing.T) {
 		m := NewNameMangler()
 		m.AddInitialisms("ELB", "OLTP")
 
-		assert.Equal(t, "ELBEndpoint", m.ToGoName("elb_endpoint"))
-		assert.Equal(t, "HTTPEndpoint", m.ToGoName("http_endpoint"))
-		assert.Equal(t, "OLTPEndpoint", m.ToGoName("oltp endpoint"))
+		assert.EqualT(t, "ELBEndpoint", m.ToGoName("elb_endpoint"))
+		assert.EqualT(t, "HTTPEndpoint", m.ToGoName("http_endpoint"))
+		assert.EqualT(t, "OLTPEndpoint", m.ToGoName("oltp endpoint"))
 	})
 
 	t.Run("with Initialisms", func(t *testing.T) {
@@ -490,8 +490,8 @@ func TestManglerInitialisms(t *testing.T) {
 			WithInitialisms("ELB", "OLTP"),
 		)
 
-		assert.Equal(t, "ELBEndpoint", m.ToGoName("elb_endpoint"))
-		assert.Equal(t, "HttpEndpoint", m.ToGoName("http_endpoint")) // no recognized as initialisms (default override)
-		assert.Equal(t, "OLTPEndpoint", m.ToGoName("oltp endpoint"))
+		assert.EqualT(t, "ELBEndpoint", m.ToGoName("elb_endpoint"))
+		assert.EqualT(t, "HttpEndpoint", m.ToGoName("http_endpoint")) // no recognized as initialisms (default override)
+		assert.EqualT(t, "OLTPEndpoint", m.ToGoName("oltp endpoint"))
 	})
 }

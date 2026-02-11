@@ -12,20 +12,20 @@ import (
 func TestContainsStringsCI(t *testing.T) {
 	list := []string{"hello", "world", "and", "such"}
 
-	assert.True(t, ContainsStringsCI(list, "hELLo"))
-	assert.True(t, ContainsStringsCI(list, "world"))
-	assert.True(t, ContainsStringsCI(list, "AND"))
-	assert.False(t, ContainsStringsCI(list, "nuts"))
+	assert.TrueT(t, ContainsStringsCI(list, "hELLo"))
+	assert.TrueT(t, ContainsStringsCI(list, "world"))
+	assert.TrueT(t, ContainsStringsCI(list, "AND"))
+	assert.FalseT(t, ContainsStringsCI(list, "nuts"))
 }
 
 func TestContainsStrings(t *testing.T) {
 	list := []string{"hello", "world", "and", "such"}
 
-	assert.True(t, ContainsStrings(list, "hello"))
-	assert.False(t, ContainsStrings(list, "hELLo"))
-	assert.True(t, ContainsStrings(list, "world"))
-	assert.False(t, ContainsStrings(list, "World"))
-	assert.True(t, ContainsStrings(list, "and"))
-	assert.False(t, ContainsStrings(list, "AND"))
-	assert.False(t, ContainsStrings(list, "nuts"))
+	assert.TrueT(t, ContainsStrings(list, "hello"))
+	assert.FalseT(t, ContainsStrings(list, "hELLo"))
+	assert.TrueT(t, ContainsStrings(list, "world"))
+	assert.FalseT(t, ContainsStrings(list, "World"))
+	assert.TrueT(t, ContainsStrings(list, "and"))
+	assert.FalseT(t, ContainsStrings(list, "AND"))
+	assert.FalseT(t, ContainsStrings(list, "nuts"))
 }

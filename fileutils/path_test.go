@@ -73,7 +73,7 @@ func assertPath(t testing.TB, expected, actual string) bool {
 	fp, err := filepath.EvalSymlinks(expected)
 	require.NoError(t, err)
 
-	return assert.Equal(t, fp, actual)
+	return assert.EqualT(t, fp, actual)
 }
 
 func TestFullGOPATH(t *testing.T) {
@@ -82,5 +82,5 @@ func TestFullGOPATH(t *testing.T) {
 	t.Setenv(GOPATHKey, ngp)
 
 	expected := ngp + ":" + runtime.GOROOT() //nolint: staticcheck // this is a deprecated function
-	assert.Equal(t, expected, FullGoSearchPath())
+	assert.EqualT(t, expected, FullGoSearchPath())
 }

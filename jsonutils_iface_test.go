@@ -40,18 +40,18 @@ func TestJSONUtilsIface(t *testing.T) {
 				require.NoError(t, FromDynamicJSON(a, &b))
 
 				_, isMap := b.(map[string]any)
-				assert.True(t, isMap)
+				assert.TrueT(t, isMap)
 			})
 
 			t.Run("ToDynamicJSON into a map", func(t *testing.T) {
 				c := ToDynamicJSON(a)
 				_, isMap := c.(map[string]any)
-				assert.True(t, isMap)
+				assert.TrueT(t, isMap)
 
 				t.Run("DynamicJSONToStruct back to struct", func(t *testing.T) {
 					a.A = 0
 					require.NoError(t, DynamicJSONToStruct(c, &a))
-					assert.Equalf(t, 1, a.A, "expected to restore original value")
+					assert.EqualTf(t, 1, a.A, "expected to restore original value")
 				})
 			})
 		})

@@ -22,101 +22,101 @@ func TestNameProvider(t *testing.T) {
 	var obj = testNameStruct{}
 
 	nm, ok := provider.GetGoName(obj, "name")
-	assert.True(t, ok)
-	assert.Equal(t, "Name", nm)
+	assert.TrueT(t, ok)
+	assert.EqualT(t, "Name", nm)
 
 	nm, ok = provider.GetGoName(obj, "plain")
-	assert.True(t, ok)
-	assert.Equal(t, "NotTheSame", nm)
+	assert.TrueT(t, ok)
+	assert.EqualT(t, "NotTheSame", nm)
 
 	nm, ok = provider.GetGoName(obj, "doesNotExist")
-	assert.False(t, ok)
+	assert.FalseT(t, ok)
 	assert.Empty(t, nm)
 
 	nm, ok = provider.GetGoName(obj, "ignored")
-	assert.False(t, ok)
+	assert.FalseT(t, ok)
 	assert.Empty(t, nm)
 
 	tpe := reflect.TypeOf(obj)
 	nm, ok = provider.GetGoNameForType(tpe, "name")
-	assert.True(t, ok)
-	assert.Equal(t, "Name", nm)
+	assert.TrueT(t, ok)
+	assert.EqualT(t, "Name", nm)
 
 	nm, ok = provider.GetGoNameForType(tpe, "plain")
-	assert.True(t, ok)
-	assert.Equal(t, "NotTheSame", nm)
+	assert.TrueT(t, ok)
+	assert.EqualT(t, "NotTheSame", nm)
 
 	nm, ok = provider.GetGoNameForType(tpe, "doesNotExist")
-	assert.False(t, ok)
+	assert.FalseT(t, ok)
 	assert.Empty(t, nm)
 
 	nm, ok = provider.GetGoNameForType(tpe, "ignored")
-	assert.False(t, ok)
+	assert.FalseT(t, ok)
 	assert.Empty(t, nm)
 
 	ptr := &obj
 	nm, ok = provider.GetGoName(ptr, "name")
-	assert.True(t, ok)
-	assert.Equal(t, "Name", nm)
+	assert.TrueT(t, ok)
+	assert.EqualT(t, "Name", nm)
 
 	nm, ok = provider.GetGoName(ptr, "plain")
-	assert.True(t, ok)
-	assert.Equal(t, "NotTheSame", nm)
+	assert.TrueT(t, ok)
+	assert.EqualT(t, "NotTheSame", nm)
 
 	nm, ok = provider.GetGoName(ptr, "doesNotExist")
-	assert.False(t, ok)
+	assert.FalseT(t, ok)
 	assert.Empty(t, nm)
 
 	nm, ok = provider.GetGoName(ptr, "ignored")
-	assert.False(t, ok)
+	assert.FalseT(t, ok)
 	assert.Empty(t, nm)
 
 	nm, ok = provider.GetJSONName(obj, "Name")
-	assert.True(t, ok)
-	assert.Equal(t, "name", nm)
+	assert.TrueT(t, ok)
+	assert.EqualT(t, "name", nm)
 
 	nm, ok = provider.GetJSONName(obj, "NotTheSame")
-	assert.True(t, ok)
-	assert.Equal(t, "plain", nm)
+	assert.TrueT(t, ok)
+	assert.EqualT(t, "plain", nm)
 
 	nm, ok = provider.GetJSONName(obj, "DoesNotExist")
-	assert.False(t, ok)
+	assert.FalseT(t, ok)
 	assert.Empty(t, nm)
 
 	nm, ok = provider.GetJSONName(obj, "Ignored")
-	assert.False(t, ok)
+	assert.FalseT(t, ok)
 	assert.Empty(t, nm)
 
 	nm, ok = provider.GetJSONNameForType(tpe, "Name")
-	assert.True(t, ok)
-	assert.Equal(t, "name", nm)
+	assert.TrueT(t, ok)
+	assert.EqualT(t, "name", nm)
 
 	nm, ok = provider.GetJSONNameForType(tpe, "NotTheSame")
-	assert.True(t, ok)
-	assert.Equal(t, "plain", nm)
+	assert.TrueT(t, ok)
+	assert.EqualT(t, "plain", nm)
 
 	nm, ok = provider.GetJSONNameForType(tpe, "doesNotExist")
-	assert.False(t, ok)
+	assert.FalseT(t, ok)
 	assert.Empty(t, nm)
 
 	nm, ok = provider.GetJSONNameForType(tpe, "Ignored")
-	assert.False(t, ok)
+	assert.FalseT(t, ok)
 	assert.Empty(t, nm)
 
 	nm, ok = provider.GetJSONName(ptr, "Name")
-	assert.True(t, ok)
-	assert.Equal(t, "name", nm)
+	assert.TrueT(t, ok)
+	assert.EqualT(t, "name", nm)
 
 	nm, ok = provider.GetJSONName(ptr, "NotTheSame")
-	assert.True(t, ok)
-	assert.Equal(t, "plain", nm)
+	assert.TrueT(t, ok)
+	assert.EqualT(t, "plain", nm)
 
 	nm, ok = provider.GetJSONName(ptr, "doesNotExist")
-	assert.False(t, ok)
+	assert.FalseT(t, ok)
 	assert.Empty(t, nm)
 
 	nm, ok = provider.GetJSONName(ptr, "Ignored")
-	assert.False(t, ok)
+	assert.FalseT(t, ok)
 	assert.Empty(t, nm)
 
 	nms := provider.GetJSONNames(ptr)

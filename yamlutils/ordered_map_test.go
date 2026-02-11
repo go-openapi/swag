@@ -43,9 +43,9 @@ func TestOrderedMap(t *testing.T) {
 						require.NotEmpty(t, y) // "null" token
 					}
 					b, ok := y.([]byte)
-					require.True(t, ok)
+					require.TrueT(t, ok)
 
-					assert.Equal(t, test.YAMLPayload, string(b))
+					assert.EqualT(t, test.YAMLPayload, string(b))
 				})
 
 				t.Run("should marshal back to JSON", func(t *testing.T) {
@@ -98,9 +98,9 @@ func TestOrderedMap(t *testing.T) {
 						require.NoError(t, err)
 
 						text, ok := reconstructed.([]byte)
-						require.True(t, ok)
+						require.TrueT(t, ok)
 
-						assert.YAMLEq(t, string(fixture2224), string(text))
+						assert.YAMLEqT(t, string(fixture2224), string(text))
 					})
 
 					t.Run("should marshal back to JSON", func(t *testing.T) {
@@ -130,7 +130,7 @@ func TestMarshalYAML(t *testing.T) {
 		require.NoError(t, json.Unmarshal([]byte(jazon), &data))
 		ny, err := data.MarshalYAML()
 		require.NoError(t, err)
-		assert.Equal(t, expected, string(ny.([]byte)))
+		assert.EqualT(t, expected, string(ny.([]byte)))
 	})
 
 	t.Run("marshalYAML should be deterministic", func(t *testing.T) {
@@ -144,7 +144,7 @@ func TestMarshalYAML(t *testing.T) {
 			require.NoError(t, json.Unmarshal([]byte(jazon), &data))
 			ny, err := data.MarshalYAML()
 			require.NoError(t, err)
-			assert.Equal(t, expected, string(ny.([]byte)))
+			assert.EqualT(t, expected, string(ny.([]byte)))
 		}
 	})
 
@@ -165,9 +165,9 @@ func TestMarshalYAML(t *testing.T) {
 				require.NoError(t, err)
 				require.NotNil(t, y)
 				b, ok := y.([]byte)
-				require.True(t, ok)
+				require.TrueT(t, ok)
 
-				assert.Equal(t, expected, string(b))
+				assert.EqualT(t, expected, string(b))
 			})
 
 			t.Run("should marshal back to JSON", func(t *testing.T) {
@@ -201,9 +201,9 @@ a:
 			require.NoError(t, err)
 			require.NotNil(t, y)
 			b, ok := y.([]byte)
-			require.True(t, ok)
+			require.TrueT(t, ok)
 
-			assert.YAMLEq(t, expected, string(b))
+			assert.YAMLEqT(t, expected, string(b))
 		})
 	})
 
@@ -296,7 +296,7 @@ float:
 			require.NoError(t, err)
 			require.NotNil(t, y)
 			b, ok := y.([]byte)
-			require.True(t, ok)
+			require.TrueT(t, ok)
 
 			fixtures.YAMLEqualOrdered(t, expected, string(b))
 		})
