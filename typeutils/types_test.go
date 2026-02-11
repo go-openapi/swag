@@ -135,7 +135,7 @@ func TestIsNil(t *testing.T) {
 		c,
 		f,
 	} {
-		require.True(t, IsNil(value))
+		require.TrueT(t, IsNil(value))
 	}
 
 	for _, value := range []any{
@@ -147,7 +147,7 @@ func TestIsNil(t *testing.T) {
 		"",
 		false,
 	} {
-		require.False(t, IsNil(value))
+		require.FalseT(t, IsNil(value))
 	}
 
 }

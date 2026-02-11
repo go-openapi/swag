@@ -14,7 +14,7 @@ func TestNetUtilsIface(t *testing.T) {
 	t.Run("deprecated functions should work", func(t *testing.T) {
 		host, port, err := SplitHostPort("localhost:1000")
 		require.NoError(t, err)
-		assert.Equal(t, "localhost", host)
-		assert.Equal(t, 1000, port)
+		assert.EqualT(t, "localhost", host)
+		assert.EqualT(t, 1000, port)
 	})
 }

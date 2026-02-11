@@ -40,7 +40,7 @@ func TestRegistryIfaces(t *testing.T) {
 				expected: "<unknown>",
 			},
 		} {
-			assert.Equal(t, test.expected, test.in.String())
+			assert.EqualT(t, test.expected, test.in.String())
 		}
 	})
 
@@ -66,7 +66,7 @@ func TestRegistryIfaces(t *testing.T) {
 				expected: "",
 			},
 		} {
-			assert.Equal(t, test.expected, test.in.String())
+			assert.EqualT(t, test.expected, test.in.String())
 		}
 	})
 }

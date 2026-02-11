@@ -14,8 +14,8 @@ import (
 
 func TestToken(t *testing.T) {
 	t.Run("token should be stringable for debugging and error formatting", func(t *testing.T) {
-		assert.Equal(t, "invalid token", invalidToken.String())
-		assert.Equal(t, "EOF", eofToken.String())
+		assert.EqualT(t, "invalid token", invalidToken.String())
+		assert.EqualT(t, "EOF", eofToken.String())
 	})
 
 	t.Run("token should be able to map all tokens from encoding/json.Token", func(t *testing.T) {
@@ -23,7 +23,7 @@ func TestToken(t *testing.T) {
 		tok := token{
 			Token: stdtok,
 		}
-		assert.Equal(t, tokenNumber, tok.Kind())
+		assert.EqualT(t, tokenNumber, tok.Kind())
 	})
 
 	t.Run("token should detect JSON delimiters", func(t *testing.T) {
@@ -32,7 +32,7 @@ func TestToken(t *testing.T) {
 		tok = token{
 			Token: stdjson.Delim(','),
 		}
-		assert.Equal(t, byte(','), tok.Delim())
+		assert.EqualT(t, byte(','), tok.Delim())
 	})
 }
 
@@ -48,30 +48,30 @@ func TestBytesReader(t *testing.T) {
 
 		n, err := r.Read(buf)
 		require.NoError(t, err)
-		require.Equal(t, bufferSize, n)
+		require.EqualT(t, bufferSize, n)
 		require.Equal(t, []byte("123"), buf[:n])
-		assert.Equal(t, bufferSize, r.offset)
+		assert.EqualT(t, bufferSize, r.offset)
 
 		n, err = r.Read(buf)
 		require.NoError(t, err)
-		require.Equal(t, bufferSize, n)
+		require.EqualT(t, bufferSize, n)
 		require.Equal(t, []byte("456"), buf[:n])
-		assert.Equal(t, 2*bufferSize, r.offset)
+		assert.EqualT(t, 2*bufferSize, r.offset)
 
 		n, err = r.Read(buf)
 		require.NoError(t, err)
-		require.Equal(t, bufferSize, n)
+		require.EqualT(t, bufferSize, n)
 		require.Equal(t, []byte("789"), buf[:n])
-		assert.Equal(t, 3*bufferSize, r.offset)
+		assert.EqualT(t, 3*bufferSize, r.offset)
 
 		n, err = r.Read(buf)
 		require.NoError(t, err)
-		require.Equal(t, 1, n)
+		require.EqualT(t, 1, n)
 		require.Equal(t, []byte("0"), buf[:n])
-		assert.Equal(t, len(r.buf), r.offset)
+		assert.EqualT(t, len(r.buf), r.offset)
 
 		n, err = r.Read(buf)
-		require.Equal(t, 0, n)
+		require.EqualT(t, 0, n)
 		require.ErrorIs(t, err, io.EOF)
 	})
 
@@ -86,9 +86,9 @@ func TestBytesReader(t *testing.T) {
 
 		n, err := r.Read(buf)
 		require.NoError(t, err)
-		require.Equal(t, len(r.buf), n)
+		require.EqualT(t, len(r.buf), n)
 		require.Equal(t, r.buf, buf[:n])
-		assert.Equal(t, len(r.buf), r.offset)
+		assert.EqualT(t, len(r.buf), r.offset)
 	})
 }
 
@@ -96,12 +96,12 @@ func TestLexer(t *testing.T) {
 	t.Run("lexer should be interruptible by setting error state", func(t *testing.T) {
 		l := newLexer([]byte("123"))
 		l.SetErr(ErrStdlib)
-		require.False(t, l.Ok())
+		require.FalseT(t, l.Ok())
 		require.Error(t, l.Error())
 
 		require.Equal(t, invalidToken, l.NextToken())
-		require.False(t, l.IsDelim(','))
-		require.False(t, l.IsNull())
+		require.FalseT(t, l.IsDelim(','))
+		require.FalseT(t, l.IsNull())
 		require.Zero(t, l.Number())
 		require.NotPanics(t, func() {
 			l.Null()
@@ -113,11 +113,11 @@ func TestLexer(t *testing.T) {
 		l.next = token{Token: stdjson.Delim('{')}
 
 		l.Delim('{')
-		require.True(t, l.Ok())
+		require.TrueT(t, l.Ok())
 
 		l.next = token{Token: "123"}
 		l.Delim('{')
-		require.False(t, l.Ok())
+		require.FalseT(t, l.Ok())
 	})
 
 	t.Run("lexer should detect null", func(t *testing.T) {
@@ -125,11 +125,11 @@ func TestLexer(t *testing.T) {
 		l.next = token{Token: nil}
 
 		l.Null()
-		require.True(t, l.Ok())
+		require.TrueT(t, l.Ok())
 
 		l.next = token{Token: "123"}
 		l.Null()
-		require.False(t, l.Ok())
+		require.FalseT(t, l.Ok())
 	})
 
 	t.Run("lexer should detect bool", func(t *testing.T) {
@@ -137,18 +137,18 @@ func TestLexer(t *testing.T) {
 		l.next = token{Token: false}
 
 		b := l.Bool()
-		require.True(t, l.Ok())
-		require.False(t, b)
+		require.TrueT(t, l.Ok())
+		require.FalseT(t, b)
 
 		l.next = token{Token: true}
 		b = l.Bool()
-		require.True(t, l.Ok())
-		require.True(t, b)
+		require.TrueT(t, l.Ok())
+		require.TrueT(t, b)
 
 		l.next = token{Token: "x"}
 		b = l.Bool()
-		require.False(t, l.Ok())
-		require.False(t, b)
+		require.FalseT(t, l.Ok())
+		require.FalseT(t, b)
 	})
 
 	t.Run("lexer should detect JSON number as string", func(t *testing.T) {
@@ -158,22 +158,22 @@ func TestLexer(t *testing.T) {
 		l.next = token{Token: stdjson.Number("123")}
 
 		n := l.Number()
-		require.True(t, l.Ok())
+		require.TrueT(t, l.Ok())
 		require.Equal(t, int64(123), n)
 
 		l.next = token{Token: stdjson.Number("123.4")}
 		n = l.Number()
-		require.True(t, l.Ok())
+		require.TrueT(t, l.Ok())
 		require.InDelta(t, float64(123.4), n, epsilon)
 
 		l.next = token{Token: 123.4}
 		n = l.Number()
-		require.True(t, l.Ok())
+		require.TrueT(t, l.Ok())
 		require.InDelta(t, float64(123.4), n, epsilon)
 
 		l.next = token{Token: "123.4"}
 		n = l.Number()
-		require.False(t, l.Ok())
+		require.FalseT(t, l.Ok())
 		require.Zero(t, n)
 	})
 }

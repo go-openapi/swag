@@ -21,17 +21,17 @@ func TestWriter(t *testing.T) {
 
 		w.err = ErrStdlib
 		w.RawString(str)
-		require.Equal(t, marker, w.buf.String())
+		require.EqualT(t, marker, w.buf.String())
 
 		raw := func() ([]byte, error) { return []byte(str), nil }
 		w.Raw(raw())
-		require.Equal(t, marker, w.buf.String())
+		require.EqualT(t, marker, w.buf.String())
 
 		w.RawByte('x')
-		require.Equal(t, marker, w.buf.String())
+		require.EqualT(t, marker, w.buf.String())
 
 		w.String(str)
-		require.Equal(t, marker, w.buf.String())
+		require.EqualT(t, marker, w.buf.String())
 
 		result, err := w.BuildBytes()
 		require.Nil(t, result)
@@ -43,7 +43,7 @@ func TestWriter(t *testing.T) {
 		w.RawString(marker)
 		raw := func() ([]byte, error) { return []byte(str), ErrStdlib }
 		w.Raw(raw())
-		require.Equal(t, marker, w.buf.String())
+		require.EqualT(t, marker, w.buf.String())
 
 		result, err := w.BuildBytes()
 		require.Nil(t, result)

@@ -38,7 +38,7 @@ func TestRegistryUnmarshal(t *testing.T) {
 			require.NotEmpty(t, jazon)
 
 			mockAdapter, ok := adapter.(*MockAdapter1)
-			require.True(t, ok)
+			require.TrueT(t, ok)
 			calls := mockAdapter.UnmarshalCalls()
 			require.Len(t, calls, 1)
 		})
@@ -58,7 +58,7 @@ func TestRegistryUnmarshal(t *testing.T) {
 
 			t.Run("should have called the adapter's OrderedUnmarshal method", func(t *testing.T) {
 				mockAdapter, ok := adapter.(*MockAdapter1)
-				require.True(t, ok)
+				require.TrueT(t, ok)
 				calls := mockAdapter.OrderedUnmarshalCalls()
 				require.Len(t, calls, 1)
 			})
@@ -66,10 +66,10 @@ func TestRegistryUnmarshal(t *testing.T) {
 			t.Run("should have cached the route for this type", func(t *testing.T) {
 				require.Len(t, reg.orderedUnmarshalerCache, 1)
 				key := reflect.TypeOf(value)
-				require.Contains(t, reg.orderedUnmarshalerCache, key)
+				require.MapContainsT(t, reg.orderedUnmarshalerCache, key)
 				entry := reg.orderedUnmarshalerCache[key]
-				require.Equal(t, "github.com/go-openapi/swag/jsonutils/adapters.MockAdapter1", entry.Who)
-				require.True(t, entry.What.Has(ifaces.CapabilityOrderedUnmarshalJSON))
+				require.EqualT(t, "github.com/go-openapi/swag/jsonutils/adapters.MockAdapter1", entry.Who)
+				require.TrueT(t, entry.What.Has(ifaces.CapabilityOrderedUnmarshalJSON))
 			})
 		})
 
@@ -84,7 +84,7 @@ func TestRegistryUnmarshal(t *testing.T) {
 			require.NotEmpty(t, jazon)
 
 			mockAdapter, ok := adapter.(*MockAdapter1)
-			require.True(t, ok)
+			require.TrueT(t, ok)
 			calls := mockAdapter.OrderedUnmarshalCalls()
 			require.Len(t, calls, 1)
 		})
@@ -115,7 +115,7 @@ func TestRegistryMarshal(t *testing.T) {
 			require.NotEmpty(t, jazon)
 
 			mockAdapter, ok := adapter.(*MockAdapter1)
-			require.True(t, ok)
+			require.TrueT(t, ok)
 			calls := mockAdapter.MarshalCalls()
 			require.Len(t, calls, 1)
 		})
@@ -134,7 +134,7 @@ func TestRegistryMarshal(t *testing.T) {
 
 			t.Run("should have called the adapter's OrderedMarshal method", func(t *testing.T) {
 				mockAdapter, ok := adapter.(*MockAdapter1)
-				require.True(t, ok)
+				require.TrueT(t, ok)
 				calls := mockAdapter.OrderedMarshalCalls()
 				require.Len(t, calls, 1)
 			})
@@ -142,10 +142,10 @@ func TestRegistryMarshal(t *testing.T) {
 			t.Run("should have cached the route for this type", func(t *testing.T) {
 				require.Len(t, reg.orderedMarshalerCache, 1)
 				key := reflect.TypeOf(value)
-				require.Contains(t, reg.orderedMarshalerCache, key)
+				require.MapContainsT(t, reg.orderedMarshalerCache, key)
 				entry := reg.orderedMarshalerCache[key]
-				require.Equal(t, "github.com/go-openapi/swag/jsonutils/adapters.MockAdapter1", entry.Who)
-				require.True(t, entry.What.Has(ifaces.CapabilityOrderedMarshalJSON))
+				require.EqualT(t, "github.com/go-openapi/swag/jsonutils/adapters.MockAdapter1", entry.Who)
+				require.TrueT(t, entry.What.Has(ifaces.CapabilityOrderedMarshalJSON))
 			})
 		})
 
@@ -159,7 +159,7 @@ func TestRegistryMarshal(t *testing.T) {
 			require.NotEmpty(t, jazon)
 
 			mockAdapter, ok := adapter.(*MockAdapter1)
-			require.True(t, ok)
+			require.TrueT(t, ok)
 			calls := mockAdapter.OrderedMarshalCalls()
 			require.Len(t, calls, 1)
 		})
@@ -193,7 +193,7 @@ func TestRegistryMarshal(t *testing.T) {
 
 			t.Run("should have called the adapter's MarshalJSON method", func(t *testing.T) {
 				mockAdapter, ok := adapter.(*MockAdapter2)
-				require.True(t, ok)
+				require.TrueT(t, ok)
 				calls := mockAdapter.MarshalCalls()
 				require.Len(t, calls, 1)
 			})
@@ -201,10 +201,10 @@ func TestRegistryMarshal(t *testing.T) {
 			t.Run("should have cached the route for this type", func(t *testing.T) {
 				require.Len(t, reg.marshalerCache, 2)
 				key := reflect.TypeOf(value)
-				require.Contains(t, reg.marshalerCache, key)
+				require.MapContainsT(t, reg.marshalerCache, key)
 				entry := reg.marshalerCache[key]
-				require.Equal(t, "github.com/go-openapi/swag/jsonutils/adapters.MockAdapter2", entry.Who)
-				require.True(t, entry.What.Has(ifaces.CapabilityMarshalJSON))
+				require.EqualT(t, "github.com/go-openapi/swag/jsonutils/adapters.MockAdapter2", entry.Who)
+				require.TrueT(t, entry.What.Has(ifaces.CapabilityMarshalJSON))
 			})
 		})
 
@@ -221,7 +221,7 @@ func TestRegistryMarshal(t *testing.T) {
 
 			t.Run("should have called the adapter's MarshalJSON method", func(t *testing.T) {
 				mockAdapter, ok := adapter.(*MockAdapter1)
-				require.True(t, ok)
+				require.TrueT(t, ok)
 				calls := mockAdapter.MarshalCalls()
 				require.Len(t, calls, 1)
 			})
@@ -229,10 +229,10 @@ func TestRegistryMarshal(t *testing.T) {
 			t.Run("should have cached the route for this type", func(t *testing.T) {
 				require.Len(t, reg.marshalerCache, 3)
 				key := reflect.TypeOf(value)
-				require.Contains(t, reg.marshalerCache, key)
+				require.MapContainsT(t, reg.marshalerCache, key)
 				entry := reg.marshalerCache[key]
-				require.Equal(t, "github.com/go-openapi/swag/jsonutils/adapters.MockAdapter1", entry.Who)
-				require.True(t, entry.What.Has(ifaces.CapabilityMarshalJSON))
+				require.EqualT(t, "github.com/go-openapi/swag/jsonutils/adapters.MockAdapter1", entry.Who)
+				require.TrueT(t, entry.What.Has(ifaces.CapabilityMarshalJSON))
 			})
 		})
 
@@ -251,7 +251,7 @@ func TestRegistryMarshal(t *testing.T) {
 
 			t.Run("should have called the adapter's Unmarshal method", func(t *testing.T) {
 				mockAdapter, ok := adapter.(*MockAdapter1)
-				require.True(t, ok)
+				require.TrueT(t, ok)
 				calls := mockAdapter.UnmarshalCalls()
 				require.Len(t, calls, 1)
 			})
@@ -259,10 +259,10 @@ func TestRegistryMarshal(t *testing.T) {
 			t.Run("should have cached the route for this type", func(t *testing.T) {
 				require.Len(t, reg.unmarshalerCache, 1)
 				key := reflect.TypeOf(value)
-				require.Contains(t, reg.unmarshalerCache, key)
+				require.MapContainsT(t, reg.unmarshalerCache, key)
 				entry := reg.unmarshalerCache[key]
-				require.Equal(t, "github.com/go-openapi/swag/jsonutils/adapters.MockAdapter1", entry.Who)
-				require.True(t, entry.What.Has(ifaces.CapabilityUnmarshalJSON))
+				require.EqualT(t, "github.com/go-openapi/swag/jsonutils/adapters.MockAdapter1", entry.Who)
+				require.TrueT(t, entry.What.Has(ifaces.CapabilityUnmarshalJSON))
 			})
 		})
 	})
@@ -293,7 +293,7 @@ func TestRegistryOrderedMap(t *testing.T) {
 
 			t.Run("should have called the adapter's NewOrderedMap method", func(t *testing.T) {
 				mockAdapter, ok := adapter.(*MockAdapter1)
-				require.True(t, ok)
+				require.TrueT(t, ok)
 				calls := mockAdapter.NewOrderedMapCalls()
 				require.Len(t, calls, 1)
 			})
@@ -301,10 +301,10 @@ func TestRegistryOrderedMap(t *testing.T) {
 			t.Run("should have cached the route for this type", func(t *testing.T) {
 				require.Len(t, reg.orderedMapCache, 1)
 				key := reflect.TypeOf(nil)
-				require.Contains(t, reg.orderedMapCache, key)
+				require.MapContainsT(t, reg.orderedMapCache, key)
 				entry := reg.orderedMapCache[key]
-				require.Equal(t, "github.com/go-openapi/swag/jsonutils/adapters.MockAdapter1", entry.Who)
-				require.True(t, entry.What.Has(ifaces.CapabilityOrderedMap))
+				require.EqualT(t, "github.com/go-openapi/swag/jsonutils/adapters.MockAdapter1", entry.Who)
+				require.TrueT(t, entry.What.Has(ifaces.CapabilityOrderedMap))
 			})
 		})
 	})
@@ -334,7 +334,7 @@ func TestGlobalRegistry(t *testing.T) {
 			defer adp.Redeem()
 
 			_, isStdLib := adp.(*stdlib.Adapter)
-			require.True(t, isStdLib)
+			require.TrueT(t, isStdLib)
 		})
 
 		t.Run("should resolve to the stdlib adapter for UnmarshalJSON", func(t *testing.T) {
@@ -344,7 +344,7 @@ func TestGlobalRegistry(t *testing.T) {
 			defer adp.Redeem()
 
 			_, isStdLib := adp.(*stdlib.Adapter)
-			require.True(t, isStdLib)
+			require.TrueT(t, isStdLib)
 		})
 
 		t.Run("should resolve to the stdlib adapter for OrderedMarshalJSON", func(t *testing.T) {
@@ -354,7 +354,7 @@ func TestGlobalRegistry(t *testing.T) {
 			defer adp.Redeem()
 
 			_, isStdLib := adp.(*stdlib.Adapter)
-			require.True(t, isStdLib)
+			require.TrueT(t, isStdLib)
 		})
 
 		t.Run("should resolve to the stdlib adapter for OrderedUnmarshalJSON", func(t *testing.T) {
@@ -364,7 +364,7 @@ func TestGlobalRegistry(t *testing.T) {
 			defer adp.Redeem()
 
 			_, isStdLib := adp.(*stdlib.Adapter)
-			require.True(t, isStdLib)
+			require.TrueT(t, isStdLib)
 		})
 
 		t.Run("should resolve to the stdlib adapter for OrderedMap", func(t *testing.T) {
@@ -374,7 +374,7 @@ func TestGlobalRegistry(t *testing.T) {
 			require.IsType(t, expectedMap, orderedMap)
 
 			_, isStdLib := orderedMap.(*stdlib.MapSlice)
-			require.True(t, isStdLib)
+			require.TrueT(t, isStdLib)
 		})
 	})
 }
@@ -396,26 +396,26 @@ func testUnmarshal[ValueType any, AdapterType ifaces.UnmarshalAdapter](reg *Regi
 
 			t.Run("should have called the adapter's Unmarshal method", func(t *testing.T) {
 				_, ok := adapter.(AdapterType)
-				require.True(t, ok)
+				require.TrueT(t, ok)
 				auditable, ok := adapter.(interface{ UnmarshalCallsLen() int })
-				require.True(t, ok)
+				require.TrueT(t, ok)
 
 				calls := auditable.UnmarshalCallsLen()
-				require.Equal(t, 1, calls)
+				require.EqualT(t, 1, calls)
 			})
 
 			t.Run("should have cached the route for this type", func(t *testing.T) {
 				require.Len(t, reg.unmarshalerCache, 1)
 				key := reflect.TypeOf(value)
-				require.Contains(t, reg.unmarshalerCache, key)
+				require.MapContainsT(t, reg.unmarshalerCache, key)
 				entry := reg.unmarshalerCache[key]
 				mockAdapter, ok := adapter.(AdapterType)
-				require.True(t, ok)
-				require.Equal(t,
+				require.TrueT(t, ok)
+				require.EqualT(t,
 					fmt.Sprintf("github.com/go-openapi/swag/jsonutils/%s", reflect.Indirect(reflect.ValueOf(mockAdapter)).Type()),
 					entry.Who,
 				)
-				require.True(t, entry.What.Has(ifaces.CapabilityUnmarshalJSON))
+				require.TrueT(t, entry.What.Has(ifaces.CapabilityUnmarshalJSON))
 			})
 		})
 	}
@@ -437,25 +437,25 @@ func testMarshal[ValueType any, AdapterType ifaces.MarshalAdapter](reg *Registra
 
 			t.Run("should have called the adapter's MarshalJSON method", func(t *testing.T) {
 				_, ok := adapter.(AdapterType)
-				require.True(t, ok)
+				require.TrueT(t, ok)
 				auditable, ok := adapter.(interface{ MarshalCallsLen() int })
-				require.True(t, ok)
+				require.TrueT(t, ok)
 				calls := auditable.MarshalCallsLen()
-				require.Equal(t, 1, calls)
+				require.EqualT(t, 1, calls)
 			})
 
 			t.Run("should have cached the route for this type", func(t *testing.T) {
 				require.Len(t, reg.marshalerCache, 1)
 				key := reflect.TypeOf(value)
-				require.Contains(t, reg.marshalerCache, key)
+				require.MapContainsT(t, reg.marshalerCache, key)
 				entry := reg.marshalerCache[key]
 				mockAdapter, ok := adapter.(AdapterType)
-				require.True(t, ok)
-				require.Equal(t,
+				require.TrueT(t, ok)
+				require.EqualT(t,
 					fmt.Sprintf("github.com/go-openapi/swag/jsonutils/%s", reflect.Indirect(reflect.ValueOf(mockAdapter)).Type()),
 					entry.Who,
 				)
-				require.True(t, entry.What.Has(ifaces.CapabilityMarshalJSON))
+				require.TrueT(t, entry.What.Has(ifaces.CapabilityMarshalJSON))
 			})
 		})
 	}

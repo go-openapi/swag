@@ -63,7 +63,7 @@ func TestJSONMapSlice(t *testing.T) {
 		require.NoError(t, FromDynamicJSON(data, &obj))
 
 		asMap, ok := obj.(map[string]any)
-		require.True(t, ok)
+		require.TrueT(t, ok)
 		assert.Len(t, asMap, 3) // 3 fields in struct
 
 		var target JSONMapSlice

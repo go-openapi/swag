@@ -124,14 +124,14 @@ func TestLoadFromHTTP(t *testing.T) {
 			}
 			ldr := LoadStrategy("not_http", loader, remLoader)
 			b, _ := ldr("")
-			assert.Equal(t, "local", string(b))
+			assert.EqualT(t, "local", string(b))
 		})
 	})
 }
 
 func TestYAMLDoc(t *testing.T) {
 	t.Run("deprecated loading YAML functions should work", func(t *testing.T) {
-		require.True(t, YAMLMatcher("a.yml"))
+		require.TrueT(t, YAMLMatcher("a.yml"))
 
 		ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
 			rw.WriteHeader(http.StatusOK)

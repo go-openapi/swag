@@ -100,7 +100,7 @@ func TestReadWriteJSON(t *testing.T) {
 				require.NoError(t, ReadJSON(rtjson, &obj1))
 
 				t.Run("this should copy the object", func(t *testing.T) {
-					require.Equal(t, obj, obj1)
+					require.EqualT(t, obj, obj1)
 				})
 			})
 
@@ -109,7 +109,7 @@ func TestReadWriteJSON(t *testing.T) {
 				require.NoError(t, obj11.UnmarshalJSON(rtjson))
 
 				t.Run("this should copy the object", func(t *testing.T) {
-					require.Equal(t, obj, obj11)
+					require.EqualT(t, obj, obj11)
 				})
 			})
 
@@ -118,7 +118,7 @@ func TestReadWriteJSON(t *testing.T) {
 				require.NoError(t, json.Unmarshal(rtjson, &obj11))
 
 				t.Run("this should copy the object", func(t *testing.T) {
-					require.Equal(t, obj, obj11)
+					require.EqualT(t, obj, obj11)
 				})
 			})
 		})
@@ -129,7 +129,7 @@ func TestReadWriteJSON(t *testing.T) {
 				var obj2 AggregationObject
 
 				require.NoError(t, ReadJSON([]byte(jsons), &obj2))
-				require.Equal(t, AggregationObject{SharedCounters: SharedCounters{Counter1: 123, Counter2: 456}, Count: 999}, obj2)
+				require.EqualT(t, AggregationObject{SharedCounters: SharedCounters{Counter1: 123, Counter2: 456}, Count: 999}, obj2)
 			})
 		})
 		t.Run("using FromDynamicJSON", func(t *testing.T) {
@@ -138,18 +138,18 @@ func TestReadWriteJSON(t *testing.T) {
 
 			require.NoError(t, FromDynamicJSON(obj, &obj2))
 			asMap, ok := obj2.(map[string]any)
-			require.True(t, ok)
+			require.TrueT(t, ok)
 			assert.Len(t, asMap, 3) // 3 fields in struct
 			c1, ok := asMap["counter1"]
-			require.True(t, ok)
+			require.TrueT(t, ok)
 			assert.InDelta(t, float64(304), c1, epsilon)
 
 			c2, ok := asMap["counter2:"]
-			require.True(t, ok)
+			require.TrueT(t, ok)
 			assert.InDelta(t, float64(948), c2, epsilon)
 
 			c, ok := asMap["count"]
-			require.True(t, ok)
+			require.TrueT(t, ok)
 			assert.InDelta(t, float64(290), c, epsilon)
 		})
 

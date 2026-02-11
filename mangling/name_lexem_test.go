@@ -18,12 +18,12 @@ func TestLexemEdgeCases(t *testing.T) {
 
 		t.Run("should not titleize", func(t *testing.T) {
 			ok := l.WriteTitleized(&b, true)
-			assert.False(t, ok)
+			assert.FalseT(t, ok)
 			assert.Empty(t, b.Bytes())
 		})
 		t.Run("should not lower", func(t *testing.T) {
 			ok := l.WriteLower(&b, true)
-			assert.False(t, ok)
+			assert.FalseT(t, ok)
 			assert.Empty(t, b.Bytes())
 		})
 	})
@@ -35,12 +35,12 @@ func TestLexemEdgeCases(t *testing.T) {
 
 		t.Run("should not titleize", func(t *testing.T) {
 			ok := l.WriteTitleized(&b, true)
-			assert.False(t, ok)
+			assert.FalseT(t, ok)
 			assert.Empty(t, b.Bytes())
 		})
 		t.Run("should not lower", func(t *testing.T) {
 			ok := l.WriteLower(&b, true)
-			assert.False(t, ok)
+			assert.FalseT(t, ok)
 		})
 	})
 
@@ -51,12 +51,12 @@ func TestLexemEdgeCases(t *testing.T) {
 
 		t.Run("should titleize but do nothing", func(t *testing.T) {
 			ok := l.WriteTitleized(&b, true)
-			assert.True(t, ok)
+			assert.TrueT(t, ok)
 			assert.Empty(t, b.Bytes())
 		})
 		t.Run("should not lower but do nothing", func(t *testing.T) {
 			ok := l.WriteLower(&b, true)
-			assert.True(t, ok)
+			assert.TrueT(t, ok)
 			assert.Empty(t, b.Bytes())
 		})
 	})

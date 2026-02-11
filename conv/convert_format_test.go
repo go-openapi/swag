@@ -35,18 +35,18 @@ func TestConvertBool(t *testing.T) {
 	for k := range evaluatesAsTrue {
 		r, err := ConvertBool(k)
 		require.NoError(t, err)
-		assert.True(t, r)
+		assert.TrueT(t, r)
 	}
 	for _, k := range []string{"a", "", "0", "false", "unchecked", "anythingElse"} {
 		r, err := ConvertBool(k)
 		require.NoError(t, err)
-		assert.False(t, r)
+		assert.FalseT(t, r)
 	}
 }
 
 func TestFormatBool(t *testing.T) {
-	assert.Equal(t, "true", FormatBool(true))
-	assert.Equal(t, "false", FormatBool(false))
+	assert.EqualT(t, "true", FormatBool(true))
+	assert.EqualT(t, "false", FormatBool(false))
 }
 
 func TestConvertFloat(t *testing.T) {
@@ -58,11 +58,11 @@ func TestConvertFloat(t *testing.T) {
 			str := FormatFloat(f)
 			c1, err := ConvertFloat32(str)
 			require.NoError(t, err)
-			assert.InDelta(t, f, c1, 1e-6)
+			assert.InDeltaT(t, f, c1, 1e-6)
 
 			c2, err := ConvertFloat[float32](str)
 			require.NoError(t, err)
-			assert.InDelta(t, c1, c2, 1e-6)
+			assert.InDeltaT(t, c1, c2, 1e-6)
 		}
 
 		for _, f := range invalidFloats {
@@ -82,11 +82,11 @@ func TestConvertFloat(t *testing.T) {
 			str := FormatFloat(f)
 			c1, err := ConvertFloat64(str)
 			require.NoError(t, err)
-			assert.InDelta(t, f, c1, 1e-6)
+			assert.InDeltaT(t, f, c1, 1e-6)
 
 			c2, err := ConvertFloat64(str)
 			require.NoError(t, err)
-			assert.InDelta(t, c1, c2, 1e-6)
+			assert.InDeltaT(t, c1, c2, 1e-6)
 		}
 
 		for _, f := range invalidFloats {
@@ -108,11 +108,11 @@ func TestConvertInteger(t *testing.T) {
 			str := FormatInteger(f)
 			c1, err := ConvertInt8(str)
 			require.NoError(t, err)
-			assert.Equal(t, f, c1)
+			assert.EqualT(t, f, c1)
 
 			c2, err := ConvertInteger[int8](str)
 			require.NoError(t, err)
-			assert.Equal(t, c1, c2)
+			assert.EqualT(t, c1, c2)
 		}
 
 		for _, f := range invalidInts {
@@ -132,11 +132,11 @@ func TestConvertInteger(t *testing.T) {
 			str := FormatInteger(f)
 			c1, err := ConvertInt16(str)
 			require.NoError(t, err)
-			assert.Equal(t, f, c1)
+			assert.EqualT(t, f, c1)
 
 			c2, err := ConvertInteger[int16](str)
 			require.NoError(t, err)
-			assert.Equal(t, c1, c2)
+			assert.EqualT(t, c1, c2)
 		}
 
 		for _, f := range invalidInts {
@@ -156,11 +156,11 @@ func TestConvertInteger(t *testing.T) {
 			str := FormatInteger(f)
 			c1, err := ConvertInt32(str)
 			require.NoError(t, err)
-			assert.Equal(t, f, c1)
+			assert.EqualT(t, f, c1)
 
 			c2, err := ConvertInteger[int32](str)
 			require.NoError(t, err)
-			assert.Equal(t, c1, c2)
+			assert.EqualT(t, c1, c2)
 		}
 
 		for _, f := range invalidInts {
@@ -180,11 +180,11 @@ func TestConvertInteger(t *testing.T) {
 			str := FormatInteger(f)
 			c1, err := ConvertInt64(str)
 			require.NoError(t, err)
-			assert.Equal(t, f, c1)
+			assert.EqualT(t, f, c1)
 
 			c2, err := ConvertInt64(str)
 			require.NoError(t, err)
-			assert.Equal(t, c1, c2)
+			assert.EqualT(t, c1, c2)
 		}
 
 		for _, f := range invalidInts {
@@ -206,11 +206,11 @@ func TestConvertUinteger(t *testing.T) {
 			str := FormatUinteger(f)
 			c1, err := ConvertUint8(str)
 			require.NoError(t, err)
-			assert.Equal(t, f, c1)
+			assert.EqualT(t, f, c1)
 
 			c2, err := ConvertUinteger[uint8](str)
 			require.NoError(t, err)
-			assert.Equal(t, c1, c2)
+			assert.EqualT(t, c1, c2)
 		}
 
 		for _, f := range invalidInts {
@@ -230,11 +230,11 @@ func TestConvertUinteger(t *testing.T) {
 			str := FormatUinteger(f)
 			c1, err := ConvertUint16(str)
 			require.NoError(t, err)
-			assert.Equal(t, f, c1)
+			assert.EqualT(t, f, c1)
 
 			c2, err := ConvertUinteger[uint16](str)
 			require.NoError(t, err)
-			assert.Equal(t, c1, c2)
+			assert.EqualT(t, c1, c2)
 		}
 
 		for _, f := range invalidUints {
@@ -254,11 +254,11 @@ func TestConvertUinteger(t *testing.T) {
 			str := FormatUinteger(f)
 			c1, err := ConvertUint32(str)
 			require.NoError(t, err)
-			assert.Equal(t, f, c1)
+			assert.EqualT(t, f, c1)
 
 			c2, err := ConvertUint32(str)
 			require.NoError(t, err)
-			assert.Equal(t, c1, c2)
+			assert.EqualT(t, c1, c2)
 		}
 
 		for _, f := range invalidUints {
@@ -278,11 +278,11 @@ func TestConvertUinteger(t *testing.T) {
 			str := FormatUinteger(f)
 			c1, err := ConvertUint64(str)
 			require.NoError(t, err)
-			assert.Equal(t, f, c1)
+			assert.EqualT(t, f, c1)
 
 			c2, err := ConvertUinteger[uint64](str)
 			require.NoError(t, err)
-			assert.Equal(t, c1, c2)
+			assert.EqualT(t, c1, c2)
 		}
 		for _, f := range invalidUints {
 			_, err := ConvertUint64(f)
@@ -323,35 +323,35 @@ func testNotIntegers(fn func(float64) bool, skipKnownFailure bool) func(*testing
 	_ = skipKnownFailure
 
 	return func(t *testing.T) {
-		assert.False(t, fn(math.Inf(1)))
-		assert.False(t, fn(maxJSONFloat+1))
-		assert.False(t, fn(minJSONFloat-1))
-		assert.False(t, fn(math.SmallestNonzeroFloat64))
-		assert.False(t, fn(0.5))
-		assert.False(t, fn(0.25))
-		assert.False(t, fn(1.00/func() float64 { return 2.00 }()))
-		assert.False(t, fn(1.00/func() float64 { return 4.00 }()))
-		assert.False(t, fn(epsilon))
+		assert.FalseT(t, fn(math.Inf(1)))
+		assert.FalseT(t, fn(maxJSONFloat+1))
+		assert.FalseT(t, fn(minJSONFloat-1))
+		assert.FalseT(t, fn(math.SmallestNonzeroFloat64))
+		assert.FalseT(t, fn(0.5))
+		assert.FalseT(t, fn(0.25))
+		assert.FalseT(t, fn(1.00/func() float64 { return 2.00 }()))
+		assert.FalseT(t, fn(1.00/func() float64 { return 4.00 }()))
+		assert.FalseT(t, fn(epsilon))
 	}
 }
 
 func testIntegers(fn func(float64) bool, skipKnownFailure bool) func(*testing.T) {
 	// wrapping in a function forces non-constant evaluation to test float64 rounding behavior
 	return func(t *testing.T) {
-		assert.True(t, fn(0.0))
-		assert.True(t, fn(1.0))
-		assert.True(t, fn(maxJSONFloat))
-		assert.True(t, fn(minJSONFloat))
+		assert.TrueT(t, fn(0.0))
+		assert.TrueT(t, fn(1.0))
+		assert.TrueT(t, fn(maxJSONFloat))
+		assert.TrueT(t, fn(minJSONFloat))
 		if !skipKnownFailure {
-			assert.True(t, fn(1/0.01*67.15000001))
+			assert.TrueT(t, fn(1/0.01*67.15000001))
 		}
 		if !skipKnownFailure {
-			assert.True(t, fn(1.00/func() float64 { return 0.01 }()*4643.4))
+			assert.TrueT(t, fn(1.00/func() float64 { return 0.01 }()*4643.4))
 		}
-		assert.True(t, fn(1.00/func() float64 { return 1.00 / 3.00 }()))
-		assert.True(t, fn(math.SmallestNonzeroFloat64/2))
-		assert.True(t, fn(math.SmallestNonzeroFloat64/3))
-		assert.True(t, fn(math.SmallestNonzeroFloat64/4))
+		assert.TrueT(t, fn(1.00/func() float64 { return 1.00 / 3.00 }()))
+		assert.TrueT(t, fn(math.SmallestNonzeroFloat64/2))
+		assert.TrueT(t, fn(math.SmallestNonzeroFloat64/3))
+		assert.TrueT(t, fn(math.SmallestNonzeroFloat64/4))
 	}
 }
 

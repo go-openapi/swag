@@ -46,7 +46,7 @@ func verifyPayload[T any](constructor func() *T) func(*testing.T) {
 			t.Run(fmt.Sprintf("value of type %T should MarshalEasyJSON", value), func(t *testing.T) {
 				var val any = value
 				easyMarshaler, ok := val.(easyjson.Marshaler)
-				require.True(t, ok)
+				require.TrueT(t, ok)
 				jw := jwriter.Writer{}
 				easyMarshaler.MarshalEasyJSON(&jw)
 				data, err := jw.BuildBytes()
@@ -58,7 +58,7 @@ func verifyPayload[T any](constructor func() *T) func(*testing.T) {
 					target := new(T)
 					var tgt any = target
 					easyUnmarshaler, ok := tgt.(easyjson.Unmarshaler)
-					require.True(t, ok)
+					require.TrueT(t, ok)
 					jl := jlexer.Lexer{Data: data}
 					easyUnmarshaler.UnmarshalEasyJSON(&jl)
 					require.NoError(t, jl.Error())

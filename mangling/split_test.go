@@ -29,8 +29,8 @@ func TestSplitPluralized(t *testing.T) {
 			require.NotNil(t, lexems)
 			require.Len(t, *lexems, 3)
 
-			assert.Equal(t, "PluralizedInitialismIDs", m.ToGoName(plurals))
-			assert.Equal(t, "pluralized_initialism_ids", m.ToFileName(plurals))
+			assert.EqualT(t, "PluralizedInitialismIDs", m.ToGoName(plurals))
+			assert.EqualT(t, "pluralized_initialism_ids", m.ToFileName(plurals))
 		})
 
 		t.Run("with initialism trailed by capital", func(t *testing.T) {
@@ -41,8 +41,8 @@ func TestSplitPluralized(t *testing.T) {
 			require.NotNil(t, lexems)
 			require.Len(t, *lexems, 4)
 
-			assert.Equal(t, "PluralizedInitialismIDsX", m.ToGoName(plurals))
-			assert.Equal(t, "pluralized_initialism_ids_x", m.ToFileName(plurals))
+			assert.EqualT(t, "PluralizedInitialismIDsX", m.ToGoName(plurals))
+			assert.EqualT(t, "pluralized_initialism_ids_x", m.ToFileName(plurals))
 		})
 
 		t.Run("with middle initialism", func(t *testing.T) {
@@ -53,8 +53,8 @@ func TestSplitPluralized(t *testing.T) {
 			require.NotNil(t, lexems)
 			require.Len(t, *lexems, 3)
 
-			assert.Equal(t, "PluralizedIDsInitialism", m.ToGoName(plurals))
-			assert.Equal(t, "pluralized_ids_initialism", m.ToFileName(plurals))
+			assert.EqualT(t, "PluralizedIDsInitialism", m.ToGoName(plurals))
+			assert.EqualT(t, "pluralized_ids_initialism", m.ToFileName(plurals))
 		})
 
 		t.Run("with upper-cased pluralized initialism", func(t *testing.T) {
@@ -65,8 +65,8 @@ func TestSplitPluralized(t *testing.T) {
 			require.NotNil(t, lexems)
 			require.Len(t, *lexems, 4)
 
-			assert.Equal(t, "PluralizedIDSInitialism", m.ToGoName(plurals))
-			assert.Equal(t, "pluralized_id_s_initialism", m.ToFileName(plurals))
+			assert.EqualT(t, "PluralizedIDSInitialism", m.ToGoName(plurals))
+			assert.EqualT(t, "pluralized_id_s_initialism", m.ToFileName(plurals))
 		})
 
 		t.Run("with leading initialism", func(t *testing.T) {
@@ -77,8 +77,8 @@ func TestSplitPluralized(t *testing.T) {
 			require.NotNil(t, lexems)
 			require.Len(t, *lexems, 3)
 
-			assert.Equal(t, "IDsPluralizedInitialism", m.ToGoName(plurals))
-			assert.Equal(t, "ids_pluralized_initialism", m.ToFileName(plurals))
+			assert.EqualT(t, "IDsPluralizedInitialism", m.ToGoName(plurals))
+			assert.EqualT(t, "ids_pluralized_initialism", m.ToFileName(plurals))
 		})
 
 		t.Run("with added non-default initialisms", func(t *testing.T) {
@@ -89,8 +89,8 @@ func TestSplitPluralized(t *testing.T) {
 			require.NotNil(t, lexems)
 			require.Len(t, *lexems, 3)
 
-			assert.Equal(t, "PluralizedInitialismELBs", m.ToGoName(plurals))
-			assert.Equal(t, "pluralized_initialism_elbs", m.ToFileName(plurals))
+			assert.EqualT(t, "PluralizedInitialismELBs", m.ToGoName(plurals))
+			assert.EqualT(t, "pluralized_initialism_elbs", m.ToFileName(plurals))
 		})
 	})
 
@@ -103,8 +103,8 @@ func TestSplitPluralized(t *testing.T) {
 			require.NotNil(t, lexems)
 			require.Len(t, *lexems, 4)
 
-			assert.Equal(t, "PluralizedHTTPsInitialism", m.ToGoName(plurals))
-			assert.Equal(t, "pluralized_http_s_initialism", m.ToFileName(plurals))
+			assert.EqualT(t, "PluralizedHTTPsInitialism", m.ToGoName(plurals))
+			assert.EqualT(t, "pluralized_http_s_initialism", m.ToFileName(plurals))
 		})
 
 		t.Run("with continued word", func(t *testing.T) {
@@ -115,9 +115,9 @@ func TestSplitPluralized(t *testing.T) {
 
 				require.NotNil(t, lexems)
 				require.Len(t, *lexems, 9)
-				assert.Equal(t, "PluralizedHTTPsIsNotAnInitialism", m.ToGoName(plurals))
-				assert.Equal(t, "pluralizedHTTPsIsNotAnInitialism", m.ToVarName(plurals))
-				assert.Equal(t, "pluralized_h_t_t_ps_is_not_an_initialism", m.ToFileName(plurals))
+				assert.EqualT(t, "PluralizedHTTPsIsNotAnInitialism", m.ToGoName(plurals))
+				assert.EqualT(t, "pluralizedHTTPsIsNotAnInitialism", m.ToVarName(plurals))
+				assert.EqualT(t, "pluralized_h_t_t_ps_is_not_an_initialism", m.ToFileName(plurals))
 			})
 
 			t.Run("no initialism (pluralizable)", func(t *testing.T) {
@@ -127,9 +127,9 @@ func TestSplitPluralized(t *testing.T) {
 
 				require.NotNil(t, lexems)
 				require.Len(t, *lexems, 7)
-				assert.Equal(t, "PluralizedELBsisNotAnInitialism", m.ToGoName(plurals))
-				assert.Equal(t, "pluralizedELBsisNotAnInitialism", m.ToVarName(plurals))
-				assert.Equal(t, "pluralized_e_l_bsis_not_an_initialism", m.ToFileName(plurals))
+				assert.EqualT(t, "PluralizedELBsisNotAnInitialism", m.ToGoName(plurals))
+				assert.EqualT(t, "pluralizedELBsisNotAnInitialism", m.ToVarName(plurals))
+				assert.EqualT(t, "pluralized_e_l_bsis_not_an_initialism", m.ToFileName(plurals))
 			})
 
 			t.Run("no initialism (no plural)", func(t *testing.T) {
@@ -139,9 +139,9 @@ func TestSplitPluralized(t *testing.T) {
 
 				require.NotNil(t, lexems)
 				require.Len(t, *lexems, 8)
-				assert.Equal(t, "PluralizedELBxIsNotAnInitialism", m.ToGoName(plurals))
-				assert.Equal(t, "pluralizedELBxIsNotAnInitialism", m.ToVarName(plurals))
-				assert.Equal(t, "pluralized_e_l_bx_is_not_an_initialism", m.ToFileName(plurals))
+				assert.EqualT(t, "PluralizedELBxIsNotAnInitialism", m.ToGoName(plurals))
+				assert.EqualT(t, "pluralizedELBxIsNotAnInitialism", m.ToVarName(plurals))
+				assert.EqualT(t, "pluralized_e_l_bx_is_not_an_initialism", m.ToFileName(plurals))
 			})
 
 			t.Run("with initialism trailed by lowercase", func(t *testing.T) {
@@ -152,8 +152,8 @@ func TestSplitPluralized(t *testing.T) {
 				require.NotNil(t, lexems)
 				require.Len(t, *lexems, 4)
 
-				assert.Equal(t, "PluralizedInitialismIDsx", m.ToGoName(plurals))
-				assert.Equal(t, "pluralized_initialism_i_dsx", m.ToFileName(plurals))
+				assert.EqualT(t, "PluralizedInitialismIDsx", m.ToGoName(plurals))
+				assert.EqualT(t, "pluralized_initialism_i_dsx", m.ToFileName(plurals))
 			})
 		})
 
@@ -164,9 +164,9 @@ func TestSplitPluralized(t *testing.T) {
 
 			require.NotNil(t, lexems)
 			require.Len(t, *lexems, 5)
-			assert.Equal(t, "PluralizedHTTPSIsAnInitialism", m.ToGoName(plurals))
-			assert.Equal(t, "pluralizedHTTPSIsAnInitialism", m.ToVarName(plurals))
-			assert.Equal(t, "pluralized_https_is_an_initialism", m.ToFileName(plurals))
+			assert.EqualT(t, "PluralizedHTTPSIsAnInitialism", m.ToGoName(plurals))
+			assert.EqualT(t, "pluralizedHTTPSIsAnInitialism", m.ToVarName(plurals))
+			assert.EqualT(t, "pluralized_https_is_an_initialism", m.ToFileName(plurals))
 		})
 	})
 }

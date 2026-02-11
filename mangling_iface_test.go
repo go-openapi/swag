@@ -16,27 +16,27 @@ func TestManglingIface(t *testing.T) {
 	)
 
 	t.Run("deprecated name mangling functions should work", func(t *testing.T) {
-		assert.Equal(t, "HelloSwagger", ToGoName(sample))
-		assert.Equal(t, "HTTPServer", ToGoName(sampleWithInitialism))
-		assert.Equal(t, "helloSwagger", ToVarName(sample))
-		assert.Equal(t, "httpServer", ToVarName(sampleWithInitialism))
-		assert.Equal(t, "hello_swagger", ToFileName(sample))
-		assert.Equal(t, "http_server", ToFileName(sampleWithInitialism))
-		assert.Equal(t, "hello-swagger", ToCommandName(sample))
-		assert.Equal(t, "http-server", ToCommandName(sampleWithInitialism))
-		assert.Equal(t, "hello swagger", ToHumanNameLower(sample))
-		assert.Equal(t, "Http server", ToHumanNameLower(sampleWithInitialism))
-		assert.Equal(t, "Hello Swagger", ToHumanNameTitle(sample))
-		assert.Equal(t, "Http Server", ToHumanNameTitle(sampleWithInitialism))
+		assert.EqualT(t, "HelloSwagger", ToGoName(sample))
+		assert.EqualT(t, "HTTPServer", ToGoName(sampleWithInitialism))
+		assert.EqualT(t, "helloSwagger", ToVarName(sample))
+		assert.EqualT(t, "httpServer", ToVarName(sampleWithInitialism))
+		assert.EqualT(t, "hello_swagger", ToFileName(sample))
+		assert.EqualT(t, "http_server", ToFileName(sampleWithInitialism))
+		assert.EqualT(t, "hello-swagger", ToCommandName(sample))
+		assert.EqualT(t, "http-server", ToCommandName(sampleWithInitialism))
+		assert.EqualT(t, "hello swagger", ToHumanNameLower(sample))
+		assert.EqualT(t, "Http server", ToHumanNameLower(sampleWithInitialism))
+		assert.EqualT(t, "Hello Swagger", ToHumanNameTitle(sample))
+		assert.EqualT(t, "Http Server", ToHumanNameTitle(sampleWithInitialism))
 
-		assert.Equal(t, "Swagger", Camelize("SWAGGER"))
-		assert.Equal(t, "helloSwagger", ToJSONName(sample))
+		assert.EqualT(t, "Swagger", Camelize("SWAGGER"))
+		assert.EqualT(t, "helloSwagger", ToJSONName(sample))
 
 		t.Run("with global config", func(t *testing.T) {
 			AddInitialisms("ELB")                                   // adding non-default initialism
 			GoNamePrefixFunc = func(_ string) string { return "Z" } // adding non-default prefix function
 
-			assert.Equal(t, "Z本HelloELB", ToGoName("本 hello Elb"))
+			assert.EqualT(t, "Z本HelloELB", ToGoName("本 hello Elb"))
 		})
 	})
 }
