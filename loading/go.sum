@@ -1,7 +1,7 @@
-github.com/go-openapi/testify/enable/yaml/v2 v2.3.0 h1:CZQFhycQSRlJGHqVoHcNoVwuE77ry//kMojNoQElps0=
-github.com/go-openapi/testify/enable/yaml/v2 v2.3.0/go.mod h1:mgGY/i3R/ppZvZXUAgTeWlDD+8wts5eZeLKHGVc4jeU=
-github.com/go-openapi/testify/v2 v2.3.0 h1:cZFOKhatfyVejoFNd8jqnHFosegN5vJZiPOTnkyT9hA=
-github.com/go-openapi/testify/v2 v2.3.0/go.mod h1:HCPmvFFnheKK2BuwSA0TbbdxJ3I16pjwMkYkP4Ywn54=
+github.com/go-openapi/testify/enable/yaml/v2 v2.4.0 h1:7SgOMTvJkM8yWrQlU8Jm18VeDPuAvB/xWrdxFJkoFag=
+github.com/go-openapi/testify/enable/yaml/v2 v2.4.0/go.mod h1:14iV8jyyQlinc9StD7w1xVPW3CO3q1Gj04Jy//Kw4VM=
+github.com/go-openapi/testify/v2 v2.4.0 h1:8nsPrHVCWkQ4p8h1EsRVymA2XABB4OT40gcvAu+voFM=
+github.com/go-openapi/testify/v2 v2.4.0/go.mod h1:HCPmvFFnheKK2BuwSA0TbbdxJ3I16pjwMkYkP4Ywn54=
 go.yaml.in/yaml/v3 v3.0.4 h1:tfq32ie2Jv2UxXFdLJdh3jXuOzWiL1fo0bu/FbuKpbc=
 go.yaml.in/yaml/v3 v3.0.4/go.mod h1:DhzuOOF2ATzADvBadXxruRBLzYTpT36CKvDb3+aBEFg=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
