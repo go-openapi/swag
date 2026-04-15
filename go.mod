@@ -17,7 +17,7 @@ require (
 	github.com/go-openapi/testify/v2 v2.4.2
 )
 
-require go.yaml.in/yaml/v3 v3.0.4 // indirect
+require gopkg.in/yaml.v3 v3.0.1 // indirect
 
 replace (
 	github.com/go-openapi/swag/cmdutils => ./cmdutils
@@ -34,4 +34,4 @@ replace (
 	github.com/go-openapi/swag/yamlutils => ./yamlutils
 )
 
-go 1.25.0
+go 1.26.2

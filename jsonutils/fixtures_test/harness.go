@@ -17,7 +17,7 @@ import (
 
 	_ "github.com/go-openapi/testify/enable/yaml/v2" // enable yaml in testify
 	"github.com/go-openapi/testify/v2/require"
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // embedded test files

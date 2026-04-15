@@ -9,5 +9,5 @@
 package yamlutils
 
 import (
-	_ "go.yaml.in/yaml/v3" // for documentation purpose only
+	_ "gopkg.in/yaml.v3" // for documentation purpose only
 )

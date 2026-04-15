@@ -10,7 +10,7 @@ import (
 	fixtures "github.com/go-openapi/swag/jsonutils/fixtures_test"
 	"github.com/go-openapi/testify/v2/assert"
 	"github.com/go-openapi/testify/v2/require"
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 func TestOrderedMap(t *testing.T) {

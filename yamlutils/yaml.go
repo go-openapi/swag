@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/go-openapi/swag/jsonutils"
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // YAMLToJSON converts a YAML document into JSON bytes.
