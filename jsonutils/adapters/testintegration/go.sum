@@ -1,7 +1,7 @@
-github.com/go-openapi/testify/enable/yaml/v2 v2.4.2 h1:5zRca5jw7lzVREKCZVNBpysDNBjj74rBh0N2BGQbSR0=
-github.com/go-openapi/testify/enable/yaml/v2 v2.4.2/go.mod h1:XVevPw5hUXuV+5AkI1u1PeAm27EQVrhXTTCPAF85LmE=
-github.com/go-openapi/testify/v2 v2.4.2 h1:tiByHpvE9uHrrKjOszax7ZvKB7QOgizBWGBLuq0ePx4=
-github.com/go-openapi/testify/v2 v2.4.2/go.mod h1:SgsVHtfooshd0tublTtJ50FPKhujf47YRqauXXOUxfw=
+github.com/go-openapi/testify/enable/yaml/v2 v2.5.0 h1:3hZD1fwydvCx/cc1R2uYNQirHqf2s6lqpKV3FcNTURA=
+github.com/go-openapi/testify/enable/yaml/v2 v2.5.0/go.mod h1:TvDZKBH7ZbMaF3EqH2AwTvNQCmzyZq8K1agRjf1B+Nk=
+github.com/go-openapi/testify/v2 v2.5.0 h1:UOCr63aAsMIDydZbZGqo5Ev01D4eydItRbekDuZMJLw=
+github.com/go-openapi/testify/v2 v2.5.0/go.mod h1:SgsVHtfooshd0tublTtJ50FPKhujf47YRqauXXOUxfw=
 github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
 github.com/josharian/intern v1.0.0/go.mod h1:5DoeVV0s6jJacbCEi61lwdGj/aVlrQvzHFFd8Hwg//Y=
 github.com/mailru/easyjson v0.9.2 h1:dX8U45hQsZpxd80nLvDGihsQ/OxlvTkVUXH2r/8cb2M=
