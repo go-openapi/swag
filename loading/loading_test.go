@@ -221,6 +221,28 @@ func TestLoadStrategy(t *testing.T) {
 		b, _ := ldr("")
 		assert.EqualT(t, thisIsNotIt, string(b))
 	})
+
+	t.Run("should serve remote strategy with an uppercase scheme", func(t *testing.T) {
+		// URL schemes are case-insensitive
+		for _, pth := range []string{"HTTP://blah", "HTTPS://blah", "HtTp://blah"} {
+			t.Run(pth, func(t *testing.T) {
+				ldr := LoadStrategy(pth, loader, remLoader)
+				b, _ := ldr("")
+				assert.EqualT(t, thisIsNotIt, string(b))
+			})
+		}
+	})
+
+	t.Run("should serve local strategy for a local file named like an http URL", func(t *testing.T) {
+		// a bare "http" prefix must not misroute a local file to the remote loader
+		for _, pth := range []string{"httpbin.json", "http2-spec.yaml", "http"} {
+			t.Run(pth, func(t *testing.T) {
+				ldr := LoadStrategy(pth, loader, remLoader)
+				b, _ := ldr("")
+				assert.YAMLEqT(t, string(yamlPetStore), string(b))
+			})
+		}
+	})
 }
 
 func TestLoadStrategyFile(t *testing.T) {
