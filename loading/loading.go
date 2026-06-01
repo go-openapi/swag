@@ -58,7 +58,7 @@ func LoadFromFileOrHTTP(pth string, opts ...Option) ([]byte, error) {
 // - `file:///c:/folder/file` becomes `C:\folder\file`
 // - `file://c:/folder/file` is tolerated (without leading `/`) and becomes `c:\folder\file`
 func LoadStrategy(pth string, local, remote func(string) ([]byte, error), opts ...Option) func(string) ([]byte, error) {
-	if strings.HasPrefix(pth, "http") {
+	if hasHTTPScheme(pth) {
 		return remote
 	}
 	o := optionsWithDefaults(opts)
@@ -124,6 +124,21 @@ func LoadStrategy(pth string, local, remote func(string) ([]byte, error), opts .
 
 		return local(filepath.FromSlash(upth))
 	}
+}
+
+// hasHTTPScheme reports whether pth is an absolute URL with an http or https scheme,
+// selecting the remote loader. The comparison is case-insensitive, as URL schemes are.
+//
+// Requiring the "://" separator (rather than a bare "http" prefix) avoids misrouting a
+// local file whose name merely starts with "http" (e.g. "httpbin.json") to the remote loader.
+func hasHTTPScheme(pth string) bool {
+	for _, scheme := range [...]string{"http://", "https://"} {
+		if len(pth) >= len(scheme) && strings.EqualFold(pth[:len(scheme)], scheme) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func loadHTTPBytes(opts ...Option) func(path string) ([]byte, error) {
