@@ -15,11 +15,15 @@
 // and is therefore safer than passing an [os.DirFS] to [WithFS], which does not block
 // symlink escapes.
 //
-// Remote loading uses a standard [net/http] client. By default it follows redirects and
-// performs no destination filtering — exactly like [net/http.DefaultClient]. A
-// caller-controlled URL may therefore reach internal services or cloud metadata endpoints
-// (server-side request forgery). This package does not, and should not, embed a network
-// policy: when the URL may derive from untrusted input, supply a restricted client with
+// Remote loading uses a standard [net/http] client.
+// By default it follows redirects and performs no destination filtering — exactly like [net/http.DefaultClient].
+//
+// A caller-controlled URL may therefore reach internal services or cloud metadata endpoints
+// (server-side request forgery).
+//
+// This package does not, and should not, embed a network policy:
+// when the URL may derive from untrusted input, supply a restricted client with
 // [WithHTTPClient] whose transport rejects unwanted destinations at dial time — which also
-// covers redirects and DNS rebinding. See the example on [LoadFromFileOrHTTP].
+// covers redirects and DNS rebinding.
+// See the example on [LoadFromFileOrHTTP].
 package loading
