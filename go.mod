@@ -14,7 +14,7 @@ require (
 	github.com/go-openapi/swag/stringutils v0.26.1
 	github.com/go-openapi/swag/typeutils v0.26.1
 	github.com/go-openapi/swag/yamlutils v0.26.1
-	github.com/go-openapi/testify/v2 v2.5.1
+	github.com/go-openapi/testify/v2 v2.6.0
 )
 
 require go.yaml.in/yaml/v3 v3.0.4 // indirect
