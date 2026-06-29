@@ -67,7 +67,7 @@ Child modules will continue to evolve and some new ones may be added in the futu
 | `cmdutils`     | utilities to work with CLIs ||
 | `conv`        | type conversion utilities | convert between values and pointers for any types<br />convert from string to builtin types (wraps `strconv`)<br />require `./typeutils` (test dependency)<br /> |
 | `fileutils`   | file utilities | |
-| `jsonname`    | JSON utilities | infer JSON names from `go` properties<br /> |
+| `jsonname`    | JSON utilities (deprecated) | infer JSON names from `go` properties<br />use `github.com/go-openapi/jsonpointer/jsonname` instead |
 | `jsonutils`   | JSON utilities | fast json concatenation<br />read and write JSON from and to dynamic `go` data structures<br />~require `github.com/mailru/easyjson`~<br /> |
 | `loading`     | file loading | load from file or http<br />require `./yamlutils`<br /> |
 | `mangling`    | safe name generation | name mangling for `go`<br /> |
