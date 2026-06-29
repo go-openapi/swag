@@ -1,9 +1,9 @@
 module github.com/go-openapi/swag/jsonutils
 
 require (
-	github.com/go-openapi/swag/conv v0.26.1
-	github.com/go-openapi/swag/jsonutils/fixtures_test v0.26.1
-	github.com/go-openapi/swag/typeutils v0.26.1
+	github.com/go-openapi/swag/conv v0.27.0
+	github.com/go-openapi/swag/jsonutils/fixtures_test v0.27.0
+	github.com/go-openapi/swag/typeutils v0.27.0
 	github.com/go-openapi/testify/v2 v2.6.0
 )
 
