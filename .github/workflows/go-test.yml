@@ -14,4 +14,6 @@ on:
 jobs:
   test:
     uses: go-openapi/ci-workflows/.github/workflows/go-test-monorepo.yml@af4c93f45481ea7d24ac2a9858272cc03daf424e # v0.4.0
+    with:
+      extra-flags: '-tags poolsdebug'
     secrets: inherit

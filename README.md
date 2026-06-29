@@ -72,6 +72,7 @@ Child modules will continue to evolve and some new ones may be added in the futu
 | `loading`     | file loading | load from file or http<br />require `./yamlutils`<br /> |
 | `mangling`    | safe name generation | name mangling for `go`<br /> |
 | `netutils`    | networking utilities | host, port from address<br /> |
+| `pools`       | utilities to work with sync.Pools | |
 | `stringutils` | `string` utilities | search in slice (with case-insensitive)<br />split/join query parameters as arrays<br /> |
 | `typeutils`   | `go` types utilities | check the zero value for any type<br />safe check for a nil value<br /> |
 | `yamlutils`   | YAML utilities | converting YAML to JSON<br />loading YAML into a dynamic YAML document<br />maintaining the original order of keys in YAML objects<br />require `./jsonutils`<br />~require `github.com/mailru/easyjson`~<br />require `go.yaml.in/yaml/v3`<br /> |
