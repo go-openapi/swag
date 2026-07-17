@@ -26,10 +26,15 @@ func Register(dispatcher ifaces.Registrar, opts ...Option) {
 
 	dispatcher.RegisterFor(
 		ifaces.RegistryEntry{
-			Who:         fmt.Sprintf("%s.%s", t.PkgPath(), t.Name()),
-			What:        ifaces.AllCapabilities,
-			Constructor: BorrowAdapterIface,
-			Support:     support,
+			Who:  fmt.Sprintf("%s.%s", t.PkgPath(), t.Name()),
+			What: ifaces.AllCapabilities,
+			Constructor: func() ifaces.Adapter {
+				a := BorrowAdapter()
+				a.options = o
+
+				return a
+			},
+			Support: support,
 		})
 }
 

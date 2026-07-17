@@ -91,6 +91,13 @@ type jlexer struct {
 	// current token
 	next token
 	// started bool
+
+	// depth tracks the current JSON container nesting level, and maxDepth caps it
+	// to guard against stack-overflow on adversarially deep documents. The standard
+	// library's streaming [encoding/json.Decoder.Token] API (used here) does not
+	// enforce the max-depth guard that [encoding/json.Unmarshal] provides, so we do.
+	depth    int
+	maxDepth int
 }
 
 type bytesReader struct {
@@ -130,7 +137,8 @@ var _ io.Reader = &bytesReader{}
 func newLexer(data []byte) *jlexer {
 	l := &jlexer{
 		// current: undefToken,
-		next: undefToken,
+		next:     undefToken,
+		maxDepth: defaultMaxNestingDepth,
 	}
 	l.buf = &bytesReader{
 		buf: data,
@@ -143,6 +151,8 @@ func newLexer(data []byte) *jlexer {
 func (l *jlexer) Reset() {
 	l.err = nil
 	l.next = undefToken
+	l.depth = 0
+	l.maxDepth = defaultMaxNestingDepth
 	// leave l.dec and l.buf alone, since they are replaced at every Borrow
 }
 
@@ -228,6 +238,21 @@ func (l *jlexer) Delim(c byte) {
 
 	if tok.Delim() != c {
 		l.err = fmt.Errorf("expected delimiter '%q' but got '%q': %w", c, tok.Delim(), ErrStdlib)
+
+		return
+	}
+
+	// Track container nesting depth centrally: every '{' or '[' opens a level and
+	// every '}' or ']' closes one. This guards the mutually-recursive unmarshal
+	// routines (unmarshalObject/unmarshalArray/asInterface) against stack overflow.
+	switch c {
+	case '{', '[':
+		l.depth++
+		if l.maxDepth > 0 && l.depth > l.maxDepth {
+			l.err = fmt.Errorf("maximum nesting depth of %d exceeded: %w", l.maxDepth, ErrStdlib)
+		}
+	case '}', ']':
+		l.depth--
 	}
 }
 
