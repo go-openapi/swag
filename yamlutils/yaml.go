@@ -12,13 +12,23 @@ import (
 	yaml "go.yaml.in/yaml/v3"
 )
 
+// defaultMaxNestingDepth caps the recursion depth of the YAML<->JSON transforms to
+// guard against stack-overflow on deeply nested (possibly adversarial) input.
+//
+// It matches the limit enforced by go.yaml.in/yaml/v3's own parser and by
+// encoding/json's decoder.
+const defaultMaxNestingDepth = 10000
+
+// errMaxNestingDepth is returned when a document nests deeper than [defaultMaxNestingDepth].
+var errMaxNestingDepth = fmt.Errorf("maximum nesting depth of %d exceeded: %w", defaultMaxNestingDepth, ErrYAML)
+
 // YAMLToJSON converts a YAML document into JSON bytes.
 //
 // Note: a YAML document is the output from a [yaml.Marshaler], e.g a pointer to a [yaml.Node].
 //
 // [YAMLToJSON] is typically called after [BytesToYAMLDoc].
 func YAMLToJSON(value any) (json.RawMessage, error) {
-	jm, err := transformData(value)
+	jm, err := transformData(value, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -44,46 +54,50 @@ func BytesToYAMLDoc(data []byte) (any, error) {
 	return &document, nil
 }
 
-func yamlNode(root *yaml.Node) (any, error) {
+func yamlNode(root *yaml.Node, depth int) (any, error) {
+	if depth > defaultMaxNestingDepth {
+		return nil, errMaxNestingDepth
+	}
+
 	switch root.Kind {
 	case yaml.DocumentNode:
-		return yamlDocument(root)
+		return yamlDocument(root, depth)
 	case yaml.SequenceNode:
-		return yamlSequence(root)
+		return yamlSequence(root, depth)
 	case yaml.MappingNode:
-		return yamlMapping(root)
+		return yamlMapping(root, depth)
 	case yaml.ScalarNode:
 		return yamlScalar(root)
 	case yaml.AliasNode:
-		return yamlNode(root.Alias)
+		return yamlNode(root.Alias, depth+1)
 	default:
 		return nil, fmt.Errorf("unsupported YAML node type: %v: %w", root.Kind, ErrYAML)
 	}
 }
 
-func yamlDocument(node *yaml.Node) (any, error) {
+func yamlDocument(node *yaml.Node, depth int) (any, error) {
 	if len(node.Content) != 1 {
 		return nil, fmt.Errorf("unexpected YAML Document node content length: %d: %w", len(node.Content), ErrYAML)
 	}
-	return yamlNode(node.Content[0])
+	return yamlNode(node.Content[0], depth+1)
 }
 
-func yamlMapping(node *yaml.Node) (any, error) {
+func yamlMapping(node *yaml.Node, depth int) (any, error) {
 	const sensibleAllocDivider = 2 // nodes concatenate (key,value) sequences
 	m := make(YAMLMapSlice, len(node.Content)/sensibleAllocDivider)
 
-	if err := m.UnmarshalYAML(node); err != nil {
+	if err := m.unmarshalYAML(node, depth); err != nil {
 		return nil, err
 	}
 
 	return m, nil
 }
 
-func yamlSequence(node *yaml.Node) (any, error) {
+func yamlSequence(node *yaml.Node, depth int) (any, error) {
 	s := make([]any, 0)
 
 	for i := range len(node.Content) {
-		v, err := yamlNode(node.Content[i])
+		v, err := yamlNode(node.Content[i], depth+1)
 		if err != nil {
 			return nil, fmt.Errorf("unable to decode YAML sequence value: %w: %w", err, ErrYAML)
 		}
@@ -174,12 +188,16 @@ func format(t any) (string, error) {
 	}
 }
 
-func transformData(input any) (out any, err error) {
+func transformData(input any, depth int) (out any, err error) {
+	if depth > defaultMaxNestingDepth {
+		return nil, errMaxNestingDepth
+	}
+
 	switch in := input.(type) {
 	case yaml.Node:
-		return yamlNode(&in)
+		return yamlNode(&in, depth)
 	case *yaml.Node:
-		return yamlNode(in)
+		return yamlNode(in, depth)
 	case map[any]any:
 		o := make(YAMLMapSlice, 0, len(in))
 		for ke, va := range in {
@@ -188,7 +206,7 @@ func transformData(input any) (out any, err error) {
 				return nil, err
 			}
 
-			v, ert := transformData(va)
+			v, ert := transformData(va, depth+1)
 			if ert != nil {
 				return nil, ert
 			}
@@ -200,7 +218,7 @@ func transformData(input any) (out any, err error) {
 		len1 := len(in)
 		o := make([]any, len1)
 		for i := range len1 {
-			o[i], err = transformData(in[i])
+			o[i], err = transformData(in[i], depth+1)
 			if err != nil {
 				return nil, err
 			}

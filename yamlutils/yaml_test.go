@@ -267,7 +267,7 @@ func TestYAMLEdgeCases(t *testing.T) {
 				{},
 				{},
 			},
-		})
+		}, 0)
 		require.Error(t, err)
 	})
 
@@ -278,7 +278,7 @@ func TestYAMLEdgeCases(t *testing.T) {
 					Kind: yaml.Kind(99), // illegal kind
 				},
 			},
-		})
+		}, 0)
 		require.Error(t, err)
 	})
 
@@ -291,7 +291,7 @@ func TestYAMLEdgeCases(t *testing.T) {
 			map[any]any{
 				complex128(0): struct{}{},
 			},
-		})
+		}, 0)
 		require.Error(t, err)
 	})
 }
