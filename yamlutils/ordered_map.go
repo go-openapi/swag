@@ -153,12 +153,13 @@ func (s YAMLMapSlice) MarshalYAML() (any, error) {
 //
 // It implements [yaml.Unmarshaler].
 func (s *YAMLMapSlice) UnmarshalYAML(node *yaml.Node) error {
-	return s.unmarshalYAML(node, 0)
+	return s.unmarshalYAML(newYAMLWalker(), node, 0)
 }
 
-// unmarshalYAML builds the slice from a [yaml.Node], tracking the recursion depth so
-// that deeply nested documents return an error instead of overflowing the stack.
-func (s *YAMLMapSlice) unmarshalYAML(node *yaml.Node, depth int) error {
+// unmarshalYAML builds the slice from a [yaml.Node], tracking the recursion depth (against
+// stack-overflow) and threading the [yamlWalker] so anchor/alias expansion stays bounded
+// across the whole document.
+func (s *YAMLMapSlice) unmarshalYAML(w *yamlWalker, node *yaml.Node, depth int) error {
 	if depth > defaultMaxNestingDepth {
 		return errMaxNestingDepth
 	}
@@ -177,13 +178,17 @@ func (s *YAMLMapSlice) unmarshalYAML(node *yaml.Node, depth int) error {
 	m = m[:0]
 
 	for i := 0; i < len(node.Content); i += 2 {
+		if err := w.account(); err != nil { // account the key node
+			return err
+		}
+
 		var nmi YAMLMapItem
 		k, err := yamlStringScalarC(node.Content[i])
 		if err != nil {
 			return fmt.Errorf("unable to decode YAML map key: %w: %w", err, ErrYAML)
 		}
 		nmi.Key = k
-		v, err := yamlNode(node.Content[i+1], depth+1)
+		v, err := w.node(node.Content[i+1], depth+1)
 		if err != nil {
 			return fmt.Errorf("unable to process YAML map value for key %q: %w: %w", k, err, ErrYAML)
 		}
