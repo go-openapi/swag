@@ -25,6 +25,14 @@ func (w *jwriter) Reset() {
 	w.err = nil
 }
 
+// SetErr records the first error encountered while building the JSON output.
+func (w *jwriter) SetErr(err error) {
+	if w.err != nil {
+		return
+	}
+	w.err = err
+}
+
 func (w *jwriter) RawString(s string) {
 	if w.err != nil {
 		return

@@ -7,21 +7,16 @@ package json
 // ('{' or '[') that the ordered-JSON marshaler and unmarshaler will process before
 // returning an error.
 //
-// It mirrors the limit enforced by the standard library's [encoding/json] decoder,
-// guarding against stack-overflow crashes on deeply nested (possibly adversarial) input.
+// It mirrors the limit enforced by the standard library's [encoding/json] decoder
+// (see encoding/json's internal maxNestingDepth), which this adapter would otherwise
+// not benefit from since it drives [encoding/json.Decoder.Token] directly.
 const defaultMaxNestingDepth = 10000
 
-// Option selects options for the easyjson adapter.
+// Option selects options for the stdlib adapter.
 type Option func(o *options)
 
 type options struct {
-	writerOptions
-	lexerOptions
-}
-
-type lexerOptions struct {
-	useMultipleErrors bool
-	maxNestingDepth   int
+	maxNestingDepth int
 }
 
 // maxDepth returns the configured maximum nesting depth, or the default when unset.
@@ -31,18 +26,6 @@ func (o options) maxDepth() int {
 	}
 
 	return o.maxNestingDepth
-}
-
-type writerOptions struct {
-	nilMapAsEmpty   bool
-	nilSliceAsEmpty bool
-	noEscapeHTML    bool
-}
-
-func WithLexerUseMultipleErrors(enabled bool) Option {
-	return func(o *options) {
-		o.useMultipleErrors = enabled
-	}
 }
 
 // WithMaxNestingDepth sets the maximum number of nested JSON containers accepted
@@ -55,23 +38,5 @@ func WithLexerUseMultipleErrors(enabled bool) Option {
 func WithMaxNestingDepth(depth int) Option {
 	return func(o *options) {
 		o.maxNestingDepth = depth
-	}
-}
-
-func WithWriterNilMapAsEmpty(enabled bool) Option {
-	return func(o *options) {
-		o.nilMapAsEmpty = enabled
-	}
-}
-
-func WithWriterNilSliceAsEmpty(enabled bool) Option {
-	return func(o *options) {
-		o.nilSliceAsEmpty = enabled
-	}
-}
-
-func WithWriterNoEscapeHTML(noescape bool) Option {
-	return func(o *options) {
-		o.noEscapeHTML = noescape
 	}
 }

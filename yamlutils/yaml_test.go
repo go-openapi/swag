@@ -262,23 +262,23 @@ func TestYAMLTags(t *testing.T) {
 
 func TestYAMLEdgeCases(t *testing.T) {
 	t.Run("should never happen because never called in the context of arrays", func(t *testing.T) {
-		_, err := yamlDocument(&yaml.Node{
+		_, err := newYAMLWalker().document(&yaml.Node{
 			Content: []*yaml.Node{
 				{},
 				{},
 			},
-		})
+		}, 0)
 		require.Error(t, err)
 	})
 
 	t.Run("should never happen unless the document representation is corrupted", func(t *testing.T) {
-		_, err := yamlSequence(&yaml.Node{
+		_, err := newYAMLWalker().sequence(&yaml.Node{
 			Content: []*yaml.Node{
 				{
 					Kind: yaml.Kind(99), // illegal kind
 				},
 			},
-		})
+		}, 0)
 		require.Error(t, err)
 	})
 
@@ -291,7 +291,7 @@ func TestYAMLEdgeCases(t *testing.T) {
 			map[any]any{
 				complex128(0): struct{}{},
 			},
-		})
+		}, 0)
 		require.Error(t, err)
 	})
 }
