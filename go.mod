@@ -17,7 +17,10 @@ require (
 	github.com/go-openapi/testify/v2 v2.6.0
 )
 
-require go.yaml.in/yaml/v3 v3.0.4 // indirect
+require (
+	github.com/go-openapi/swag/pools v0.27.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.4 // indirect
+)
 
 replace (
 	github.com/go-openapi/swag/cmdutils => ./cmdutils
@@ -29,6 +32,7 @@ replace (
 	github.com/go-openapi/swag/loading => ./loading
 	github.com/go-openapi/swag/mangling => ./mangling
 	github.com/go-openapi/swag/netutils => ./netutils
+	github.com/go-openapi/swag/pools => ./pools
 	github.com/go-openapi/swag/stringutils => ./stringutils
 	github.com/go-openapi/swag/typeutils => ./typeutils
 	github.com/go-openapi/swag/yamlutils => ./yamlutils
