@@ -10,10 +10,13 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4
 )
 
+require github.com/go-openapi/swag/pools v0.27.0 // indirect
+
 replace (
 	github.com/go-openapi/swag/conv => ../conv
 	github.com/go-openapi/swag/jsonutils => ../jsonutils
 	github.com/go-openapi/swag/jsonutils/fixtures_test => ../jsonutils/fixtures_test
+	github.com/go-openapi/swag/pools => ../pools
 	github.com/go-openapi/swag/typeutils => ../typeutils
 )
 
