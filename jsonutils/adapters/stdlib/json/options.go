@@ -13,10 +13,18 @@ package json
 const defaultMaxNestingDepth = 10000
 
 // Option selects options for the stdlib adapter.
-type Option func(o *options)
+type Option func(o options) options
 
 type options struct {
 	maxNestingDepth int
+}
+
+func buildOptions(o options, opts []Option) options {
+	for _, apply := range opts {
+		o = apply(o)
+	}
+
+	return o
 }
 
 // maxDepth returns the configured maximum nesting depth, or the default when unset.
@@ -31,12 +39,14 @@ func (o options) maxDepth() int {
 // WithMaxNestingDepth sets the maximum number of nested JSON containers accepted
 // when marshaling or unmarshaling ordered JSON.
 //
-// A value <= 0 selects the default ([defaultMaxNestingDepth]).
+// A value <= 0 selects the default (10,000).
 //
 // This guards against stack-overflow crashes on deeply nested (possibly adversarial)
 // JSON documents or in-memory structures.
 func WithMaxNestingDepth(depth int) Option {
-	return func(o *options) {
+	return func(o options) options {
 		o.maxNestingDepth = depth
+
+		return o
 	}
 }

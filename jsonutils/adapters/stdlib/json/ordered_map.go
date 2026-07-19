@@ -70,10 +70,9 @@ func (s MapSlice) MarshalJSON() ([]byte, error) {
 }
 
 func (s MapSlice) OrderedMarshalJSON() ([]byte, error) {
-	w := poolOfWriters.Borrow()
-	defer func() {
-		poolOfWriters.Redeem(w)
-	}()
+	w, redeem := poolOfWriters.BorrowWithRedeem()
+	defer redeem()
+	w.setBuf()
 
 	s.marshalObject(w, 1)
 
@@ -92,10 +91,11 @@ func (s *MapSlice) OrderedUnmarshalJSON(data []byte) error {
 }
 
 func (s *MapSlice) orderedUnmarshalJSON(data []byte, maxDepth int) error {
-	l := poolOfLexers.Borrow(data)
-	defer func() {
-		poolOfLexers.Redeem(l)
-	}()
+	l, redeem := poolOfLexers.BorrowWithRedeem()
+	defer redeem()
+
+	redeemBuf := l.setBuf(data)
+	defer redeemBuf()
 
 	if maxDepth > 0 {
 		l.maxDepth = maxDepth

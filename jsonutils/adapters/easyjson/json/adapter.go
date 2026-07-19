@@ -10,7 +10,6 @@ import (
 	"github.com/go-openapi/swag/jsonutils/adapters/ifaces"
 	"github.com/go-openapi/swag/typeutils"
 	"github.com/mailru/easyjson"
-	"github.com/mailru/easyjson/jlexer"
 	"github.com/mailru/easyjson/jwriter"
 )
 
@@ -28,21 +27,18 @@ type Adapter struct {
 // NewAdapter yields a JSON adapter for [easyjson].
 func NewAdapter(opts ...Option) *Adapter {
 	var o options
-	for _, apply := range opts {
-		apply(&o)
-	}
+
 	return &Adapter{
-		options: o,
+		options: buildOptions(o, opts),
 	}
 }
 
 func (a *Adapter) Marshal(value any) ([]byte, error) {
 	marshaler, ok := value.(easyjson.Marshaler)
 	if ok {
-		w := BorrowWriter()
-		defer func() {
-			RedeemWriter(w)
-		}()
+		w, redeem := BorrowWriter()
+		defer redeem()
+
 		if a.nilMapAsEmpty {
 			w.Flags |= jwriter.NilMapAsEmpty
 		}
@@ -63,13 +59,12 @@ func (a *Adapter) Marshal(value any) ([]byte, error) {
 func (a *Adapter) Unmarshal(data []byte, value any) error {
 	unmarshaler, ok := value.(easyjson.Unmarshaler)
 	if ok {
-		l := BorrowLexer(data)
-		defer func() {
-			RedeemLexer(l)
-		}()
-		l.UseMultipleErrors = a.useMultipleErrors
+		l, redeem := BorrowLexer(data)
+		defer redeem()
 
+		l.UseMultipleErrors = a.useMultipleErrors
 		unmarshaler.UnmarshalEasyJSON(l)
+
 		return l.Error()
 	}
 
@@ -77,10 +72,8 @@ func (a *Adapter) Unmarshal(data []byte, value any) error {
 }
 
 func (a *Adapter) OrderedMarshal(value ifaces.Ordered) ([]byte, error) {
-	w := BorrowWriter()
-	defer func() {
-		RedeemWriter(w)
-	}()
+	w, redeem := BorrowWriter()
+	defer redeem()
 
 	a.orderedMarshal(w, value, a.maxDepth())
 
@@ -162,14 +155,4 @@ func (a *Adapter) orderedMarshal(w *jwriter.Writer, value ifaces.Ordered, budget
 	}
 
 	w.RawByte('}')
-}
-
-func newJWriter() *jwriter.Writer {
-	return &jwriter.Writer{
-		Flags: jwriter.NilMapAsEmpty | jwriter.NilSliceAsEmpty,
-	}
-}
-
-func newJLexer() *jlexer.Lexer {
-	return &jlexer.Lexer{}
 }

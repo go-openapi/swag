@@ -79,10 +79,8 @@ func (s MapSlice) MarshalJSON() ([]byte, error) {
 }
 
 func (s MapSlice) OrderedMarshalJSON() ([]byte, error) {
-	w := BorrowWriter()
-	defer func() {
-		RedeemWriter(w)
-	}()
+	w, redeem := BorrowWriter()
+	defer redeem()
 
 	s.MarshalEasyJSON(w)
 
@@ -142,10 +140,8 @@ func (s MapSlice) marshalEasyJSON(w *jwriter.Writer, budget int) {
 }
 
 func (s *MapSlice) orderedUnmarshalJSON(data []byte, budget int) error {
-	l := BorrowLexer(data)
-	defer func() {
-		RedeemLexer(l)
-	}()
+	l, redeem := BorrowLexer(data)
+	defer redeem()
 
 	s.unmarshalEasyJSON(l, budget)
 

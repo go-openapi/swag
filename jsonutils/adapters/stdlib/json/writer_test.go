@@ -16,7 +16,8 @@ func TestWriter(t *testing.T) {
 	)
 
 	t.Run("writer should be interruptible when in error state", func(t *testing.T) {
-		w := newJWriter()
+		w := &jwriter{}
+		w.setBuf()
 		w.RawString(marker)
 
 		w.err = ErrStdlib
@@ -39,7 +40,8 @@ func TestWriter(t *testing.T) {
 	})
 
 	t.Run("Raw should not write any output if error", func(t *testing.T) {
-		w := newJWriter()
+		w := &jwriter{}
+		w.setBuf()
 		w.RawString(marker)
 		raw := func() ([]byte, error) { return []byte(str), ErrStdlib }
 		w.Raw(raw())

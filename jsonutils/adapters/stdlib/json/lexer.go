@@ -54,7 +54,7 @@ func (t token) Delim() byte {
 		return 0
 	}
 
-	return byte(r)
+	return byte(r) //nolint:gosec // delimiter runes are single byte
 }
 
 type tokenKind uint8
@@ -153,7 +153,9 @@ func (l *jlexer) Reset() {
 	l.next = undefToken
 	l.depth = 0
 	l.maxDepth = defaultMaxNestingDepth
-	// leave l.dec and l.buf alone, since they are replaced at every Borrow
+	l.dec = nil
+	// leave l.buf alone, since they are replaced at every Borrow
+	l.buf = nil
 }
 
 func (l *jlexer) Error() error {
@@ -342,4 +344,13 @@ func (l *jlexer) fetchToken() token {
 	}
 
 	return token{Token: jtok}
+}
+
+func (l *jlexer) setBuf(data []byte) func() {
+	rdr, redeemBuf := poolOfReaders.BorrowWithRedeem()
+	l.buf = rdr
+	l.buf.buf = data
+	l.dec = stdjson.NewDecoder(l.buf) // cannot pool, not exposed by the encoding/json API
+
+	return redeemBuf
 }

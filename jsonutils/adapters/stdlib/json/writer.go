@@ -14,14 +14,10 @@ type jwriter struct {
 	err error
 }
 
-func newJWriter() *jwriter {
-	buf := make([]byte, 0, sensibleBufferSize)
-
-	return &jwriter{buf: bytes.NewBuffer(buf)}
-}
-
 func (w *jwriter) Reset() {
-	w.buf.Reset()
+	if w.buf != nil {
+		w.buf.Reset()
+	}
 	w.err = nil
 }
 
@@ -80,4 +76,13 @@ func (w *jwriter) BuildBytes() ([]byte, error) {
 	}
 
 	return bytes.Clone(w.buf.Bytes()), nil
+}
+
+func (w *jwriter) setBuf() {
+	if w.buf != nil {
+		return
+	}
+
+	buf := make([]byte, 0, sensibleBufferSize)
+	w.buf = bytes.NewBuffer(buf)
 }
