@@ -12,7 +12,7 @@ package json
 const defaultMaxNestingDepth = 10000
 
 // Option selects options for the easyjson adapter.
-type Option func(o *options)
+type Option func(o options) options
 
 type options struct {
 	writerOptions
@@ -22,6 +22,14 @@ type options struct {
 type lexerOptions struct {
 	useMultipleErrors bool
 	maxNestingDepth   int
+}
+
+func buildOptions(o options, opts []Option) options {
+	for _, apply := range opts {
+		o = apply(o)
+	}
+
+	return o
 }
 
 // maxDepth returns the configured maximum nesting depth, or the default when unset.
@@ -40,38 +48,48 @@ type writerOptions struct {
 }
 
 func WithLexerUseMultipleErrors(enabled bool) Option {
-	return func(o *options) {
+	return func(o options) options {
 		o.useMultipleErrors = enabled
+
+		return o
 	}
 }
 
 // WithMaxNestingDepth sets the maximum number of nested JSON containers accepted
 // when marshaling or unmarshaling ordered JSON.
 //
-// A value <= 0 selects the default ([defaultMaxNestingDepth]).
+// A value <= 0 selects the default (10,000).
 //
 // This guards against stack-overflow crashes on deeply nested (possibly adversarial)
 // JSON documents or in-memory structures.
 func WithMaxNestingDepth(depth int) Option {
-	return func(o *options) {
+	return func(o options) options {
 		o.maxNestingDepth = depth
+
+		return o
 	}
 }
 
 func WithWriterNilMapAsEmpty(enabled bool) Option {
-	return func(o *options) {
+	return func(o options) options {
 		o.nilMapAsEmpty = enabled
+
+		return o
 	}
 }
 
 func WithWriterNilSliceAsEmpty(enabled bool) Option {
-	return func(o *options) {
+	return func(o options) options {
 		o.nilSliceAsEmpty = enabled
+
+		return o
 	}
 }
 
 func WithWriterNoEscapeHTML(noescape bool) Option {
-	return func(o *options) {
+	return func(o options) options {
 		o.noEscapeHTML = noescape
+
+		return o
 	}
 }

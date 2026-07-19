@@ -3,6 +3,7 @@ module github.com/go-openapi/swag/jsonutils
 require (
 	github.com/go-openapi/swag/conv v0.27.0
 	github.com/go-openapi/swag/jsonutils/fixtures_test v0.27.0
+	github.com/go-openapi/swag/pools v0.27.0
 	github.com/go-openapi/swag/typeutils v0.27.0
 	github.com/go-openapi/testify/v2 v2.6.0
 )
@@ -15,6 +16,7 @@ require (
 replace (
 	github.com/go-openapi/swag/conv => ../conv
 	github.com/go-openapi/swag/jsonutils/fixtures_test => ./fixtures_test
+	github.com/go-openapi/swag/pools => ../pools
 	github.com/go-openapi/swag/typeutils => ../typeutils
 )
 

@@ -137,7 +137,8 @@ func TestReproDataRace(t *testing.T) {
 
 			toks := make([]token, 0, 4)
 			buf := []byte(`{"test":"data"}`)
-			l := poolOfLexers.Borrow(buf)
+			l, redeem := poolOfLexers.BorrowWithRedeem()
+			redeemBuf := l.setBuf(buf)
 
 			for tok := l.NextToken(); tok != eofToken; tok = l.NextToken() {
 				toks = append(toks, tok)
@@ -145,7 +146,8 @@ func TestReproDataRace(t *testing.T) {
 			assert.Len(t, toks, 4)
 			fmt.Fprintf(io.Discard, "%d", len(toks))
 			defer func() {
-				poolOfLexers.Redeem(l)
+				redeemBuf()
+				redeem()
 			}()
 		}()
 	}

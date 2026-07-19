@@ -1,0 +1,139 @@
+# configuration for benchviz
+environment: ''
+render:
+  title: 'Benchark JSON Adapters'
+  theme: vintage
+  chart: barchart
+  orientation: horizontal
+  labelFontSize: 9
+  layout:
+    horizontal: 2
+    #vertical: 2
+  legend: bottom
+  scale: auto
+
+outputs:
+  htmlFile: ''
+  pngFile: ''
+
+metrics:
+  -
+    id: nsPerOp
+    title: Benchmark Timings
+    axis: 'ns/op'
+  -
+    id: allocsPerOp
+    title: Benchmark Allocations
+    axis: 'allocs/op'
+  -
+    id: bytesPerOp
+    title: Benchmark Memory Usage
+    axis: 'bytes/op'
+  -
+    id: MBytesPerS
+    title: Benchmark Throughput
+    axis: 'MB/s'
+
+functions:
+  -
+    id: FromDynamicJSON
+    title: FromDynamicJSON
+    match: FromDynamicJSON
+  -
+    id: ReadJSON
+    title: ReadJSON
+    match: ReadJSON
+  -
+    id: WriteJSON
+    title: WriteJSON
+    match: WriteJSON
+
+contexts:
+  -
+    id: small
+    title: small
+    match: small
+  -
+    id: medium
+    title: medium
+    match: medium
+  -
+    id: large
+    title: large
+    match: large
+
+versions:
+  -
+    id: standard-library
+    title: 'Standard library'
+    match: standard
+  -
+    id: easyjson
+    title: 'EasyJSON'
+    match: easyjson
+
+categories:
+  -
+    id: 'R/W'
+    title: '{metric} Read/Write'
+    includes:
+      functions:
+        - ReadJSON
+        - WriteJSON
+      versions:
+        - standard-library
+        - easyjson
+      contexts:
+        - small
+        - medium
+      metrics:
+        - nsPerOp
+        - allocsPerOp
+        - bytesPerOp
+  -
+    id: 'R/W large'
+    title: '{metric} Read/Write (large)'
+    includes:
+      functions:
+        - ReadJSON
+        - WriteJSON
+      versions:
+        - standard-library
+        - easyjson
+      contexts:
+        - large
+      metrics:
+        - nsPerOp
+        - allocsPerOp
+        - bytesPerOp
+  -
+    id: dynamic-json
+    title: '{metric} FromDynamicJSON'
+    includes:
+      functions:
+        - FromDynamicJSON
+      versions:
+        - standard-library
+        - easyjson
+      contexts:
+        - small
+        - medium
+      metrics:
+        - nsPerOp
+        - allocsPerOp
+        - bytesPerOp
+  -
+    id: dynamic-json-large
+    title: '{metric} FromDynamicJSON (large)'
+    includes:
+      functions:
+        - FromDynamicJSON
+      versions:
+        - standard-library
+        - easyjson
+      contexts:
+        - large
+      metrics:
+        - nsPerOp
+        - allocsPerOp
+        - bytesPerOp

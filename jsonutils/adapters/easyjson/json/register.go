@@ -20,9 +20,7 @@ import (
 func Register(dispatcher ifaces.Registrar, opts ...Option) {
 	t := reflect.TypeOf(Adapter{})
 	var o options
-	for _, apply := range opts {
-		apply(&o)
-	}
+	o = buildOptions(o, opts)
 
 	dispatcher.RegisterFor(
 		ifaces.RegistryEntry{

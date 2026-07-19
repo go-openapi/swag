@@ -31,11 +31,10 @@ type Adapter struct {
 // NewAdapter yields an [ifaces.Adapter] using the standard library.
 func NewAdapter(opts ...Option) *Adapter {
 	var o options
-	for _, apply := range opts {
-		apply(&o)
-	}
 
-	return &Adapter{options: o}
+	return &Adapter{
+		options: buildOptions(o, opts),
+	}
 }
 
 func (a *Adapter) Marshal(value any) ([]byte, error) {
@@ -47,10 +46,9 @@ func (a *Adapter) Unmarshal(data []byte, value any) error {
 }
 
 func (a *Adapter) OrderedMarshal(value ifaces.Ordered) ([]byte, error) {
-	w := poolOfWriters.Borrow()
-	defer func() {
-		poolOfWriters.Redeem(w)
-	}()
+	w, redeem := poolOfWriters.BorrowWithRedeem()
+	defer redeem()
+	w.setBuf()
 
 	a.orderedMarshal(w, value, 1)
 
