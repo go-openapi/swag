@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"testing/fstest"
 
@@ -48,6 +49,29 @@ func TestWithRoot(t *testing.T) {
 
 		t.Run("nested path", func(t *testing.T) {
 			b, err := LoadFromFileOrHTTP("sub/api.yaml", WithRoot(root))
+			require.NoError(t, err)
+			assert.EqualT(t, nested, string(b))
+		})
+	})
+
+	t.Run("should load absolute paths confined to the root", func(t *testing.T) {
+		// Callers such as go-openapi/spec normalize $ref targets to absolute paths before
+		// loading. These must resolve when they point within the root (they are rebased onto it),
+		// not be rejected merely for being absolute.
+		abs := filepath.Join(root, "api.yaml")
+		for _, pth := range []string{
+			abs,                               // absolute path within the root
+			"file://" + filepath.ToSlash(abs), // absolute path within the root, via a file:// URI
+		} {
+			t.Run(pth, func(t *testing.T) {
+				b, err := LoadFromFileOrHTTP(pth, WithRoot(root))
+				require.NoError(t, err)
+				assert.EqualT(t, inside, string(b))
+			})
+		}
+
+		t.Run("nested absolute path", func(t *testing.T) {
+			b, err := LoadFromFileOrHTTP(filepath.Join(root, "sub", "api.yaml"), WithRoot(root))
 			require.NoError(t, err)
 			assert.EqualT(t, nested, string(b))
 		})
@@ -110,5 +134,31 @@ func TestWithRoot(t *testing.T) {
 		b, err := LoadFromFileOrHTTP(filepath.Join(parent, "secret.txt"))
 		require.NoError(t, err)
 		assert.EqualT(t, secret, string(b))
+	})
+}
+
+func TestRootRelative(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "root")
+
+	t.Run("relative names are returned unchanged", func(t *testing.T) {
+		// os.Root confines relative names directly, so they are passed through verbatim.
+		for _, name := range []string{"api.yaml", "sub/api.yaml", "sub/../api.yaml", "../escape.yaml"} {
+			got, err := rootRelative(root, name)
+			require.NoError(t, err)
+			assert.EqualT(t, name, got)
+		}
+	})
+
+	t.Run("absolute in-root names are rebased onto the root", func(t *testing.T) {
+		got, err := rootRelative(root, filepath.Join(root, "sub", "api.yaml"))
+		require.NoError(t, err)
+		assert.EqualT(t, filepath.Join("sub", "api.yaml"), got)
+	})
+
+	t.Run("absolute escaping names yield a traversal path (rejected later by os.Root)", func(t *testing.T) {
+		got, err := rootRelative(root, filepath.Join(filepath.Dir(root), "secret.txt"))
+		require.NoError(t, err)
+		assert.TrueT(t, strings.HasPrefix(got, ".."+string(filepath.Separator)),
+			"expected a traversal path, got %q", got)
 	})
 }
