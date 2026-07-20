@@ -4,21 +4,21 @@ retract v0.24.0 // bad tagging of the main module: superseeded by v0.24.1
 
 require (
 	github.com/go-openapi/jsonpointer v1.0.0
-	github.com/go-openapi/swag/cmdutils v0.27.1
-	github.com/go-openapi/swag/conv v0.27.1
-	github.com/go-openapi/swag/fileutils v0.27.1
-	github.com/go-openapi/swag/jsonutils v0.27.1
-	github.com/go-openapi/swag/loading v0.27.1
-	github.com/go-openapi/swag/mangling v0.27.1
-	github.com/go-openapi/swag/netutils v0.27.1
-	github.com/go-openapi/swag/stringutils v0.27.1
-	github.com/go-openapi/swag/typeutils v0.27.1
-	github.com/go-openapi/swag/yamlutils v0.27.1
+	github.com/go-openapi/swag/cmdutils v0.27.2
+	github.com/go-openapi/swag/conv v0.27.2
+	github.com/go-openapi/swag/fileutils v0.27.2
+	github.com/go-openapi/swag/jsonutils v0.27.2
+	github.com/go-openapi/swag/loading v0.27.2
+	github.com/go-openapi/swag/mangling v0.27.2
+	github.com/go-openapi/swag/netutils v0.27.2
+	github.com/go-openapi/swag/stringutils v0.27.2
+	github.com/go-openapi/swag/typeutils v0.27.2
+	github.com/go-openapi/swag/yamlutils v0.27.2
 	github.com/go-openapi/testify/v2 v2.6.0
 )
 
 require (
-	github.com/go-openapi/swag/pools v0.27.1 // indirect
+	github.com/go-openapi/swag/pools v0.27.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 )
 
