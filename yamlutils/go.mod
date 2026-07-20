@@ -1,16 +1,16 @@
 module github.com/go-openapi/swag/yamlutils
 
 require (
-	github.com/go-openapi/swag/conv v0.27.2
-	github.com/go-openapi/swag/jsonutils v0.27.2
-	github.com/go-openapi/swag/jsonutils/fixtures_test v0.27.2
-	github.com/go-openapi/swag/typeutils v0.27.2
+	github.com/go-openapi/swag/conv v0.27.3
+	github.com/go-openapi/swag/jsonutils v0.27.3
+	github.com/go-openapi/swag/jsonutils/fixtures_test v0.27.3
+	github.com/go-openapi/swag/typeutils v0.27.3
 	github.com/go-openapi/testify/enable/yaml/v2 v2.6.0
 	github.com/go-openapi/testify/v2 v2.6.0
 	go.yaml.in/yaml/v3 v3.0.4
 )
 
-require github.com/go-openapi/swag/pools v0.27.2 // indirect
+require github.com/go-openapi/swag/pools v0.27.3 // indirect
 
 replace (
 	github.com/go-openapi/swag/conv => ../conv
