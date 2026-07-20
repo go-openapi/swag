@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 )
 
@@ -76,17 +77,48 @@ func (fo fileOptions) ReadFileFunc() func(string) ([]byte, error) {
 // absolute path that lexically escapes root yields a "../" prefix here and is then rejected by
 // os.Root.
 func rootRelative(root, name string) (string, error) {
-	osName := filepath.FromSlash(name)
+	osName := toOSPath(name)
 	if !filepath.IsAbs(osName) {
 		return name, nil
 	}
 
-	absRoot, err := filepath.Abs(filepath.FromSlash(root))
+	absRoot, err := filepath.Abs(toOSPath(root))
 	if err != nil {
 		return "", err
 	}
 
 	return filepath.Rel(absRoot, osName)
+}
+
+// toOSPath converts a slash-separated path to an OS-native path.
+//
+// On Windows it additionally normalizes the "/C:/dir" form — a leading separator before a drive
+// letter — that file URIs and URL-style path normalization (as performed by
+// github.com/go-openapi/spec) produce. Without this, filepath.IsAbs does not recognize such a
+// path as absolute and os.Root rejects an otherwise in-root target. This mirrors the file://
+// drive-letter handling in LoadStrategy, which the os.Root loader bypasses.
+func toOSPath(p string) string {
+	p = filepath.FromSlash(p)
+	if runtime.GOOS == "windows" {
+		p = stripLeadingDriveSlash(p)
+	}
+
+	return p
+}
+
+// stripLeadingDriveSlash removes a leading separator that precedes a Windows drive letter,
+// turning "\C:\dir" (from a "/C:/dir" URL path) into "C:\dir". Any other path is returned
+// unchanged. It is pure (no OS dependency) so that its logic can be tested on any platform.
+func stripLeadingDriveSlash(p string) string {
+	if len(p) >= 3 && (p[0] == '/' || p[0] == '\\') && p[2] == ':' && isASCIILetter(p[1]) {
+		return p[1:]
+	}
+
+	return p
+}
+
+func isASCIILetter(b byte) bool {
+	return ('a' <= b && b <= 'z') || ('A' <= b && b <= 'Z')
 }
 
 // WithTimeout sets a timeout for the remote file loader.

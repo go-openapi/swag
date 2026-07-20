@@ -162,3 +162,20 @@ func TestRootRelative(t *testing.T) {
 			"expected a traversal path, got %q", got)
 	})
 }
+
+func TestStripLeadingDriveSlash(t *testing.T) {
+	// A Windows file-URL path ("/C:/dir/file", produced e.g. by go-openapi/spec normalization) must
+	// have its leading separator stripped so it is recognized as an absolute path; anything else is
+	// left untouched. The helper is pure, so its logic is exercised on every platform.
+	for in, want := range map[string]string{
+		`/C:/dir/file`: `C:/dir/file`, // forward-slash URL form
+		`\C:\dir\file`: `C:\dir\file`, // back-slash form
+		`/c:/x`:        `c:/x`,        // lowercase drive letter
+		`/usr/local`:   `/usr/local`,  // no drive letter: unchanged
+		`relative/x`:   `relative/x`,  // relative: unchanged
+		`/C`:           `/C`,          // too short: unchanged
+		``:             ``,            // empty: unchanged
+	} {
+		assert.EqualT(t, want, stripLeadingDriveSlash(in), "input %q", in)
+	}
+}
