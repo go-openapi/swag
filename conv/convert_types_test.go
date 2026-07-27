@@ -132,26 +132,26 @@ func TestPointer(t *testing.T) {
 
 func assertSingleValue(t *testing.T, inElem, elem reflect.Value, expectPointer bool, idx int) {
 	require.EqualTf(t,
-		expectPointer, (elem.Kind() == reflect.Ptr),
+		expectPointer, (elem.Kind() == reflect.Pointer),
 		"unexpected expectPointer=%t value type %T at idx %d", expectPointer, elem, idx,
 	)
 
-	if inElem.Kind() == reflect.Ptr && !inElem.IsNil() {
+	if inElem.Kind() == reflect.Pointer && !inElem.IsNil() {
 		inElem = reflect.Indirect(inElem)
 	}
 
-	if elem.Kind() == reflect.Ptr && !elem.IsNil() {
+	if elem.Kind() == reflect.Pointer && !elem.IsNil() {
 		elem = reflect.Indirect(elem)
 	}
 
 	require.TrueTf(t,
-		(elem.Kind() == reflect.Ptr && elem.IsNil()) ||
-			typeutils.IsZero(elem.Interface()) == (inElem.Kind() == reflect.Ptr && inElem.IsNil()) ||
+		(elem.Kind() == reflect.Pointer && elem.IsNil()) ||
+			typeutils.IsZero(elem.Interface()) == (inElem.Kind() == reflect.Pointer && inElem.IsNil()) ||
 			typeutils.IsZero(inElem.Interface()),
 		"unexpected nil pointer at idx %d", idx,
 	)
 
-	if (elem.Kind() != reflect.Ptr || !elem.IsNil()) && !typeutils.IsZero(elem.Interface()) {
+	if (elem.Kind() != reflect.Pointer || !elem.IsNil()) && !typeutils.IsZero(elem.Interface()) {
 		require.IsTypef(t, inElem.Interface(), elem.Interface(),
 			"expected in/out to match types at idx %d", idx,
 		)
