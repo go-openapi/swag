@@ -49,6 +49,106 @@ func TestFormatBool(t *testing.T) {
 	assert.EqualT(t, "false", FormatBool(false))
 }
 
+func TestAppendBool(t *testing.T) {
+	t.Run("should append to an empty slice", func(t *testing.T) {
+		assert.EqualT(t, "true", string(AppendBool(nil, true)))
+		assert.EqualT(t, "false", string(AppendBool(nil, false)))
+	})
+
+	t.Run("should append to an existing prefix", func(t *testing.T) {
+		assert.EqualT(t, "value=true", string(AppendBool([]byte("value="), true)))
+		assert.EqualT(t, "value=false", string(AppendBool([]byte("value="), false)))
+	})
+
+	t.Run("should be consistent with FormatBool", func(t *testing.T) {
+		for _, v := range []bool{true, false} {
+			assert.EqualT(t, FormatBool(v), string(AppendBool(nil, v)))
+		}
+	})
+}
+
+func TestAppendInteger(t *testing.T) {
+	t.Run("with int8", testAppendInteger([]int8{0, 1, -1, math.MaxInt8, math.MinInt8}))
+	t.Run("with int16", testAppendInteger([]int16{0, 1, -1, math.MaxInt16, math.MinInt16}))
+	t.Run("with int32", testAppendInteger([]int32{0, 1, -1, math.MaxInt32, math.MinInt32}))
+	t.Run("with int64", testAppendInteger([]int64{0, 1, -1, math.MaxInt64, math.MinInt64}))
+	t.Run("with int", testAppendInteger([]int{0, 1, -1, math.MaxInt, math.MinInt}))
+}
+
+func TestAppendUinteger(t *testing.T) {
+	t.Run("with uint8", testAppendUinteger([]uint8{0, 1, math.MaxUint8}))
+	t.Run("with uint16", testAppendUinteger([]uint16{0, 1, math.MaxUint8, math.MaxUint16}))
+	t.Run("with uint32", testAppendUinteger([]uint32{0, 1, math.MaxUint16, math.MaxUint32}))
+	t.Run("with uint64", testAppendUinteger([]uint64{0, 1, math.MaxUint32, math.MaxUint64}))
+	t.Run("with uint", testAppendUinteger([]uint{0, 1, math.MaxUint}))
+}
+
+func TestAppendFloat(t *testing.T) {
+	t.Run("with float32", testAppendFloat([]float32{0, 1.0, -1, math.MaxFloat32, math.SmallestNonzeroFloat32, 5.494430303}, float32(1e-6)))
+	t.Run("with float64", testAppendFloat([]float64{0, 1.0, -1, math.MaxFloat64, math.SmallestNonzeroFloat64, 5.494430303}, 1e-6))
+}
+
+func testAppendInteger[T Signed](values []T) func(*testing.T) {
+	return func(t *testing.T) {
+		for _, v := range values {
+			t.Run("should append to an empty slice", func(t *testing.T) {
+				appended := string(AppendInteger(nil, v))
+				assert.EqualT(t, FormatInteger(v), appended)
+
+				c, err := ConvertInteger[T](appended)
+				require.NoError(t, err)
+				assert.EqualT(t, v, c)
+			})
+
+			t.Run("should preserve an existing prefix", func(t *testing.T) {
+				assert.EqualT(t, "n="+FormatInteger(v), string(AppendInteger([]byte("n="), v)))
+			})
+		}
+	}
+}
+
+func testAppendUinteger[T Unsigned](values []T) func(*testing.T) {
+	return func(t *testing.T) {
+		for _, v := range values {
+			t.Run("should append to an empty slice", func(t *testing.T) {
+				appended := string(AppendUinteger(nil, v))
+				assert.EqualT(t, FormatUinteger(v), appended)
+
+				c, err := ConvertUinteger[T](appended)
+				require.NoError(t, err)
+				assert.EqualT(t, v, c)
+			})
+
+			t.Run("should preserve an existing prefix", func(t *testing.T) {
+				assert.EqualT(t, "n="+FormatUinteger(v), string(AppendUinteger([]byte("n="), v)))
+			})
+		}
+	}
+}
+
+func testAppendFloat[T Float](values []T, delta T) func(*testing.T) {
+	return func(t *testing.T) {
+		for _, v := range values {
+			t.Run("should append a round-trippable value to an empty slice", func(t *testing.T) {
+				appended := string(AppendFloat(nil, v))
+
+				c, err := ConvertFloat[T](appended)
+				require.NoError(t, err)
+				assert.InDeltaT(t, v, c, delta)
+			})
+
+			t.Run("should preserve an existing prefix", func(t *testing.T) {
+				appended := string(AppendFloat([]byte("f="), v))
+				require.Truef(t, strings.HasPrefix(appended, "f="), "expected %q to keep the prefix", appended)
+
+				c, err := ConvertFloat[T](strings.TrimPrefix(appended, "f="))
+				require.NoError(t, err)
+				assert.InDeltaT(t, v, c, delta)
+			})
+		}
+	}
+}
+
 func TestConvertFloat(t *testing.T) {
 	t.Run("with float32", func(t *testing.T) {
 		validFloats := []float32{1.0, -1, math.MaxFloat32, math.SmallestNonzeroFloat32, 0, 5.494430303}
@@ -449,7 +549,7 @@ func bitwiseIsFloat64JSONInteger2(f float64) bool {
 		}
 
 		x := math.Float64bits(f)
-		exp += int((x>>shift)&mask) - bias + 1 //nolint:gosec // x>>12 & 0x7FF - 1022 : extract exp, recentered from bias
+		exp += int((x>>shift)&mask) - bias + 1
 
 		x &^= mask << shift       // x= x &^ 0x7FF << 12 (clear 11 exp bits then shift 12)
 		x |= (-1 + bias) << shift // x = x | 1022 << 12 ==> or with 1022 as exp location
