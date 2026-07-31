@@ -19,7 +19,7 @@ require (
 
 require (
 	github.com/go-openapi/swag/pools v0.28.0 // indirect
-	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 )
 
 replace (
