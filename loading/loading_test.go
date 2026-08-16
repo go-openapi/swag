@@ -108,7 +108,7 @@ func TestLoadFromHTTP(t *testing.T) {
 
 			t.Run("with custom HTTP client mocking a remote", func(t *testing.T) {
 				cwd, _ := os.Getwd()
-				fixtureDir := filepath.Join(cwd, "fixtures")
+				fixtureDir := filepath.Join(cwd, "testdata")
 				client := &http.Client{
 					// intercepts calls to the server and serves local files instead
 					Transport: http.NewFileTransport(http.Dir(fixtureDir)),
@@ -164,7 +164,7 @@ func TestLoadFromHTTP(t *testing.T) {
 
 	t.Run("should load from local embedded file system (single file)", func(t *testing.T) {
 		// using plain fs.FS
-		rooted, err := fs.Sub(embeddedFixtures, "fixtures")
+		rooted, err := fs.Sub(embeddedFixtures, "testdata")
 		require.NoError(t, err)
 		b, err := LoadFromFileOrHTTP("petstore_fixture.yaml",
 			WithFS(rooted),
@@ -187,7 +187,7 @@ func TestLoadFromHTTP(t *testing.T) {
 	t.Run("should load from local embedded file system (path)", func(t *testing.T) {
 		// using plain fs.ReadFileFS
 		// NOTE: this doesn't work on windows, because embed.FS uses / even on windows
-		b, err := LoadFromFileOrHTTP("fixtures/petstore_fixture.yaml",
+		b, err := LoadFromFileOrHTTP("testdata/petstore_fixture.yaml",
 			WithFS(embeddedFixtures),
 		)
 		require.NoError(t, err)

@@ -13,7 +13,7 @@ import (
 	fixtures "github.com/go-openapi/swag/jsonutils/fixtures_test"
 )
 
-//go:embed fixtures/*.json
+//go:embed testdata/*.json
 var EmbeddedFixtures embed.FS
 
 var (
@@ -54,9 +54,9 @@ func BenchmarkJSON(b *testing.B) {
 }
 
 func initBenchmarks(b *testing.B) *benchmarkContext {
-	smallJSON = fixtures.ShouldLoadFixture(b, EmbeddedFixtures, "fixtures/small_sample.json")
-	mediumJSON = fixtures.ShouldLoadFixture(b, EmbeddedFixtures, "fixtures/medium_sample.json")
-	largeJSON = fixtures.ShouldLoadFixture(b, EmbeddedFixtures, "fixtures/large_sample.json")
+	smallJSON = fixtures.ShouldLoadFixture(b, EmbeddedFixtures, "testdata/small_sample.json")
+	mediumJSON = fixtures.ShouldLoadFixture(b, EmbeddedFixtures, "testdata/medium_sample.json")
+	largeJSON = fixtures.ShouldLoadFixture(b, EmbeddedFixtures, "testdata/large_sample.json")
 
 	return &benchmarkContext{
 		small:  NewSmallPayload(),
