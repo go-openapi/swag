@@ -68,7 +68,7 @@ func TestFindPackage(t *testing.T) {
 	assert.Empty(t, pkg)
 }
 
-//nolint:unparam
+//nolint:unparam // the bool return matches the assert helpers, and callers may ignore it
 func assertPath(t testing.TB, expected, actual string) bool {
 	fp, err := filepath.EvalSymlinks(expected)
 	require.NoError(t, err)
