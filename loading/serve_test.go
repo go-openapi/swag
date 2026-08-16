@@ -14,7 +14,7 @@ import (
 
 // embedded test files
 
-//go:embed fixtures/*
+//go:embed testdata/*
 var embeddedFixtures embed.FS
 
 // yamlPetStore embeds the classical pet store API swagger example.
@@ -86,7 +86,7 @@ func serveRequireHeaderFunc(key, value string) func(http.ResponseWriter, *http.R
 
 func mustLoadFixture(name string) []byte {
 	const msg = "wrong embedded FS configuration: %w"
-	data, err := embeddedFixtures.ReadFile(path.Join("fixtures", name))
+	data, err := embeddedFixtures.ReadFile(path.Join("testdata", name))
 	if err != nil {
 		panic(fmt.Errorf(msg, err))
 	}

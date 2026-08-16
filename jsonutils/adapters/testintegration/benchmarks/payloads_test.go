@@ -23,9 +23,9 @@ func TestPayloads(t *testing.T) {
 
 func TestFixtures(t *testing.T) {
 	for i, jazon := range [][]byte{
-		fixtures.ShouldLoadFixture(t, EmbeddedFixtures, "fixtures/small_sample.json"),
-		fixtures.ShouldLoadFixture(t, EmbeddedFixtures, "fixtures/medium_sample.json"),
-		fixtures.ShouldLoadFixture(t, EmbeddedFixtures, "fixtures/large_sample.json"),
+		fixtures.ShouldLoadFixture(t, EmbeddedFixtures, "testdata/small_sample.json"),
+		fixtures.ShouldLoadFixture(t, EmbeddedFixtures, "testdata/medium_sample.json"),
+		fixtures.ShouldLoadFixture(t, EmbeddedFixtures, "testdata/large_sample.json"),
 	} {
 		t.Run(fmt.Sprintf("[%d] json should be valid", i), func(t *testing.T) {
 			var value any

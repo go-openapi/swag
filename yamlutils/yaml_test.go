@@ -20,7 +20,7 @@ import (
 
 // embedded test files
 
-//go:embed fixtures/*.yaml
+//go:embed testdata/*.yaml
 var embeddedFixtures embed.FS
 
 var fixtureSpecTags, fixture2224, fixtureWithQuotedYKey, fixtureWithYKey []byte
@@ -298,7 +298,7 @@ func TestYAMLEdgeCases(t *testing.T) {
 
 func mustLoadFixture(name string) []byte {
 	const msg = "wrong embedded FS configuration: %w"
-	data, err := embeddedFixtures.ReadFile(path.Join("fixtures", name)) // "/" even on windows
+	data, err := embeddedFixtures.ReadFile(path.Join("testdata", name)) // "/" even on windows
 	if err != nil {
 		panic(fmt.Errorf(msg, err))
 	}
