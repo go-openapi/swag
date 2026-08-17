@@ -5,8 +5,8 @@ require (
 	github.com/go-openapi/swag/jsonutils v0.28.0
 	github.com/go-openapi/swag/jsonutils/fixtures_test v0.28.0
 	github.com/go-openapi/swag/typeutils v0.28.0
-	github.com/go-openapi/testify/enable/yaml/v2 v2.6.0
-	github.com/go-openapi/testify/v2 v2.6.0
+	github.com/go-openapi/testify/enable/yaml/v2 v2.6.1
+	github.com/go-openapi/testify/v2 v2.6.1
 	go.yaml.in/yaml/v3 v3.0.5
 )
 
