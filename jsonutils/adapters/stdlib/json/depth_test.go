@@ -29,12 +29,17 @@ func TestMaxNestingDepthUnmarshal(t *testing.T) {
 		require.NoError(t, m.UnmarshalJSON(deepObject(100)))
 	})
 
+	// At the default limit, either guard may report first: with encoding/json v1,
+	// Decoder.Token accepts any nesting and our own counter in jlexer.Delim reports
+	// "maximum nesting depth of 10000 exceeded"; with encoding/json v2 (GOEXPERIMENT=jsonv2,
+	// the default from go1.27), Decoder.Token rejects the document itself with
+	// "exceeded max depth". Both wrap [ErrStdlib], so assert on that and leave the
+	// wording to the subtest below, which sets a limit the stdlib cannot preempt.
 	t.Run("object nesting beyond the default limit should error, not crash", func(t *testing.T) {
 		var m MapSlice
 		err := m.UnmarshalJSON(deepObject(defaultMaxNestingDepth + 5))
 		require.Error(t, err)
 		assert.ErrorIs(t, err, ErrStdlib)
-		assert.Contains(t, err.Error(), "maximum nesting depth")
 	})
 
 	t.Run("array nesting beyond the default limit should error, not crash", func(t *testing.T) {
@@ -53,6 +58,8 @@ func TestMaxNestingDepthUnmarshal(t *testing.T) {
 		var badMap MapSlice
 		err := a.OrderedUnmarshal(deepObject(10), &badMap)
 		require.Error(t, err)
+		assert.ErrorIs(t, err, ErrStdlib)
+		assert.Contains(t, err.Error(), "maximum nesting depth")
 	})
 }
 
