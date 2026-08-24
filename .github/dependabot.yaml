@@ -36,7 +36,7 @@ updates:
     schedule:
       interval: "cron"
       cronjob: "35 7 * * 2,5"    # => update twice a week
-      timezone: CEST
+      timezone: CET
     open-pull-requests-limit: 68 # => {# modules} x {# groups} = 17 x 4
     groups:
       development-dependencies:
