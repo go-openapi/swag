@@ -13,7 +13,7 @@ on:
 
 jobs:
   test:
-    uses: go-openapi/ci-workflows/.github/workflows/go-test-monorepo.yml@cba06a2e6390abfedda6bf1067f44741cbe93650 # v0.6.2
+    uses: go-openapi/ci-workflows/.github/workflows/go-test-monorepo.yml@69a76bc5d13145693ca13d24a418942b59fce727 # v0.6.3
     with:
       extra-flags: '-tags poolsdebug'
     secrets: inherit
